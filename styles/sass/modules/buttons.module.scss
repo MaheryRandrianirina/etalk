@@ -1,0 +1,18 @@
+@import "../mixins/buttons.scss";
+@import "../colors.scss";
+
+.to_loginpage_button {
+    @include button();
+    position: relative;
+    top: 20px;
+    left: 100%;
+    transform: translateX(calc(-100% - 20px));
+    padding-top: 10px;
+    padding-bottom: 8px;
+    height: 20px;
+    width: 120px;
+    border: 1px solid $primary;
+    border-radius: 30px;
+    color: $primary;
+    text-decoration: none;
+}

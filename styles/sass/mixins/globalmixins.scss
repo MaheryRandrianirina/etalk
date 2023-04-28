@@ -1,0 +1,122 @@
+@mixin centerXYWithAbsolutePoz {
+    position: absolute;
+    text-align: center;
+    left: 0;
+    right: 0;
+    top: 35%;
+    bottom: 0;
+    margin: auto;
+}
+
+@mixin center_absolute_position {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+}
+
+@mixin circle {
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+}
+
+@mixin link {
+    color: $primary;
+    text-decoration: none;
+}
+
+@mixin form_group {
+    margin-bottom: 20px;
+    width: 300px;
+}
+
+@mixin bar {
+    display: inline-block;
+    width: 50px;
+    height: 6px;
+    background-color: $secondary;
+}
+
+@mixin hamburger_menu {
+    width: 40px;
+    cursor: pointer;
+    .hamburger_menu_bar {
+        height: 10px;
+        width: 40px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+        background-color: $primary;
+    }
+    .hamburger_menu_bar.bottom {
+        width: 34px;
+        margin-bottom: 0;
+        margin-left: 6px;
+    }
+}
+
+@mixin logo {
+    font-size: 30px;
+    text-transform: uppercase;
+    color: $white;
+}
+
+@mixin conversation {
+    position: relative;
+    width: 360px;
+    height: 60px;
+    background-color: $white;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    .adressee {
+        position: relative;
+        height: 30px;
+        .profile_pic {
+            @include profile_pic();
+        }
+        .username {
+            position: absolute;
+            bottom: 0;
+            left: 40px;
+            color: $primaryBlack;
+        }
+    }
+    .last_message {
+        position: absolute;
+        bottom: 10px;
+        left: 40px;
+        color: $secondaryBlack;
+        .sender {
+            font-weight: bold;
+        }
+    }
+    .datetime {
+        position: absolute;
+        right: 20px;
+        bottom: 50%;
+        font-size: 13px;
+        transform: translateY(50%);
+        color: $secondaryBlack;
+    }
+}
+
+@mixin profile_pic {
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+@mixin status_online {
+    height: 10px;
+    width: 10px;
+    background-color: $success;
+    border-radius: 50%;
+    box-shadow: 0 0 5px $success;
+}

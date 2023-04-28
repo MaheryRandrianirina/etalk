@@ -1,0 +1,12 @@
+@mixin input {
+    display: block;
+    height: 30px;
+    width: 285px;
+    border-radius: 5px;
+    border: transparent;
+    padding: 5px;
+    padding-left: 10px;
+    &::placeholder {
+        color: $primaryBlack;
+    }
+}

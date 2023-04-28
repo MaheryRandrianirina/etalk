@@ -1,0 +1,27 @@
+@import "../mixins/globalmixins.scss";
+
+.opening_app_loader {
+    position: relative;
+    height: 100%;
+    width: 100%
+}
+
+.applogo_and_name {
+    @include center_absolute_position();
+    text-align: center;
+    .app_name {
+        margin-top: 20px;
+    }
+}
+
+.copyright {
+    display: block;
+    position: absolute;
+    margin: 0 auto;
+    bottom: 50px;
+    text-align: center;
+    width: 100%;
+    .copyright_owner {
+        margin-bottom: 10px;
+    }
+}

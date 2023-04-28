@@ -1,0 +1,51 @@
+@mixin button {
+    text-align: center;
+    display: block;
+    border-radius: 10px;
+    border: transparent;
+    height: 40px;
+    width: 300px;
+    padding: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@mixin primary_button {
+    @include button();
+    background-color: $primary;
+    transition: background-color .3s;
+    &:hover {
+        background-color: darken($color: $primary, $amount: 6)
+    }
+}
+
+@mixin primary_button_with_arrow_right {
+    @include primary_button();
+    margin: 0 auto;
+    position: relative;
+    p {
+        display: block;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+
+    }
+    svg {
+        display: inline-block;
+    }
+}
+
+@mixin secondary_button {
+    @include button();
+    background-color: $secondary;
+    color: $primary;
+    margin: 0 auto;
+}
+
+@mixin action_button {
+    width: 25px;
+    height: 25px;
+    fill: $primary;
+    stroke: none;
+}

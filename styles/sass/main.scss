@@ -1,0 +1,475 @@
+@import "./colors.scss";
+@import "./mixins/globalmixins.scss";
+@import "./mixins/buttons.scss";
+@import "./mixins/input.scss";
+@import "./mixins/search.scss";
+
+html, body {
+    height: 100%;
+    overflow-y: hidden;
+}
+
+#__next, .reception_box {
+    height: 100%;
+}
+
+.reception_box {
+    position: relative;
+}
+body {
+    padding: 0;
+    margin: 0;
+    font-size: 16px;
+    color: $white;
+    background-color: $primaryBlack;
+    font-family: "Roboto";
+}
+
+.reception_box {
+    overflow-y: scroll;
+}
+
+p {
+    margin: 0
+}
+
+.logo {
+    color: $white;
+    font-size: 30px;
+    text-transform: uppercase;
+}
+
+.logo_for_opening_loader {
+    @include circle();
+    margin: 0 auto;
+    background-color: $secondary;
+}
+
+.reception_box {
+    position: relative;
+}
+
+.login_page {
+    display: block;
+    height: 100%;
+    position: relative;
+
+    .logo {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+    }
+
+    form {
+        @include center_absolute_position();
+        .form_group {
+            @include form_group();
+            input {
+                @include input();
+                background: $white;
+            }
+    
+            .password_input {
+                margin-bottom: 30px;
+            }
+            
+            .remember_me_input {
+                @include input();
+                position: absolute;
+                left: 0;
+                display: inline-block;
+                width: unset;
+                height: unset;
+                color: $primary;
+            }
+        }
+    
+        .form_group.form_group_remember_me_input {
+            position: relative;
+            text-align: center
+        }
+
+        .primary_button {
+            @include button();
+            display: block;
+            background: $primary;
+            margin: 0 auto;
+        }
+            
+        .no_account_yet {
+            margin-top: 40px;
+            text-align: center;
+            .registration_link_from_login {
+                @include link();
+            }
+        }
+    }
+}
+
+.registration_page {
+    display: block;
+    height: 100%;
+    position: relative;
+    form {
+        @include center_absolute_position();
+        .inline_block_inputs {
+            width: 100%;
+            .form_group_name_input {
+                display: inline-block;
+                width: 60%;
+                input {
+                    width: calc(100% - 15px);
+                }
+            }
+
+            .form_group_firstname_input {
+                display: inline-block;
+                width: 25%;
+                margin-left: 20px;
+                input {
+                    width: calc(100% + 15px);
+                }
+            }
+        }
+
+        .form_group {
+            @include form_group();
+        }
+        
+        .form_group_man_radio_button, .form_group_woman_radio_button {
+            display: flex;
+            justify-content: flex-start;
+            label {
+                margin-left: 10px
+            }
+            input {
+                color: $primary;
+                height: unset;
+                width: unset;
+                margin: 0;
+            }
+        }
+        .form_group_man_radio_button {
+            margin-bottom: 10px
+        }
+
+        input {
+            @include input();
+            background: $white;
+        }
+
+        .primary_button {
+            @include primary_button_with_arrow_right();
+            margin-top: 30px
+        }
+
+        .secondary_button {
+            @include secondary_button();
+        }
+
+        .profile_photo_choice {
+            position: relative;
+            margin: 0 auto;
+            margin-bottom: 30px;
+            height: 100px;
+            width: 100px;
+            background: $secondary;
+            border-radius: 50%;
+            .camera_icon {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                top: 0;
+                margin: auto;
+                color: $primary;
+                transform: scale(1.5);
+                fill: $secondary;
+                path {
+                    fill: $primary;
+                }
+            }
+        }
+
+        .registration_progress {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            .bar {
+                @include bar();
+                &.active {
+                    background-color: $secondaryGreen;
+                    height: 8px;
+                }
+            }
+            .bar_2, .bar_3 {
+                margin-left: 20px;
+            }
+        }
+    }
+    
+    .congrats_for_subscription {
+        width: 400px;
+        height: 600px;
+        margin: 0 auto;
+        transform: translateY(30%);
+        .subscribed {
+            text-align: center;
+            color: $success;
+            font-size: 30px;
+        }
+        .man_flying_with_welcome_banner {
+            display: block;
+            z-index: 5;
+        }
+        
+        .primary_button {
+            @include primary_button();
+            margin: 0 auto;
+            z-index: 20;
+        }
+    }
+}
+
+.app_header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    height: 40px;
+    background-color: $secondaryBlack;
+    z-index: 15;
+    .logo {
+        @include logo();
+    }
+    .hamburger_menu {
+        @include hamburger_menu();
+    }
+}
+
+.search_bar_container {
+    position: fixed;
+    height: 50px;
+    left: 0;right: 0;
+    margin: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: $primaryBlack;
+    z-index: 10;
+    .search_bar {
+        @include search_bar();
+    }
+}
+
+.list_conversations {
+    margin-top: 110px;
+    .conversation {
+        @include conversation();
+    }
+}
+
+.app_footer {
+    display: flex;
+    justify-content: space-around;
+    width: calc(100% - 40px);
+    height: 39px;
+    padding: 20px;
+    border-top: 1px solid $white;
+    position: fixed;
+    bottom: 0;
+    background-color: $primaryBlack;
+    .message_circle, .user_friends {
+        display: block;
+        width: 30px;
+        height: 30px;
+        stroke: none;
+        fill: $primary;
+    }
+    .active {
+        stroke: none;
+        fill: $white;
+    }
+}
+
+.list_active_friends {
+    width: 360px;
+    margin: 0 auto;
+    margin-top: 20px;
+    .active_friend {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        height: 50px;
+        border-bottom: 1px solid $white;
+        
+        .status_online, .username {
+            position: absolute;
+            bottom: 10px;
+        }
+        .status_online {
+            @include status_online();
+            right: 20px;
+        }
+        .username {
+            left: 20px;
+        }
+    }
+}
+
+.search_results {
+    position: fixed;
+    left: 0;
+    right: 0;
+    margin: auto;
+    margin-top: 60px;
+    width: 360px;
+    height: 520px;
+    border-radius: 10px;
+    background-color: $secondary;
+    overflow-y: scroll;
+    z-index: 15;
+    .search_result {
+        @include search_result();
+    }
+}
+
+.user_conversation {
+    position: relative;
+    background-color: $primaryBlack;
+    .conversation_header {
+        display: flex;
+        justify-content: space-between;
+        background-color: $secondaryBlack;
+        padding: 20px;
+        height: 40px;
+        color: $white;
+        .go_back_button {
+            color: $primary;
+            width: 30px;
+            height: 30px;
+        }
+        .adressee {
+            position: relative;
+        }
+        .adressee .username {
+            position: absolute;
+            top: 0;
+            right: 50px;
+        }
+        .adressee .profile_pic {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .adressee .status_online {
+            @include status_online();
+            position: absolute;
+            right: 50px;
+            top: 30px;
+        }
+    }
+
+    .conversation_content {
+        padding: 40px;
+        .bubble {
+            width: 170px;
+            height: 50px;
+            padding: 10px;
+            margin-top: 20px;
+            position: relative;
+        }
+        .bubble.incoming {
+            background-color: $secondary;
+            float: left;
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -20px;
+                border-top: 20px solid $secondary;
+                border-left: 20px solid transparent;
+                border-bottom: 20px solid transparent;
+            }
+        }
+        .bubble.outgoing {
+            background-color: $primary;
+            float: right;
+            &::after {
+                content: "";
+                position: absolute;
+                right: -20px;
+                bottom: 0;
+                border-bottom: 20px solid $primary;
+                border-right: 20px solid transparent;
+                border-top: 20px solid transparent;
+            }
+        }
+    }
+
+    .conversation_footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 100px;
+        padding: 20px;
+        border-top: 1px solid $white;
+        .actions_buttons {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+            width: 160px;
+            .uploads {
+                .add_file_button, .add_image_button {
+                    @include action_button();
+                }
+                .add_image_button {
+                    margin-right: 10px
+                }
+                .add_file_button {
+                    fill: none;
+                    stroke: $primary;
+                }
+            }
+            .peers {
+                margin-left: 40px;
+                .microphone_button, .video_call_button {
+                    @include action_button();
+                }
+                .microphone_button {
+                    margin-right: 10px;
+                }
+            }
+        }
+
+        .message_textarea {
+            width: 260px;
+            height: 40px;
+            padding: 10px 20px;
+            border-radius: 15px;
+        }
+
+        .send_button {
+            border: none;
+            padding: 0;
+            background: $primaryBlack;
+            width: 50px;
+            height: 50px;
+            margin-left: 20px;
+            .send_icon {
+                display: inline-block;
+                height: 100%;
+                width: 100%;
+                fill: $primary;
+                stroke: $white;
+                stroke-width: 1px;
+                margin-bottom: 5px;
+            }
+        }
+    }
+}
+

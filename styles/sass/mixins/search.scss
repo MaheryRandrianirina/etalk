@@ -1,0 +1,66 @@
+@import "./globalmixins.scss";
+@import "./input.scss";
+
+@mixin search_bar {
+    display: flex;
+    width: 360px;
+    height: 100%;
+    margin: 0 auto;
+    .search_input {
+        @include input();
+        border-radius: 0;
+        border-top-left-radius: 30px;
+        border-bottom-left-radius: 30px;
+        height: 100%;
+        width: 300px;
+    }
+    .search_button {
+        position: relative;
+        width: 60px;
+        height: 50px;
+        background-color: $primary;
+        border-top-right-radius: 30px;
+        border-bottom-right-radius: 30px;
+        cursor: pointer;
+        .magnifying_glass {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            width: 30px;
+            height: 30px;
+            color: $white;
+        }
+    }
+}
+
+@mixin search_result {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    border-bottom: 1px solid $secondaryBlack;
+    .profile_pic {
+        @include profile_pic();
+        top: 0;
+        bottom: 0;
+        left: 10px;
+        margin: auto;
+    }
+    .username {
+        color: $primaryBlack;
+        position: absolute;
+        top: 25px;
+        left: 50px;
+        transform: translateY(-50%)
+    }
+    .status_online {
+        @include status_online();
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 10px;
+        margin: auto;
+    }
+}

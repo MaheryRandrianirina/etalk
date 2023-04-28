@@ -1,0 +1,22 @@
+@import "../colors.scss";
+
+.label_for_checkbox {
+    display: inline-block;
+    margin-left: -120px;
+}
+
+.error {
+    font-size: 12px;
+    margin-top: 5px;
+    color: $fail;
+}
+.nameError, .firstnameError {
+    display: block;
+    float: left;
+    margin-top: -15px;
+    margin-bottom: 20px;
+}
+.firstnameError {
+    float: right;
+    width: 100px;
+}
