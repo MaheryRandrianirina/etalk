@@ -1,4 +1,4 @@
-import { TableColumns } from "../../types/tables/TableColumns"
+import { TableColumns } from "../../types/Database/tables/TableColumns"
 import { ValidationErrorTypes, ValidationErrors } from "../../types/validator/errors"
 import ValidationError from "./validationError"
 
@@ -68,7 +68,6 @@ export default class Validator {
         }else if(typeof field !== "string" && type === "inequals"){
             this.errors[type] = field
         }
-        console.log("errors:", this.errors)
     }
 
     protected lengthForFieldAreInit(): boolean
@@ -126,10 +125,11 @@ export default class Validator {
     equals(fieldOne: string, fieldTwo: string): this {
         const f_one = fieldOne as keyof TableColumns
         const f_two  = fieldTwo as keyof TableColumns
-
+        
         if(this.data[f_one] !== this.data[f_two]){
             this.addError([f_one, f_two], "inequals")
         }
+        
         return this
     }
 

@@ -1,16 +1,29 @@
-import { ChangeEvent, ChangeEventHandler, FormEvent, FormEventHandler, MouseEventHandler, SyntheticEvent, useState } from "react";
-import { RegisterStepOne, RegisterStepThree, RegisterStepTwo } from "../components/form/registerStepElements";
+import {
+    ChangeEvent,
+    ChangeEventHandler,
+    Dispatch,
+    FormEvent,
+    FormEventHandler,
+    MouseEventHandler,
+    SetStateAction,
+    SyntheticEvent,
+    useState
+} from "react";
+import {RegisterStepOne, RegisterStepThree, RegisterStepTwo} from "../components/form/registerStepElements";
 import CongratsForSubscription from "../components/congratsForSubscription";
 import styles from "../styles/sass/modules/buttons.module.scss";
 import Link from "next/link";
-import { UserIdentity, UserUniqueProperties } from "../types/user";
-import axios, { AxiosError } from "axios";
-import { RegistrationFormErrors } from "../types/registration/registrationFormErrors";
-import { DataFromRegistration } from "../types/registration/dataFromRegistration";
+import {UserIdentity, UserUniqueProperties} from "../types/user";
+import axios, {AxiosError} from "axios";
+import {RegistrationFormErrors} from "../types/registration/registrationFormErrors";
+import {DataFromRegistration} from "../types/registration/dataFromRegistration";
+import { PostDataReturnType } from "../types/registration/dataBaseCommunication";
 
-const PostData: (step: number, identity: UserIdentity)=>Promise<any> = async (step, identity): Promise<any> => {
+
+const PostData: (step: number, data: UserIdentity | UserUniqueProperties)=>Promise<PostDataReturnType> 
+    = async (step, data): Promise<any> => {
     try {
-        const res = await axios.post("/api/user", {registrationStep: step, data: identity})
+        const res = await axios.post("/api/user", {registrationStep: step, data: data})
         if(res.statusText === "OK"){
             return res.data
         }
@@ -20,7 +33,10 @@ const PostData: (step: number, identity: UserIdentity)=>Promise<any> = async (st
 }
 
 export default function Register(): JSX.Element {
-    const [registerStep, setRegisterStep] = useState(1)
+    const [registerStep, setRegisterStep]: [
+        registerStep: number,
+        stRegisterStep: Function
+    ] = useState(1)
 
     const [identity, setIdentity]: [identity: UserIdentity, setIdentity: Function] = useState({
         name: "",
@@ -40,17 +56,28 @@ export default function Register(): JSX.Element {
     ] = useState({
         email: "",
         password: "",
-        passwordConfirmation: ""
+        password_confirmation: "",
+        id: null
     })
 
     const handleSubmit: FormEventHandler = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
         try {
-            const res = await PostData(registerStep, identity)
-            if('success' in res && res.success === true){
-                console.log(res)
-                setRegisterStep(s => s + 1)
+            let res: PostDataReturnType | undefined
+            if(registerStep === 1){
+                res = await PostData(registerStep, identity)
+            }else if(registerStep === 2){
+                res = await PostData(registerStep, userUniqueProperties)
+            }
+
+            if( res !== undefined && 'success' in res && res.success === true){
+                if("insertedUserId" in res){
+                    setUserUniqueProperties((p: UserUniqueProperties) => {
+                        return {...p, id:res?.insertedUserId}
+                    })
+                }
+                setRegisterStep((s: number) => s + 1)
             }
         }catch(error){
             if(error instanceof AxiosError && "errors" in error.response?.data){
@@ -99,7 +126,7 @@ export default function Register(): JSX.Element {
         }else if(targetName === "password_confirmation"){
             setUserUniqueProperties((properties: UserUniqueProperties) => {
                 return {
-                    ...properties, passwordConfirmation: value
+                    ...properties, password_confirmation: value
                 }
             })
         }
@@ -129,7 +156,8 @@ export default function Register(): JSX.Element {
             }} values={{
                 email:userUniqueProperties.email,
                 password: userUniqueProperties.password,
-                passwordConfirmation: userUniqueProperties.passwordConfirmation
+                password_confirmation: userUniqueProperties.password_confirmation,
+                id: userUniqueProperties.id
             }}/>}
 
             {registerStep === 3 && <RegisterStepThree events={{

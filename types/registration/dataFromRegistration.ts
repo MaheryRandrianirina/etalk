@@ -6,7 +6,8 @@ type DataFromRegistration = {
     sex: "man" | "woman",
     email: string,
     password: string,
-    password_confirmation: string
+    password_confirmation: string,
+    id: number
 }
 
 export type { DataFromRegistration }

@@ -17,40 +17,45 @@ export default class ValidationError {
                 t !== "name" && t !== "email" 
                 && t !== "password" && t !== 'inequals'
             ){
-
                 this.validationErrors[t].forEach(field => {
                     this.currentField = field
-                    if(t === "required"){
+                    if(t === "required" && field.length > 0){
                         this.pushError("Ce champ est requis")
-                    }else if(t === "string"){
+                    }else if(t === "string" && field.length > 0){
                         this.pushError("Ce champ doit être une chaîne de caractères.")
-                    }else if (t === "exclude"){
+                    }else if (t === "exclude" && field.length > 0){
                         this.pushError(`Ce champ ne peut pas contenir des caractères spéciaux.`)
-                    }else {
+                    }else if(t === "number" && field.length > 0){
                         this.pushError(`La valeur de ce champ doit être un nombre.`)
                     }
                 })
             }else if(t === "min_length"){
                 for(const field in this.validationErrors[t]){
-                    this.currentField = field
-                    this.pushError(`Ce champ doit contenir au moins ${this.validationErrors[t][field][1]} caractères.`)
+                    if(field.length > 0){
+                        this.currentField = field
+                        this.pushError(`Ce champ doit contenir au moins ${this.validationErrors[t][field][1]} caractères.`)
+                    }
+                    
                 }
             }else if(t === "max_length"){
                 for(const field in this.validationErrors[t]){
-                    this.currentField = field
-                    this.pushError(`Ce champ doit contenir au plus ${this.validationErrors[t][field][1]} caractères.`)
+                    if(field.length > 0){
+                        this.currentField = field
+                        this.pushError(`Ce champ doit contenir au plus ${this.validationErrors[t][field][1]} caractères.`)
+                    }
                 }
-            }else if(t === 'email'){
+            }else if(t === 'email' || 
+                t === "username" || 
+                t === "password" || 
+                t === "name" ||
+                t === "firstname"){
                 this.pushErrorForSpecificField(t, `Ce champ ne contient pas un email valide`)
-            }else if(t === "password"){
-                this.pushErrorForSpecificField(t, "Ce champ contient un mot de passe invalide")
             }else if(t === 'inequals'){
-                console.log('here we are in inequals error')
                 this.currentField = this.validationErrors[t][1]
-                this.pushError(`Ce champ doit contenir la même valeur que le champ précédent`)
-            }else{
-                this.pushErrorForSpecificField(t, `Ce champ est invalide`)
-            } 
+                if(typeof this.currentField === "string" && this.currentField.length > 0){
+                    this.pushError(`Ce champ doit contenir la même valeur que le champ précédent`)
+                }
+            }
         }
     }
 

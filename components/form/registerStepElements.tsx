@@ -107,7 +107,7 @@ function RegisterStepTwo({inputsEvents, values}: {
         attributes={{
           className: "password_confirmation_input",
           name: "password_confirmation",
-          value: values.passwordConfirmation,
+          value: values.password_confirmation,
           placeholder: "Confirmer le mot de passe"
         }}
         events={{

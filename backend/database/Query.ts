@@ -1,14 +1,16 @@
+import { queryConditions } from "../../types/Database/Query"
 
 abstract class QueryBuilder {
 
     protected abstract queries: string[]
+
     protected abstract table: string
 
     abstract select(columns: string[]): this
 
     abstract insert(columns: string[]): this
 
-    abstract update(): this
+    abstract update(columns: string[]): this
 
     abstract delete(): this
 
@@ -25,7 +27,7 @@ export default class Query extends QueryBuilder {
     }
 
     select(columns: string[]): this {
-        
+        return this
     }
 
     insert(columns: string[]): this {
@@ -39,15 +41,31 @@ export default class Query extends QueryBuilder {
             string += column + " = ?,"
         })
 
-        return string.slice(0, string.lastIndexOf(','))
+        return string.slice(0, string.lastIndexOf(', '))
     }
 
-    update(): this {
-        
+    where(conditions: queryConditions): this {
+        this.queries.push(`WHERE ${this.transformObjectToEquality(conditions)}`)
+        return this
+    }
+
+    transformObjectToEquality(object: {}): string {
+        let string: string = ""
+        for(const i in object){
+            const index = i as keyof Object
+            string += i + " = " + object[index] + " AND "
+        }
+
+        return string.slice(0, string.lastIndexOf(" AND "))
+    }
+
+    update(columns: string[]): this {
+        this.queries.push(`UPDATE ${this.table} SET ${this.columnsToFill(columns)}`)
+        return this
     }
 
     delete(): this {
-        
+        return this
     }
 
     __toString(): string {
