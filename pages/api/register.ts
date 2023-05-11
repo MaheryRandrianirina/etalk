@@ -1,29 +1,34 @@
 import { NextApiRequest, NextApiResponse} from "next"
-import { UserIdentity } from "../../types/user"
 import UserTable from "../../backend/database/tables/UserTable"
 import { DataFromRegistration } from "../../types/registration/dataFromRegistration"
 import ValidationError from "../../backend/security/validationError"
 import UserValidator from "../../backend/security/userValidator"
 import PasswordGuard from "../../backend/security/password"
+import { withSessionRoute } from "../../backend/utilities/withSession"
 
-export default function User(req: NextApiRequest, res: NextApiResponse) {
+export default withSessionRoute(Register) 
+
+function Register(req: NextApiRequest, res: NextApiResponse) {
+    
     if(req.method === "POST"){
         const {registrationStep, data}: {registrationStep: number, data:DataFromRegistration} = req.body
         const validator = new UserValidator(data)
 
         switch(registrationStep){
             case 1:
-                handleRegistrationStepOne(data, validator, res)
+                handleRegistrationStepOne(data, validator, req, res)
                 break
             case 2:
-                handleRegistrationStepTwo(data, validator, res)
+                handleRegistrationStepTwo(data, validator, req, res)
                 break
         }
     }
 }
 
-
-async function handleRegistrationStepOne(data:DataFromRegistration, validator: UserValidator,res: NextApiResponse){
+async function handleRegistrationStepOne(data:DataFromRegistration, 
+    validator: UserValidator,
+    req: NextApiRequest,
+    res: NextApiResponse){
     const errors: ValidationError | null = validator
         .required("sex")
         .string("sex")
@@ -32,17 +37,23 @@ async function handleRegistrationStepOne(data:DataFromRegistration, validator: U
         .username("username")
         .getErrors()
 
-    try {
-        if(errors === null){
+    
+    if(errors === null){
+        try {
             const userId: number = await insertUserIdentity(data)
-            res.status(200).json({success: true, insertedUserId: userId}) 
-        }else {
-            res.status(500).json({...errors, success: false})
+            req.session.userId = userId
+            console.log("user id from server", userId, req.session.userId)
+            await req.session.save()
+
+            res.status(200).json({success: true}) 
+        }catch(error){
+            res.status(500).json({success: false, sqlError: error})
         }
-        
-    }catch(error){
-        res.status(500).json({success: false})
+    }else {
+        res.status(500).json({...errors, success: false})
     }
+        
+    
 }
 
 const userTable = new UserTable()
@@ -64,20 +75,22 @@ async function insertUserIdentity(userIdentity: DataFromRegistration): Promise<n
     }
 }
 
-function handleRegistrationStepTwo(data:DataFromRegistration, validator: UserValidator, res: NextApiResponse) {
+function handleRegistrationStepTwo(data:DataFromRegistration, validator: UserValidator, req: NextApiRequest, res: NextApiResponse) {
     const errors = validator
         .required("id")
         .email("email")
         .password("password")
         .equals("password", "password_confirmation")
         .getErrors()
-    
-    if (errors === null && data.id !== null) {
+
+    const userId = req.session.userId
+    console.log("userid from step 2: ", userId)
+    if (errors === null && userId !== undefined && userId !== null) {
         try {
-            insertUserStepTwoData(data)
+            insertUserStepTwoData(data, userId)
             res.status(200).json({ success: true })
-        } catch (e) {
-            res.status(500).json({ success: false })
+        } catch (error) {
+            res.status(500).json({success: false, sqlError: error})
         }
     } else {
         res.status(500).json({ ...errors, success: false })
@@ -86,13 +99,13 @@ function handleRegistrationStepTwo(data:DataFromRegistration, validator: UserVal
     
 }
 
-async function insertUserStepTwoData(data: DataFromRegistration): Promise<void> {
+async function insertUserStepTwoData(data: DataFromRegistration, userId: number): Promise<void> {
     const hash = PasswordGuard.hash(data.password)
     try {
         await userTable.update({
             password: hash,
             email: data.email
-        }, {id: data.id})
+        }, {id: userId})
     }catch(e){
         throw e
     }

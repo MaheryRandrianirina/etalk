@@ -1,10 +1,12 @@
 
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useContext } from "react";
 import { ButtonHTMLAttributes } from "react";
 import styles from "../../styles/sass/modules/decorations.module.scss";
+import { ButtonContext } from "../form/registerStepElements";
 
 function Button({type, children, className}: ButtonHTMLAttributes<string>): JSX.Element {
-    return <button type={type} className={className}>{children}</button>
+    const clickEventHandler = useContext(ButtonContext)
+    return <button type={type} className={className} onClick={clickEventHandler}>{children}</button>
 }
 
 function PrimaryButton({children}: PropsWithChildren): JSX.Element {

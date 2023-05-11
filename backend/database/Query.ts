@@ -31,17 +31,18 @@ export default class Query extends QueryBuilder {
     }
 
     insert(columns: string[]): this {
+        
         this.queries.push(`INSERT INTO ${this.table} SET ${this.columnsToFill(columns)}`)
         return this
     }
 
     private columnsToFill(columns: string[]): string {
-        let string = ""
+        let toJoin: string[] = []
         columns.forEach(column => {
-            string += column + " = ?,"
+            toJoin.push(`${column} = ?`)
         })
-
-        return string.slice(0, string.lastIndexOf(', '))
+        
+        return toJoin.join(', ')
     }
 
     where(conditions: queryConditions): this {

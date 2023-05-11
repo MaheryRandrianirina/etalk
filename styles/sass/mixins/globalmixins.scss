@@ -46,16 +46,16 @@
     width: 40px;
     cursor: pointer;
     .hamburger_menu_bar {
-        height: 10px;
+        height: 6px;
         width: 40px;
         border-radius: 10px;
         margin-bottom: 5px;
         background-color: $primary;
     }
     .hamburger_menu_bar.bottom {
-        width: 34px;
+        width: 30px;
         margin-bottom: 0;
-        margin-left: 6px;
+        margin-left: 10px;
     }
 }
 

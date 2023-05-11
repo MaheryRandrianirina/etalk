@@ -23,8 +23,7 @@ type UserIdentity = {
 type UserUniqueProperties = {
     email: string,
     password: string,
-    password_confirmation: string,
-    id: number | null
+    password_confirmation: string
 }
 
 export type { User, UserIdentity, UserUniqueProperties }

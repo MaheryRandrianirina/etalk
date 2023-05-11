@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "backend/test/validatortest.mts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "backend/test/validatortest.mts", "jest.config.js"],
   "exclude": ["node_modules"]
 }

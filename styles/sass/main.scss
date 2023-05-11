@@ -175,6 +175,8 @@ p {
             width: 100px;
             background: $secondary;
             border-radius: 50%;
+            transition: background .3s;
+            cursor: pointer;
             .camera_icon {
                 position: absolute;
                 bottom: 0;
@@ -185,9 +187,31 @@ p {
                 color: $primary;
                 transform: scale(1.5);
                 fill: $secondary;
+                transition: color .3s;
                 path {
                     fill: $primary;
                 }
+            }
+            .camera_icon.shrunk {
+                color: $secondary;
+                fill: $primary;
+                transform: scale(1);
+                bottom: -70px;
+                right: -50px;
+            }
+            &:hover {
+                background: $primary;
+                .camera_icon {
+                    color: $secondary;
+                }
+                .camera_icon.shrunk {
+                    color: $primary;
+                    fill: $secondary;
+                }
+            }
+            
+            #selected_image_canvas {
+                border-radius: 50%;
             }
         }
 
@@ -217,12 +241,28 @@ p {
             text-align: center;
             color: $success;
             font-size: 30px;
+            transform: translateY(15px);
+            opacity: 0;
+            transition: opacity .3s, transform .3s ease-out;
+        }
+        .subscribed.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         .man_flying_with_welcome_banner {
             display: block;
             z-index: 5;
+            transform: translateY(60px);
+            opacity: 0;
+            transition: transform 1.5s, opacity .3s;
         }
-        
+        .man_flying_with_welcome_banner.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        a {
+            text-decoration: none;
+        }
         .primary_button {
             @include primary_button();
             margin: 0 auto;

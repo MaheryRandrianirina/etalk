@@ -17,13 +17,14 @@ import {UserIdentity, UserUniqueProperties} from "../types/user";
 import axios, {AxiosError} from "axios";
 import {RegistrationFormErrors} from "../types/registration/registrationFormErrors";
 import {DataFromRegistration} from "../types/registration/dataFromRegistration";
-import { PostDataReturnType } from "../types/registration/dataBaseCommunication";
+import { PostDataReturnType } from "../types/registration/dataBaseCommunication"
+import { RegistrationStepThreeProperties } from "../types/registration/registration";
 
 
-const PostData: (step: number, data: UserIdentity | UserUniqueProperties)=>Promise<PostDataReturnType> 
+const PostData: (step: number, data: UserIdentity | UserUniqueProperties | File)=>Promise<PostDataReturnType> 
     = async (step, data): Promise<any> => {
     try {
-        const res = await axios.post("/api/user", {registrationStep: step, data: data})
+        const res = await axios.post("/api/register", {registrationStep: step, data: data})
         if(res.statusText === "OK"){
             return res.data
         }
@@ -56,9 +57,16 @@ export default function Register(): JSX.Element {
     ] = useState({
         email: "",
         password: "",
-        password_confirmation: "",
-        id: null
+        password_confirmation: ""
     })
+
+    const [stepThreeProperties, setStepThreeProperties]: [
+        stepThreeProperties: RegistrationStepThreeProperties, 
+        setStepThreeProperties: Dispatch<SetStateAction<RegistrationStepThreeProperties>>
+    ] = useState({
+        activeButton: "ignore",
+        chosenImage: null
+    } as RegistrationStepThreeProperties)
 
     const handleSubmit: FormEventHandler = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -72,12 +80,12 @@ export default function Register(): JSX.Element {
             }
 
             if( res !== undefined && 'success' in res && res.success === true){
-                if("insertedUserId" in res){
-                    setUserUniqueProperties((p: UserUniqueProperties) => {
-                        return {...p, id:res?.insertedUserId}
-                    })
-                }
                 setRegisterStep((s: number) => s + 1)
+            }else if(res !== undefined && 'success' in res && res.success === false){
+                console.error("Echec de l'insertion")
+                if("sqlError" in res){
+                    console.error(res.sqlError)
+                }
             }
         }catch(error){
             if(error instanceof AxiosError && "errors" in error.response?.data){
@@ -95,9 +103,7 @@ export default function Register(): JSX.Element {
 
         if(targetName === "name"){
             setIdentity((s:UserIdentity) => {
-                return {...s,
-                    name: value 
-                }
+                return {...s, name: value}
             })
         }else if(targetName === "firstname"){
             setIdentity((s:UserIdentity) => {
@@ -132,8 +138,38 @@ export default function Register(): JSX.Element {
         }
     }
 
-    const chooseProfilPic: MouseEventHandler = (event: SyntheticEvent) => {
+    const handleStepThreeButtonClick: MouseEventHandler<HTMLButtonElement> = (e: SyntheticEvent) => {
+        e.preventDefault()
+        
+        /* ON INITIALISE UNE SESSION ICI. JUSTE AVANT L'ETAPE EN DESSOUS*/
+        const activeButton = stepThreeProperties.activeButton
+        if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
+            PostData(registerStep, stepThreeProperties.chosenImage).then(res => {
+                if("success" in res && res.success === true){
+                    setRegisterStep((s: number) => s + 1)
+                }else {}
+            })
+        }else if(activeButton === "ignore") {
+            setRegisterStep((s: number) => s + 1)
+        }
+    }
 
+    const chooseProfilPic: MouseEventHandler = (event: SyntheticEvent) => {
+        console.log("choose profile pic")
+
+        const fileInput = document.querySelector('.hidden_file_input') as HTMLInputElement
+        if(fileInput && fileInput.type === "file"){
+            fileInput.click()
+            fileInput.addEventListener('change', ()=>{
+                setStepThreeProperties(s =>{
+                    const file = fileInput.files !== null ? fileInput.files[0] : null
+                    return {...s, activeButton: "finish", chosenImage: file}
+                })
+            })
+            
+        }else {
+            console.error("La variable fileInput possède une valeur null ou n'est pa de type file")
+        }
     }
 
     return <div className="registration_page">
@@ -150,19 +186,20 @@ export default function Register(): JSX.Element {
                 username: identity.username,
                 sex: identity.sex
             }} errors={formErrors}/>}
-            {JSON.stringify(userUniqueProperties)}
+            
             {registerStep === 2 && <RegisterStepTwo inputsEvents={{
                 onChange: handleChange
             }} values={{
                 email:userUniqueProperties.email,
                 password: userUniqueProperties.password,
-                password_confirmation: userUniqueProperties.password_confirmation,
-                id: userUniqueProperties.id
+                password_confirmation: userUniqueProperties.password_confirmation
             }}/>}
 
-            {registerStep === 3 && <RegisterStepThree events={{
+            {registerStep === 3 && <RegisterStepThree onButtonClick={handleStepThreeButtonClick} events={{
                 onClick: chooseProfilPic
-            }}/>}
+            }} activeButton={stepThreeProperties.activeButton}
+                chosenProfilePhoto={stepThreeProperties.chosenImage}
+            />}
         </form> : <CongratsForSubscription/>}
     </div>
 }

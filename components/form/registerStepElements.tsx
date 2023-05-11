@@ -1,4 +1,4 @@
-import { PrimaryButtonWithArrowRight, SecondaryButton } from "../widgets/button";
+import { PrimaryButton, PrimaryButtonWithArrowRight, SecondaryButton } from "../widgets/button";
 import ProfilePhotoChoiceInput from "../widgets/profilePhotoChoiceInput";
 import RegistrationProgress from "../widgets/registrationProgress";
 import { InputEmail, InputPassword, InputRadio, InputText } from "./input";
@@ -7,6 +7,8 @@ import { UserIdentity } from "../../types/user";
 import { RegistrationFormErrors } from "../../types/registration/registrationFormErrors";
 import styles from "../../styles/sass/modules/input.module.scss"
 import { UserUniqueProperties } from "../../types/user";
+import { Context, MouseEventHandler, SyntheticEvent } from "react";
+import { createContext } from "react";
 
 
 function RegisterStepOne({inputsEvents, values, errors}: {
@@ -121,14 +123,32 @@ function RegisterStepTwo({inputsEvents, values}: {
   );
 }
 
-function RegisterStepThree({events}: {events: ElementEvents<HTMLDivElement>}): JSX.Element {
+const ButtonContext: Context<MouseEventHandler<HTMLButtonElement>> = createContext((event: SyntheticEvent)=>{
+  console.log(event)
+})
+
+function RegisterStepThree({
+  events, 
+  onButtonClick, 
+  activeButton,
+  chosenProfilePhoto
+}: {
+  events: ElementEvents<HTMLDivElement>,
+  onButtonClick: MouseEventHandler<HTMLButtonElement>,
+  activeButton: 'ignore' | 'finish',
+  chosenProfilePhoto: File | null
+}): JSX.Element {
   return (
     <div className="register_step_three">
-      <ProfilePhotoChoiceInput />
-      <SecondaryButton>Ignorer </SecondaryButton>
+      <ProfilePhotoChoiceInput image={chosenProfilePhoto} onClickImagePicker={events.onClick !== undefined ? events.onClick : null}/>
+      <ButtonContext.Provider value={onButtonClick}>
+        { activeButton === "ignore" ? 
+        <SecondaryButton>Ignorer </SecondaryButton> :
+        <PrimaryButton>Terminer</PrimaryButton>}
+      </ButtonContext.Provider>
       <RegistrationProgress activeBar={3} />
     </div>
   );
 }
 
-export { RegisterStepOne, RegisterStepTwo, RegisterStepThree}
+export { RegisterStepOne, RegisterStepTwo, RegisterStepThree, ButtonContext }
