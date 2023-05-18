@@ -4,6 +4,7 @@ type User = {
     "firstname": string,
     "username": string,
     "password": string,
+    "salt": string,
     "sex": "man" | "woman",
     "image": string,
     "email": string,

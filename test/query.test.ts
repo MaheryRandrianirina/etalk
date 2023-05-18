@@ -23,4 +23,20 @@ describe('test querybuilder', ()=>{
         query = new Query('user')
         expect(query.update(['username']).where({"id": 2}).__toString()).toBe('UPDATE user SET username = ? WHERE id = 2')
     })
+
+    test('simple select query', ()=>{
+        let query: Query = new Query('user')
+        expect(query.select("*").__toString()).toBe("SELECT * FROM user")
+    })
+
+    test('select query with conditions', ()=>{
+        let query: Query = new Query('user')
+        expect(query.select('*').where(["username", "name"]).__toString()).toBe('SELECT * FROM user WHERE username = ? AND name = ?')
+        query = new Query('user')
+        expect(query.select(['username', "name"])
+            .where({"username": "Mahery"})
+            .__toString())
+            .toBe("SELECT username, name FROM user WHERE username = Mahery")
+    })
+
 })

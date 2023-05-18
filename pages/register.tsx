@@ -15,17 +15,31 @@ import styles from "../styles/sass/modules/buttons.module.scss";
 import Link from "next/link";
 import {UserIdentity, UserUniqueProperties} from "../types/user";
 import axios, {AxiosError} from "axios";
-import {RegistrationFormErrors} from "../types/registration/registrationFormErrors";
 import {DataFromRegistration} from "../types/registration/dataFromRegistration";
 import { PostDataReturnType } from "../types/registration/dataBaseCommunication"
 import { RegistrationStepThreeProperties } from "../types/registration/registration";
+import useFormErrors from "../lib/hooks/useFormErrors";
+import { RegistrationFormErrors } from "../types/errors";
 
 
-const PostData: (step: number, data: UserIdentity | UserUniqueProperties | File)=>Promise<PostDataReturnType> 
+const PostDataforRegistration: (step: number, data: UserIdentity | UserUniqueProperties | {image:File})=>Promise<PostDataReturnType> 
     = async (step, data): Promise<any> => {
     try {
-        const res = await axios.post("/api/register", {registrationStep: step, data: data})
-        if(res.statusText === "OK"){
+        let res
+        if("image" in data){
+            if(data.image.size <=10 * 1024 *1024){
+                res = await axios.postForm("/api/register", {
+                    "filename": data.image.name,
+                    "file": data.image 
+                })
+            }else {
+                console.error("Le fichier est trop volumineux")
+            }
+        }else {
+            res = await axios.post("/api/register", {registrationStep: step, data: data})
+        }
+        
+        if(res?.statusText === "OK"){
             return res.data
         }
     }catch(error){
@@ -46,10 +60,7 @@ export default function Register(): JSX.Element {
         sex: "man"
     })
 
-    const [formErrors, setFormErrors]: [
-        formErrors: RegistrationFormErrors,
-        setFormErrors: Function
-    ] = useState({})
+    const [formErrors, setFormErrors]= useFormErrors<RegistrationFormErrors>({})
 
     const [userUniqueProperties, setUserUniqueProperties]: [
         userUniqueProperties: UserUniqueProperties,
@@ -74,22 +85,48 @@ export default function Register(): JSX.Element {
         try {
             let res: PostDataReturnType | undefined
             if(registerStep === 1){
-                res = await PostData(registerStep, identity)
+                res = await PostDataforRegistration(registerStep, identity)
             }else if(registerStep === 2){
-                res = await PostData(registerStep, userUniqueProperties)
+                res = await PostDataforRegistration(registerStep, userUniqueProperties)
             }
 
             if( res !== undefined && 'success' in res && res.success === true){
                 setRegisterStep((s: number) => s + 1)
             }else if(res !== undefined && 'success' in res && res.success === false){
-                console.error("Echec de l'insertion")
                 if("sqlError" in res){
                     console.error(res.sqlError)
                 }
             }
         }catch(error){
-            if(error instanceof AxiosError && "errors" in error.response?.data){
-                setFormErrors(error.response?.data.errors)
+            if(error instanceof AxiosError && error.response !== undefined){
+                const errorData = error.response.data
+                if("errors" in errorData){
+                    setFormErrors(errorData.errors)
+                }else if("sqlError" in errorData){
+                    const sqlError = errorData.sqlError
+                    if(typeof sqlError === "string" && sqlError.includes("ER_DUP_ENTRY")){
+                        const message = "Cette valeur existe déjà"
+
+                        if(sqlError.includes("username")){
+                            setFormErrors(e=>{
+                                return {...e, username: [message]}
+                            })
+                        }else if(sqlError.includes('password')){
+                            setFormErrors(e=>{
+                                return {...e, password: [message]}
+                            })
+                        }else if(sqlError.includes('email')){
+                            setFormErrors(e=>{
+                                return {...e, email: [message]}
+                            })
+                        }
+
+                    }else {
+                        console.error(sqlError)
+                    }
+                }else {
+                    console.error(error)
+                }
             }
             
         }
@@ -140,14 +177,15 @@ export default function Register(): JSX.Element {
 
     const handleStepThreeButtonClick: MouseEventHandler<HTMLButtonElement> = (e: SyntheticEvent) => {
         e.preventDefault()
-        
-        /* ON INITIALISE UNE SESSION ICI. JUSTE AVANT L'ETAPE EN DESSOUS*/
         const activeButton = stepThreeProperties.activeButton
         if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
-            PostData(registerStep, stepThreeProperties.chosenImage).then(res => {
+            
+            PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage}).then(res => {
                 if("success" in res && res.success === true){
                     setRegisterStep((s: number) => s + 1)
-                }else {}
+                }else {
+                    console.error("Echec de l'insertion de l'image. Veuillez réessayer.")
+                }
             })
         }else if(activeButton === "ignore") {
             setRegisterStep((s: number) => s + 1)
@@ -155,7 +193,6 @@ export default function Register(): JSX.Element {
     }
 
     const chooseProfilPic: MouseEventHandler = (event: SyntheticEvent) => {
-        console.log("choose profile pic")
 
         const fileInput = document.querySelector('.hidden_file_input') as HTMLInputElement
         if(fileInput && fileInput.type === "file"){

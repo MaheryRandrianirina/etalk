@@ -7,8 +7,8 @@ import { UserIdentity } from "../../types/user";
 import { RegistrationFormErrors } from "../../types/registration/registrationFormErrors";
 import styles from "../../styles/sass/modules/input.module.scss"
 import { UserUniqueProperties } from "../../types/user";
-import { Context, MouseEventHandler, SyntheticEvent } from "react";
-import { createContext } from "react";
+import { ButtonContext } from "../contexts/ButtonContext";
+import { MouseEventHandler } from "react";
 
 
 function RegisterStepOne({inputsEvents, values, errors}: {
@@ -122,10 +122,6 @@ function RegisterStepTwo({inputsEvents, values}: {
     </div>
   );
 }
-
-const ButtonContext: Context<MouseEventHandler<HTMLButtonElement>> = createContext((event: SyntheticEvent)=>{
-  console.log(event)
-})
 
 function RegisterStepThree({
   events, 

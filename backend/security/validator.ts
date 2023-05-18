@@ -4,6 +4,8 @@ import ValidationError from "./validationError"
 
 export default class Validator {
 
+    protected data: TableColumns = {}
+
     protected errors: ValidationErrors = {
         "required": [],
         "string": [],
@@ -23,8 +25,13 @@ export default class Validator {
 
     protected caractersToExclude: string = ""
 
-    constructor(protected data: TableColumns){
+    constructor(){
         
+    }
+
+    setData(data: TableColumns): this {
+        this.data = data
+        return this
     }
 
     required(...fields: string[]): this {
