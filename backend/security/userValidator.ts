@@ -19,28 +19,6 @@ export default class UserValidator extends Validator {
         })
         return this
     }
-    
-    // protected addError(field: string | [string, string], type: ValidationErrorTypes): void {
-        
-    //     if(!this.lengthForFieldAreInit()
-    //         && (type === "min_length" || type === "max_length")
-    //     ){
-    //         this.errors[type][field] = [field, this.lengthForField[type]]
-    //         this.lengthForField = {min_length: 0, max_length: 0}
-    //     }else if(type !== "min_length" && 
-    //         type !== "max_length" && 
-    //         type !== "username" &&
-    //         type !== "firstname" && 
-    //         type !== "name" && type !== "email" 
-    //         && type !== "password"
-    //     ){
-    //         this.errors[type].push(field)
-    //     }else if(type !== "min_length" && type !== "max_length"){
-    //         this.errors[type] = field
-    //     }else if(typeof field !== "string" && type === "inequals"){
-    //         this.errors[type] = field
-    //     }
-    // }
 
     firstname(firstname: string): this {
         return this.username(firstname)

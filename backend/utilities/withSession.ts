@@ -1,9 +1,12 @@
+import { getIronSession } from "iron-session";
 import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
+
 import {
   GetServerSidePropsContext,
   GetServerSidePropsResult,
   NextApiHandler,
 } from "next";
+import type { NextRequest, NextResponse } from "next/server";
 
 const sessionOptions = {
   password: process.env.COOKIE_PASSWORD !== undefined ? process.env.COOKIE_PASSWORD : "cookie_name",
@@ -26,4 +29,8 @@ export function withSessionSsr<
   ) => GetServerSidePropsResult<P> | Promise<GetServerSidePropsResult<P>>,
 ) {
   return withIronSessionSsr(handler, sessionOptions);
+}
+
+export async function withIronSession(req: NextRequest, res: NextResponse) {
+  return await getIronSession(req, res, sessionOptions)
 }

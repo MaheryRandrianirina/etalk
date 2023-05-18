@@ -1,4 +1,4 @@
-import { queryConditions } from "../../types/Database/Query"
+import { TableColumns } from "../../types/Database/tables/TableColumns"
 
 abstract class QueryBuilder {
 
@@ -26,7 +26,16 @@ export default class Query extends QueryBuilder {
         this.table = table
     }
 
-    select(columns: string[]): this {
+    select(columns: string[] | string): this {
+        let query: string = "SELECT "
+        if(typeof columns === "string"){
+            query += columns
+        }else {
+            query += columns.join(', ')
+        }
+
+        query += ` FROM ${this.table}`
+        this.queries.push(query)
         return this
     }
 
@@ -45,19 +54,26 @@ export default class Query extends QueryBuilder {
         return toJoin.join(', ')
     }
 
-    where(conditions: queryConditions): this {
-        this.queries.push(`WHERE ${this.transformObjectToEquality(conditions)}`)
+    where(conditions: TableColumns | (keyof TableColumns)[]): this {
+        this.queries.push(`WHERE ${this.transformObjectToForConditions(conditions)}`)
         return this
     }
 
-    transformObjectToEquality(object: {}): string {
-        let string: string = ""
-        for(const i in object){
-            const index = i as keyof Object
-            string += i + " = " + object[index] + " AND "
+    transformObjectToForConditions(conditions: TableColumns | (keyof TableColumns)[]): string {
+        let collections: string[] = []
+        if(conditions instanceof Array){
+            conditions.forEach(column => {
+                collections.push(`${column} = ?`)
+            })
+        }else {
+            for(const i in conditions){
+                const index = i as keyof Object
+                collections.push(i + " = " + conditions[index])
+            }
         }
+        
 
-        return string.slice(0, string.lastIndexOf(" AND "))
+        return collections.join(" AND ")
     }
 
     update(columns: string[]): this {

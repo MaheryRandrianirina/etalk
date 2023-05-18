@@ -2,12 +2,11 @@ import { NextApiRequest, NextApiResponse} from "next"
 import { withSessionRoute } from "../../backend/utilities/withSession"
 import Auth from "../../backend/User/Auth"
 
-export default withSessionRoute(Register) 
+export default withSessionRoute(Login)
 
-function Register(req: NextApiRequest, res: NextApiResponse) {
-    
+function Login(req: NextApiRequest, res: NextApiResponse) {
     if(req.method === "POST"){
         const auth = new Auth(req, res)
-        auth.registerUser()
+        auth.loginUser()
     }
 }

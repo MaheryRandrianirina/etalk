@@ -15,4 +15,9 @@
     border-radius: 30px;
     color: $primary;
     text-decoration: none;
+    transition: background-color .3s ease-in, color .3s ease-in;
+    &:hover {
+        background-color: $primary;
+        color: $secondaryBlack;
+    }
 }

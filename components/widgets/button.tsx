@@ -1,16 +1,19 @@
 
-import { PropsWithChildren, useContext } from "react";
+import { PropsWithChildren, ReactNode, useContext } from "react";
 import { ButtonHTMLAttributes } from "react";
 import styles from "../../styles/sass/modules/decorations.module.scss";
 import { ButtonContext } from "../form/registerStepElements";
 
-function Button({type, children, className}: ButtonHTMLAttributes<string>): JSX.Element {
+function Button({type, children, className, disabled}: ButtonHTMLAttributes<string | boolean | undefined>): JSX.Element {
     const clickEventHandler = useContext(ButtonContext)
-    return <button type={type} className={className} onClick={clickEventHandler}>{children}</button>
+    return <button type={type} className={className} onClick={clickEventHandler} disabled={disabled}>{children}</button>
 }
 
-function PrimaryButton({children}: PropsWithChildren): JSX.Element {
-    return <Button className="primary_button">{children}</Button>
+function PrimaryButton({children, disabled}: {
+    children: ReactNode,
+    disabled?: boolean
+}): JSX.Element {
+    return <Button className="primary_button" disabled={disabled}>{children}</Button>
 }
 
 function PrimaryButtonWithArrowRight({children}: PropsWithChildren): JSX.Element {

@@ -9,7 +9,7 @@ function Input({type, attributes, events}: InputOptions<InputTypes[number]>): JS
         className={attributes.className}
         name={attributes.name}
         id={attributes.id}
-        checked={attributes.checked}
+        checked={type === "checkbox" || type === "radio" ? attributes.checked : undefined}
         placeholder={attributes.placeholder}
         onChange={events?.onChange}
         value={attributes.value !== null ? attributes.value : ""}
@@ -29,8 +29,10 @@ function InputRadio({label, attributes, events}: {
 }
 
 function InputText({label, attributes, events, errors}: {
-    label?: string, attributes: InputAttributes<"text">,
-    events?: InputEvents<"text">, errors?: string[] | null
+    label?: string, 
+    attributes: InputAttributes<"text">,
+    events?: InputEvents<"text">, 
+    errors?: string[] | null
 }): JSX.Element {
     
     return <div className={"form_group form_group_" + attributes.className}>

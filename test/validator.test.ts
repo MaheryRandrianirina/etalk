@@ -2,10 +2,12 @@ import { test } from "@jest/globals"
 import Validator from "../backend/security/validator"
 import ValidationError from "../backend/security/validationError"
 
-test("username validation fail", ()=>{
-    const validator = new Validator({username: ""})
-    const errors = validator.required("username").getErrors()
+test("test setData method", ()=>{
+    const validator = new Validator()
+    const v = validator.setData({name: "mahery"})
+    const errors = v.required("name").getErrors()
 
-    expect(errors).toBeInstanceOf(ValidationError)
-    expect(errors).not.toBeNull()
+    expect(v).toBeInstanceOf(Validator)
+    expect(errors).not.toBeInstanceOf(ValidationError)
+    expect(errors).toBeNull()
 })
