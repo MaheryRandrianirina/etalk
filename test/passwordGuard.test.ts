@@ -11,7 +11,6 @@ describe('test passwordGuard class', ()=>{
     test("verify method return true",async ()=>{
         const p_one = new PasswordGuard()
         const hash = await p_one.hash("mypassword")
-        console.log(hash)
         const p_two = new PasswordGuard()
         const verificationResult = await p_two.verify("mypassword", hash)
         expect(verificationResult).toBeTruthy()

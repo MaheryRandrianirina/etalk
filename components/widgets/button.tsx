@@ -16,8 +16,11 @@ function PrimaryButton({children, disabled}: {
     return <Button className="primary_button" disabled={disabled}>{children}</Button>
 }
 
-function PrimaryButtonWithArrowRight({children}: PropsWithChildren): JSX.Element {
-    return <Button className="primary_button">
+function PrimaryButtonWithArrowRight({children, disabled}: {
+    children: ReactNode,
+    disabled?: boolean
+}): JSX.Element {
+    return <Button className="primary_button" disabled={disabled}>
         <p>{children}</p>
         <svg style={{float: "right"}} viewBox="0 0 55 24" strokeWidth="2" width="50" height="24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
             <line x1="5" y1="12" x2="30" y2="12"></line>

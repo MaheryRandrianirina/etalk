@@ -28,6 +28,9 @@
 @mixin link {
     color: $primary;
     text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 @mixin form_group {

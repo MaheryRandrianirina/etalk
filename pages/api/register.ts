@@ -8,6 +8,11 @@ function Register(req: NextApiRequest, res: NextApiResponse) {
     
     if(req.method === "POST"){
         const auth = new Auth(req, res)
-        auth.registerUser()
+        try {
+            auth.registerUser()
+        }catch(e){
+            console.error(e)
+        }
+        
     }
 }

@@ -27,10 +27,14 @@ const PostDataforRegistration: (step: number, data: UserIdentity | UserUniquePro
     try {
         let res
         if("image" in data){
-            if(data.image.size <=10 * 1024 *1024){
-                res = await axios.postForm("/api/register", {
-                    "filename": data.image.name,
-                    "file": data.image 
+            const imageSizeAccepted: boolean = data.image.size <= 10 * 1024 *1024
+            if(imageSizeAccepted){
+                const formdata = new FormData()
+                formdata.append("profile_photo", data.image)
+                res = await axios.postForm("/api/register", formdata, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
                 })
             }else {
                 console.error("Le fichier est trop volumineux")
@@ -79,6 +83,18 @@ export default function Register(): JSX.Element {
         chosenImage: null
     } as RegistrationStepThreeProperties)
 
+    const rulesForEachStep = {
+        one: identity.name.length >= 3 
+            && identity.firstname.length >= 3 
+            && identity.username.length >= 3
+            && (identity.sex === "man" || identity.sex === "woman"),
+        two: userUniqueProperties.email.includes("@") 
+            && userUniqueProperties.email.includes('.')
+            && userUniqueProperties.password.length >= 8
+            && userUniqueProperties.password_confirmation.length >= 8
+            && (userUniqueProperties.password === userUniqueProperties.password_confirmation)
+    }
+
     const handleSubmit: FormEventHandler = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
@@ -88,6 +104,21 @@ export default function Register(): JSX.Element {
                 res = await PostDataforRegistration(registerStep, identity)
             }else if(registerStep === 2){
                 res = await PostDataforRegistration(registerStep, userUniqueProperties)
+            }else if(registerStep === 3){
+                console.log("register step 3")
+                const activeButton = stepThreeProperties.activeButton
+                if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
+                    
+                    PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage}).then(res => {
+                        if("success" in res && res.success === true){
+                            setRegisterStep((s: number) => s + 1)
+                        }else {
+                            console.error("Echec de l'insertion de l'image. Veuillez réessayer.")
+                        }
+                    })
+                }else if(activeButton === "ignore") {
+                    setRegisterStep((s: number) => s + 1)
+                }
             }
 
             if( res !== undefined && 'success' in res && res.success === true){
@@ -177,19 +208,7 @@ export default function Register(): JSX.Element {
 
     const handleStepThreeButtonClick: MouseEventHandler<HTMLButtonElement> = (e: SyntheticEvent) => {
         e.preventDefault()
-        const activeButton = stepThreeProperties.activeButton
-        if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
-            
-            PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage}).then(res => {
-                if("success" in res && res.success === true){
-                    setRegisterStep((s: number) => s + 1)
-                }else {
-                    console.error("Echec de l'insertion de l'image. Veuillez réessayer.")
-                }
-            })
-        }else if(activeButton === "ignore") {
-            setRegisterStep((s: number) => s + 1)
-        }
+        
     }
 
     const chooseProfilPic: MouseEventHandler = (event: SyntheticEvent) => {
@@ -203,17 +222,20 @@ export default function Register(): JSX.Element {
                     return {...s, activeButton: "finish", chosenImage: file}
                 })
             })
-            
         }else {
             console.error("La variable fileInput possède une valeur null ou n'est pa de type file")
         }
     }
 
+    const disabledButton: boolean | null = registerStep === 1 
+        ? rulesForEachStep.one === false
+        : (registerStep === 2 ? rulesForEachStep.two === false : null)
+
     return <div className="registration_page">
         {registerStep === 1 && <Link href="/login" className={styles.to_loginpage_button}>
             Se connecter
         </Link>}
-        {registerStep < 4 ? <form method="post" onSubmit={handleSubmit}>
+        {registerStep < 4 ? <form method="post" onSubmit={handleSubmit} encType="multipart/form-data">
             
             {registerStep === 1 && <RegisterStepOne inputsEvents={{
                 onChange: handleChange
@@ -222,7 +244,7 @@ export default function Register(): JSX.Element {
                 firstname: identity.firstname,
                 username: identity.username,
                 sex: identity.sex
-            }} errors={formErrors}/>}
+            }} errors={formErrors} disableButton={disabledButton as boolean}/>}
             
             {registerStep === 2 && <RegisterStepTwo inputsEvents={{
                 onChange: handleChange
@@ -230,9 +252,9 @@ export default function Register(): JSX.Element {
                 email:userUniqueProperties.email,
                 password: userUniqueProperties.password,
                 password_confirmation: userUniqueProperties.password_confirmation
-            }}/>}
+            }} disableButton={disabledButton as boolean}/>}
 
-            {registerStep === 3 && <RegisterStepThree onButtonClick={handleStepThreeButtonClick} events={{
+            {registerStep === 3 && <RegisterStepThree events={{
                 onClick: chooseProfilPic
             }} activeButton={stepThreeProperties.activeButton}
                 chosenProfilePhoto={stepThreeProperties.chosenImage}

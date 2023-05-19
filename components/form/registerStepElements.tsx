@@ -4,17 +4,18 @@ import RegistrationProgress from "../widgets/registrationProgress";
 import { InputEmail, InputPassword, InputRadio, InputText } from "./input";
 import { ElementEvents } from "../../types/events";
 import { UserIdentity } from "../../types/user";
-import { RegistrationFormErrors } from "../../types/registration/registrationFormErrors";
 import styles from "../../styles/sass/modules/input.module.scss"
 import { UserUniqueProperties } from "../../types/user";
 import { ButtonContext } from "../contexts/ButtonContext";
 import { MouseEventHandler } from "react";
+import { RegistrationFormErrors } from "../../types/errors";
 
 
-function RegisterStepOne({inputsEvents, values, errors}: {
+function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
   inputsEvents: ElementEvents<HTMLInputElement>,
   values: UserIdentity,
-  errors: RegistrationFormErrors
+  errors: RegistrationFormErrors,
+  disableButton: boolean
 }):JSX.Element {
   
   return (
@@ -70,16 +71,17 @@ function RegisterStepOne({inputsEvents, values, errors}: {
         }}
         events={inputsEvents}
       />
-
-      <PrimaryButtonWithArrowRight>Suivant </PrimaryButtonWithArrowRight>
+      
+      <PrimaryButtonWithArrowRight disabled={disableButton}>Suivant </PrimaryButtonWithArrowRight>
       <RegistrationProgress />
     </div>
   );
 }
 
-function RegisterStepTwo({inputsEvents, values}: {
+function RegisterStepTwo({inputsEvents, values, disableButton}: {
   inputsEvents: ElementEvents<HTMLInputElement>,
-  values: UserUniqueProperties
+  values: UserUniqueProperties,
+  disableButton: boolean
 }): JSX.Element {
   return (
     <div className="register_step_two">
@@ -117,7 +119,7 @@ function RegisterStepTwo({inputsEvents, values}: {
         }}
       />
 
-      <PrimaryButtonWithArrowRight>Suivant </PrimaryButtonWithArrowRight>
+      <PrimaryButtonWithArrowRight disabled={disableButton}>Suivant </PrimaryButtonWithArrowRight>
       <RegistrationProgress activeBar={2} />
     </div>
   );
@@ -125,23 +127,20 @@ function RegisterStepTwo({inputsEvents, values}: {
 
 function RegisterStepThree({
   events, 
-  onButtonClick, 
   activeButton,
   chosenProfilePhoto
 }: {
   events: ElementEvents<HTMLDivElement>,
-  onButtonClick: MouseEventHandler<HTMLButtonElement>,
   activeButton: 'ignore' | 'finish',
   chosenProfilePhoto: File | null
 }): JSX.Element {
   return (
     <div className="register_step_three">
       <ProfilePhotoChoiceInput image={chosenProfilePhoto} onClickImagePicker={events.onClick !== undefined ? events.onClick : null}/>
-      <ButtonContext.Provider value={onButtonClick}>
-        { activeButton === "ignore" ? 
+      { activeButton === "ignore" ? 
         <SecondaryButton>Ignorer </SecondaryButton> :
-        <PrimaryButton>Terminer</PrimaryButton>}
-      </ButtonContext.Provider>
+        <PrimaryButton>Terminer</PrimaryButton>
+      }
       <RegistrationProgress activeBar={3} />
     </div>
   );

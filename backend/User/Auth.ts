@@ -5,10 +5,11 @@ import ValidationError from "../security/validationError"
 import UserTable from "../database/tables/UserTable"
 import PasswordGuard from "../security/password"
 import { User } from "../../types/user"
-import { createWriteStream } from "fs"
 import { File } from "buffer"
 import { LoginInputs } from "../../components/login"
-import { NextResponse } from "next/server"
+import multer from "multer"
+import { NextRequest } from "next/server"
+
 
 export default class Auth {
 
@@ -16,55 +17,71 @@ export default class Auth {
     private passwordGuard = new PasswordGuard()
     private userValidator: UserValidator = new UserValidator()
 
-    constructor(private req: NextApiRequest, private res: NextApiResponse) {
+    private errorMessage = {
+        responseNull: "Impossible d'invoquer cetter methode si 'this.res' est null",
+        not: {
+            NextApiRequest: "this.req n'est pas de type NextApiRequest"
+        }
+    }
+
+    constructor(private req: NextApiRequest | NextRequest, private res?: NextApiResponse) {
 
     }
 
     registerUser() {
         const d: BeforeStepThreeData | File = this.req.body
-        
-        if(d instanceof File === false || typeof d === "object"){
-            const {registrationStep, data} = d as BeforeStepThreeData
+        if (this.res) {
+            if (d instanceof File === false) {
+                const { registrationStep, data } = d as BeforeStepThreeData
 
-            this.userValidator.setData(data)
-            
-            switch(registrationStep){
-                case 1:
-                    this.handleRegistrationStepOne(data, this.req, this.res)
-                    break
-                case 2:
-                    this.handleRegistrationStepTwo(data, this.req, this.res)
-                    break
+                this.userValidator.setData(data)
+
+                switch (registrationStep) {
+                    case 1:
+                        this.handleRegistrationStepOne(data)
+                        break
+                    case 2:
+                        this.handleRegistrationStepTwo(data)
+                        break
+                }
             }
+            //this.handleRegistrationStepThree(d)
+        }else {
+            throw Error(this.errorMessage.responseNull)
         }
-        //this.handleRegistrationStepThree(d, req, res)
     }
 
-    private async handleRegistrationStepOne(data:DataFromRegistration,
-        req: NextApiRequest,
-        res: NextApiResponse){
+    private async handleRegistrationStepOne(data:DataFromRegistration){
     
-        const errors: ValidationError | null = this.userValidator
-            .required("sex")
-            .string("sex")
-            .name('name')
-            .firstname("firstname")
-            .username("username")
-            .getErrors()
-        
-        if(errors === null){
-            try {
-                const userId: number = await this.insertUserIdentity(data)
-                req.session.userId = userId
-                await req.session.save()
-    
-                res.status(200).json({success: true}) 
-            }catch(e){
-                const error = e as Error
-                res.status(500).json({success: false, sqlError: error.message})
+        try {
+            if(this.res){
+                const errors: ValidationError | null = this.userValidator
+                .required("sex")
+                .string("sex")
+                .name('name')
+                .firstname("firstname")
+                .username("username")
+                .getErrors()
+            
+                if(errors === null && "session" in this.req){
+                    try {
+                        const userId: number = await this.insertUserIdentity(data)
+                        this.req.session.userId = userId
+                        await this.req.session.save()
+            
+                        this.res.status(200).json({success: true}) 
+                    }catch(e){
+                        const error = e as Error
+                        this.res.status(500).json({success: false, sqlError: error.message})
+                    }
+                }else {
+                    this.res.status(500).json({...errors, success: false})
+                }
+            }else {
+                throw new Error(this.errorMessage.responseNull)
             }
-        }else {
-            res.status(500).json({...errors, success: false})
+        }catch(e){
+            throw e
         }
             
         
@@ -86,32 +103,37 @@ export default class Auth {
         }
     }
     
-    private async handleRegistrationStepTwo(data:DataFromRegistration, req: NextApiRequest, res: NextApiResponse) {
-        const errors = this.userValidator
+    private async handleRegistrationStepTwo(data:DataFromRegistration) {
+        if(this.res && "session" in this.req){
+            const errors = this.userValidator
             .email("email")
             .password("password")
             .equals("password", "password_confirmation")
             .getErrors()
     
-        const userId = req.session.userId
-        
-        if (errors === null && userId !== undefined && userId !== null) {
-            try {
-                await this.insertUserStepTwoData(data, userId)
-                const authenticatedUser = await this.loginAfterRegistration(data, userId, req)
+            const userId = this.req.session.userId
+            
+            if (errors === null && userId !== undefined && userId !== null) {
+                try {
+                    await this.insertUserStepTwoData(data, userId)
+                    const authenticatedUser = await this.loginAfterRegistration(data, userId, this.req)
 
-                if(authenticatedUser){
-                    res.status(200).json({ success: true })
-                }else {
-                    res.status(301).redirect("/forbidden").send("Accès refusé !")
+                    if(authenticatedUser){
+                        this.res.status(200).json({ success: true })
+                    }else {
+                        this.res.status(301).redirect("/forbidden").send("Accès refusé !")
+                    }
+                    
+                } catch (error) {
+                    this.res.status(500).json({success: false, sqlError: error})
                 }
-                
-            } catch (error) {
-                res.status(500).json({success: false, sqlError: error})
-            }
-        } else {
-            res.status(500).json({ ...errors, success: false })
-        }  
+            } else {
+                this.res.status(500).json({ ...errors, success: false })
+            } 
+        }else {
+            throw Error(this.errorMessage.responseNull)
+        }
+             
     }
     
     private async insertUserStepTwoData(data: DataFromRegistration, userId: number): Promise<void> {
@@ -140,8 +162,7 @@ export default class Auth {
 
     private async authenticatedUser(password: string, user: User): Promise<boolean> {
         const verifiedPassword = await this.passwordGuard.verify(password, user.password)
-        console.log("verified password : ",verifiedPassword)
-        if(verifiedPassword){
+        if(verifiedPassword && "session" in this.req){
             this.req.session.user = {
                 id: user.id,
                 name: user.name,
@@ -159,31 +180,22 @@ export default class Auth {
         }
     }
     
-    private handleRegistrationStepThree(imageFile:File, req: NextApiRequest, res: NextApiResponse) {
-        
-        const authUser = req.session.user
-        console.log('aeazd')
-        if (authUser !== undefined && authUser.id !== null) {
-            try {
-                const writeStream = createWriteStream("D:\\CODES\\MESPROJETS\\nextjs\\ETALK\\storage\\public\\user.png")
-                req.on('data', (chunk)=>{
-                    console.log('write')
-                    writeStream.write(chunk)
-                })
-    
-                req.on('end', ()=>{
-                    writeStream.end()
+    private async handleRegistrationStepThree(imageFile:File) {
+        if(this.res && "session" in this.req){
+            const authUser = this.req.session.user
+            if (authUser !== undefined && authUser.id !== null) {
+                try {
                     
-                    //insertUserStepThreeData(path, authUser.id)
-                    res.status(200).json({ success: true })
-                })
-                
-            } catch (error) {
-                res.status(500).json({success: false, sqlError: error})
-            }
-        } else {
-            res.status(500).json({ success: false, user: "Vous devez être connecté pour pouvoir faire cette action." })
-        }  
+                    
+                } catch (error) {
+                    this.res.status(500).json({success: false, sqlError: error})
+                }
+            } else {
+                this.res.status(500).json({ success: false, user: "Vous devez être connecté pour pouvoir faire cette action." })
+            } 
+        }else {
+            throw Error(this.errorMessage.responseNull)
+        } 
     }
     
     private insertUserStepThreeData(imagePath: string, userid: number){
@@ -191,43 +203,63 @@ export default class Auth {
     }
 
     async loginUser() {
-        const loginData = this.req.body as LoginInputs
-        const errors = this.userValidator.setData(loginData)
-            .required("username", "password")
-            .username("username")
-            .password("password")
-            .getErrors()
-        
-        if(errors === null){
-            try {
-                const [user] = await this.userTable.get([],["username"], [loginData.username]) as [User | undefined]
-                if(user !== undefined){
-                    const authenticatedUser = await this.authenticatedUser(loginData.password, user)
-                    if(authenticatedUser){
-                        this.res
-                            .status(301)
-                            .redirect("/")
-                            .json({success: true, message: "Vous êtes connecté !"})
+        if(this.res){
+            const loginData = this.req.body as LoginInputs
+            const errors = this.userValidator.setData(loginData)
+                .required("username", "password")
+                .username("username")
+                .password("password")
+                .getErrors()
+            
+            if(errors === null){
+                try {
+                    const [user] = await this.userTable.get([],["username"], [loginData.username]) as [User | undefined]
+                    if(user !== undefined){
+                        const authenticatedUser = await this.authenticatedUser(loginData.password, user)
+                        if(authenticatedUser){
+                            this.res
+                                .status(301)
+                                .redirect("/")
+                                .json({success: true, message: "Vous êtes connecté !"})
+                        }else {
+                            this.res
+                                .status(500)
+                                .json({success: false, errors: {password: "Mot de passe incorrect"}})
+                        }
                     }else {
                         this.res
                             .status(500)
-                            .json({success: false, errors: {password: "Mot de passe incorrect"}})
+                            .json({success: false, errors: {username: "Aucun utilisateur ne possède ce pseudo"}})
                     }
-                }else {
+                }catch(e){
+                    const error = e as Error
                     this.res
                         .status(500)
-                        .json({success: false, errors: {username: "Aucun utilisateur ne possède ce pseudo"}})
+                        .json({success: false, sqlError: error.message})
                 }
-            }catch(e){
-                const error = e as Error
-                this.res
-                    .status(500)
-                    .json({success: false, sqlError: error.message})
+            }else {
+                console.log(errors)
+                this.res.status(500).json({success: false, errors: errors})
             }
         }else {
-            console.log(errors)
-            this.res.status(500).json({success: false, errors: errors})
+            throw Error(this.errorMessage.responseNull)
         }
+    }
+
+    isAuthenticated(): boolean {
+        if("session" in this.req){
+            const authUser = this.req.session.user
+            return authUser !== undefined 
+                && authUser.is_online === true
+        }else {
+            throw Error(this.errorMessage.not.NextApiRequest)
+        }
+    }
+}
+
+export const config = {
+    api: {
+        bodyParser: false,
     }
 }
 
