@@ -111,29 +111,25 @@ export default class Auth {
             .equals("password", "password_confirmation")
             .getErrors()
     
-            const userId = this.req.session.userId
-            
-            if (errors === null && userId !== undefined && userId !== null) {
-                try {
-                    await this.insertUserStepTwoData(data, userId)
-                    const authenticatedUser = await this.loginAfterRegistration(data, userId, this.req)
+        const userId = this.req.session.userId
+        
+        if (errors === null && userId !== undefined && userId !== null) {
+            try {
+                await this.insertUserStepTwoData(data, userId)
+                const authenticatedUser = await this.loginAfterRegistration(data, userId, req)
 
-                    if(authenticatedUser){
-                        this.res.status(200).json({ success: true })
-                    }else {
-                        this.res.status(301).redirect("/forbidden").send("Accès refusé !")
-                    }
-                    
-                } catch (error) {
-                    this.res.status(500).json({success: false, sqlError: error})
+                if(authenticatedUser){
+                    this.res.status(200).json({ success: true })
+                }else {
+                    this.res.status(301).redirect("/forbidden").send("Accès refusé !")
                 }
-            } else {
-                this.res.status(500).json({ ...errors, success: false })
-            } 
-        }else {
-            throw Error(this.errorMessage.responseNull)
-        }
-             
+                
+            } catch (error) {
+                this.res.status(500).json({success: false, sqlError: error})
+            }
+        } else {
+            this.res.status(500).json({ ...errors, success: false })
+        }  
     }
     
     private async insertUserStepTwoData(data: DataFromRegistration, userId: number): Promise<void> {
