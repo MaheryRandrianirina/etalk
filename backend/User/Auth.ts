@@ -1,20 +1,23 @@
 import { DataFromRegistration } from "../../types/registration/dataFromRegistration"
 import UserValidator from "../security/userValidator"
-import {NextApiRequest, NextApiResponse} from "next"
+import type {NextApiRequest, NextApiResponse} from "next"
 import ValidationError from "../security/validationError"
 import UserTable from "../database/tables/UserTable"
 import PasswordGuard from "../security/password"
 import { User } from "../../types/user"
 import { File } from "buffer"
 import { LoginInputs } from "../../components/login"
-import multer from "multer"
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import Str from "../Helpers/Str"
+import { MysqlError } from "mysql"
 
 
 export default class Auth {
 
     private userTable = new UserTable()
+
     private passwordGuard = new PasswordGuard()
+
     private userValidator: UserValidator = new UserValidator()
 
     private errorMessage = {
@@ -28,7 +31,7 @@ export default class Auth {
 
     }
 
-    registerUser() {
+    async registerUser() {
         const d: BeforeStepThreeData | File = this.req.body
         if (this.res) {
             if (d instanceof File === false) {
@@ -111,25 +114,26 @@ export default class Auth {
             .equals("password", "password_confirmation")
             .getErrors()
     
-        const userId = this.req.session.userId
-        
-        if (errors === null && userId !== undefined && userId !== null) {
-            try {
-                await this.insertUserStepTwoData(data, userId)
-                const authenticatedUser = await this.loginAfterRegistration(data, userId, req)
+            const userId = this.req.session.userId
+            
+            if (errors === null && userId !== undefined && userId !== null) {
+                try {
+                    await this.insertUserStepTwoData(data, userId)
+                    const authenticatedUser = await this.loginAfterRegistration(data, userId, this.req)
 
-                if(authenticatedUser){
-                    this.res.status(200).json({ success: true })
-                }else {
-                    this.res.status(301).redirect("/forbidden").send("Accès refusé !")
+                    if(authenticatedUser){
+                        this.res.status(200).json({ success: true })
+                    }else {
+                        this.res.status(301).redirect("/forbidden").send("Accès refusé !")
+                    }
+                    
+                } catch (error) {
+                    this.res.status(500).json({success: false, sqlError: error})
                 }
-                
-            } catch (error) {
-                this.res.status(500).json({success: false, sqlError: error})
-            }
-        } else {
-            this.res.status(500).json({ ...errors, success: false })
-        }  
+            } else {
+                this.res.status(500).json({ ...errors, success: false })
+            }  
+        }
     }
     
     private async insertUserStepTwoData(data: DataFromRegistration, userId: number): Promise<void> {
@@ -156,7 +160,7 @@ export default class Auth {
         }
     }
 
-    private async authenticatedUser(password: string, user: User): Promise<boolean> {
+    private async authenticatedUser(password: string, user: User, remember_me?: boolean): Promise<boolean> {
         const verifiedPassword = await this.passwordGuard.verify(password, user.password)
         if(verifiedPassword && "session" in this.req){
             this.req.session.user = {
@@ -170,13 +174,31 @@ export default class Auth {
             }
 
             await this.req.session.save()
+
+            if(remember_me === true){
+                try {
+                    const rememberToken = this.generateRememberToken(user)
+                    this.userTable.update({remember_token: rememberToken}, {id: user.id})
+                    
+                    const response = NextResponse.next()
+                    response.cookies.set("auth", rememberToken)
+                }catch(e){
+                    throw e
+                }
+            }
+
             return true
         }else {
             return false
         }
     }
     
+    private generateRememberToken(user: User): string {
+        return user.id + "-----" + Str.random(64)
+    }
+
     private async handleRegistrationStepThree(imageFile:File) {
+        
         if(this.res && "session" in this.req){
             const authUser = this.req.session.user
             if (authUser !== undefined && authUser.id !== null) {
@@ -211,12 +233,12 @@ export default class Auth {
                 try {
                     const [user] = await this.userTable.get([],["username"], [loginData.username]) as [User | undefined]
                     if(user !== undefined){
-                        const authenticatedUser = await this.authenticatedUser(loginData.password, user)
+                        const authenticatedUser = await this
+                            .authenticatedUser(loginData.password, user, loginData.remember_me)
                         if(authenticatedUser){
                             this.res
-                                .status(301)
-                                .redirect("/")
-                                .json({success: true, message: "Vous êtes connecté !"})
+                                .status(200)
+                                .json({success: true, redirection:{redirected: true, url: "/"}})
                         }else {
                             this.res
                                 .status(500)
@@ -228,10 +250,18 @@ export default class Auth {
                             .json({success: false, errors: {username: "Aucun utilisateur ne possède ce pseudo"}})
                     }
                 }catch(e){
-                    const error = e as Error
-                    this.res
+                    
+                    const error = e as MysqlError | Error
+                    if("sqlMessage" in error){
+                        this.res
                         .status(500)
-                        .json({success: false, sqlError: error.message})
+                        .json({success: false, errors: {sqlMessage: error.message}})
+        
+                    }else{
+                        this.res
+                        .status(500)
+                        .json({success: false, errors: {message: error.message}})
+                    }
                 }
             }else {
                 console.log(errors)
@@ -250,12 +280,6 @@ export default class Auth {
         }else {
             throw Error(this.errorMessage.not.NextApiRequest)
         }
-    }
-}
-
-export const config = {
-    api: {
-        bodyParser: false,
     }
 }
 

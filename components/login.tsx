@@ -1,4 +1,4 @@
-import { ChangeEvent, ChangeEventHandler, Context, Dispatch, MouseEventHandler, SetStateAction, SyntheticEvent, useState } from "react";
+import { ChangeEvent, ChangeEventHandler, Context, Dispatch, FormEventHandler, MouseEventHandler, SetStateAction, SyntheticEvent, useState } from "react";
 import { InputCheckbox, InputPassword, InputText } from "./form/input";
 import { PrimaryButton } from "./widgets/button";
 import Link from "next/link";
@@ -61,11 +61,19 @@ export default function Login(): JSX.Element {
         }
     }
 
-    const handleClickButton: MouseEventHandler<HTMLButtonElement> = async (e)=>{
+    const handleSubmit: FormEventHandler<HTMLFormElement> = async (e)=>{
         e.preventDefault();
 
         try {
-            await PostLoginData(inputsValues) as {success: boolean, message: string}
+            const data = await PostLoginData(inputsValues) as {
+                success: true, message?: string, 
+                redirection?: {redirected: boolean, url: string}
+            }
+
+            if("redirection" in data && data.redirection?.redirected === true){
+                document.location.href = data.redirection.url
+            }
+        
         }catch(e){
             const error = e as AxiosError
             const errorResponse = error.response
@@ -76,26 +84,31 @@ export default function Login(): JSX.Element {
             ){
                 if("errors" in errorResponse.data){
                     const errors = errorResponse.data.errors as LoginFormErrors
-                    setFormErrors(errors)
-                }else if("sqlError" in errorResponse.data){
-                    const sqlError = errorResponse.data.sqlError
-                    // ON FAIT CA QUAND ON RENCOTRE UN CAS D'ERREUR SQL
-                    // if(typeof sqlError === "string" && sqlError.includes("ER_DUP_ENTRY")){
-                    //     const message = "Cette valeur existe déjà"
-    
-                    //     if(sqlError.includes("username")){
-                    //         setFormErrors(e =>{
-                    //             return {...e, username: [message]}
-                    //         })
-                    //     }else if(sqlError.includes('password')){
-                    //         setFormErrors(e =>{
-                    //             return {...e, password: [message]}
-                    //         })
-                    //     }
-    
-                    // }else {
-                    //     console.error(sqlError)
-                    // }
+
+                    if("username" in errors
+                        || "password" in errors
+                    ){
+                        setFormErrors(errors)
+                    }else if("sqlMessage" in errors){
+                        const sqlMessage = errors.sqlMessage
+                        // ON FAIT CA QUAND ON RENCOTRE UN CAS D'ERREUR SQL
+                        // if(typeof sqlError === "string" && sqlError.includes("ER_DUP_ENTRY")){
+                        //     const message = "Cette valeur existe déjà"
+        
+                        //     if(sqlError.includes("username")){
+                        //         setFormErrors(e =>{
+                        //             return {...e, username: [message]}
+                        //         })
+                        //     }else if(sqlError.includes('password')){
+                        //         setFormErrors(e =>{
+                        //             return {...e, password: [message]}
+                        //         })
+                        //     }
+        
+                        // }else {
+                        //     console.error(sqlError)
+                        // }
+                    }
                 }
             }
             
@@ -109,7 +122,7 @@ export default function Login(): JSX.Element {
     return <div className="login_page">
         {JSON.stringify(inputsValues)}
         <div className="logo">LOGO</div>
-        <form action="" method="post">
+        <form action="" method="post" onSubmit={handleSubmit}>
             <InputText events={{
                 onChange: handleChangeInputs
             }} errors={formErrors.username !== undefined ? formErrors.username : null} attributes={{className: "username_input", name: "username", value: inputsValues.username, placeholder: "Pseudo"}}/>
@@ -122,9 +135,7 @@ export default function Login(): JSX.Element {
                 onChange: handleChangeInputs
             }} label="se souvenir de moi" attributes={{className: "remember_me_input", name: "remember_me", checked: inputsValues.remember_me}}/>
             
-            <ButtonContext.Provider value={handleClickButton}>
-                <PrimaryButton disabled={disabledButton}>Se connecter</PrimaryButton>
-            </ButtonContext.Provider>
+            <PrimaryButton disabled={disabledButton}>Se connecter</PrimaryButton>
             <div className="no_account_yet">
                 Pas de compte ? <Link href="/register" className="registration_link_from_login">S&lsquo;inscrire</Link>
             </div>

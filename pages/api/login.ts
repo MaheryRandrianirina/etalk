@@ -4,9 +4,11 @@ import Auth from "../../backend/User/Auth"
 
 export default withSessionRoute(Login)
 
-function Login(req: NextApiRequest, res: NextApiResponse) {
+async function Login(req: NextApiRequest, res: NextApiResponse) {
     if(req.method === "POST"){
         const auth = new Auth(req, res)
-        auth.loginUser()
+        await auth.loginUser()
+    }else {
+        res.status(401).send("Not Allowed Method")
     }
 }

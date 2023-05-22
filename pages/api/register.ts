@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse} from "next"
 import { withSessionRoute } from "../../backend/utilities/withSession"
 import Auth from "../../backend/User/Auth"
+import formidable from "formidable"
 
 export default withSessionRoute(Register) 
 
@@ -13,6 +14,5 @@ function Register(req: NextApiRequest, res: NextApiResponse) {
         }catch(e){
             console.error(e)
         }
-        
     }
 }

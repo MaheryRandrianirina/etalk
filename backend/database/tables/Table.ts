@@ -7,8 +7,8 @@ import { TableColumns } from "../../../types/Database/tables/TableColumns"
 export default class Table {
     protected table: string = ""
 
-    new(columns: TableColumns): Promise<number | boolean> {
-        return this.queryTypeInsertion("insert", columns)
+    new(columns: TableColumns): Promise<number> {
+        return this.queryTypeInsertion<number>("insert", columns)
     }
 
     /**
@@ -20,7 +20,7 @@ export default class Table {
      * le nom de la collone à remplir pour parvenir à ce resultat "colonne = valeur". Ce dernier est à utiliser quand les données ne viennent pas de l'utilisateur
      * @returns {Promise<number | boolean>} contenant le resultat venant de la BDD
      */
-    private queryTypeInsertion(type: "insert" | "update", columns: TableColumns, conditions?: TableColumns | (keyof TableColumns)[]): Promise<number | boolean> {
+    private queryTypeInsertion<T extends number | true>(type: "insert" | "update", columns: TableColumns, conditions?: TableColumns | (keyof TableColumns)[]): Promise<T>{
         return new Promise((resolve, reject)=>{
             let arrayOfColumns: (keyof TableColumns)[] = []
             let data: (TableColumns[keyof TableColumns])[] = []
@@ -59,10 +59,13 @@ export default class Table {
             this.getMysqlConnection().query(queryString, data, (err, results)=>{
                 if(err) reject(err)
                 const res = results as OkPacket
-                if(res !== undefined && "insertId" in res){
-                    resolve(res.insertId)
+                if(type === "insert" 
+                    && res !== undefined 
+                    && "insertId" in res
+                ){
+                    resolve(res.insertId as T)
                 }else {
-                    resolve(true)
+                    resolve(true as T)
                 }
                 
             })
@@ -77,8 +80,8 @@ export default class Table {
         return connection
     }
 
-    update(columns: TableColumns, conditions?: TableColumns | (keyof TableColumns)[]): Promise<number | boolean> {
-        return this.queryTypeInsertion('update', columns, conditions)
+    update(columns: TableColumns, conditions?: TableColumns | (keyof TableColumns)[]): Promise<true> {
+        return this.queryTypeInsertion<true>('update', columns, conditions)
     }
 
     find(id: number): Promise<unknown> {
