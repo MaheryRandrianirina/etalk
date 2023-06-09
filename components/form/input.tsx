@@ -1,6 +1,7 @@
 import { InputAttributes, InputEvents, InputOptions, InputTypes } from "../../types/input";
 import styles from "../../styles/sass/modules/input.module.scss"
-
+import conversationStyles from "../../styles/sass/modules/conversations.module.scss"
+import { ChangeEventHandler } from "react";
 
 function Input({type, attributes, events}: InputOptions<InputTypes[number]>): JSX.Element {
     return (
@@ -93,6 +94,12 @@ function InputSearch({attributes, events}:{
     return <Input type="search" attributes={attributes} events={events}/>
 }
 
+function AddReceiverInput({onChangeInput}: {
+    onChangeInput: ChangeEventHandler<HTMLInputElement>
+}): JSX.Element {
+    return <InputSearch events={{onChange: onChangeInput}} attributes={{className: `search_input ${conversationStyles.add_receiver}`, placeholder: "A : "}}/>
+}
+
 export {
   InputText,
   InputNumber,
@@ -101,5 +108,6 @@ export {
   InputPassword,
   InputEmail,
   InputHidden,
-  InputSearch
+  InputSearch,
+  AddReceiverInput
 };

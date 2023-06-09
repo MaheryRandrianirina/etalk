@@ -1,11 +1,12 @@
+import { Entity } from "../../types/Database";
 import { ValidationErrorTypes, ValidationErrors } from "../../types/validator/errors";
 import Validator from "./validator";
 
-export default class UserValidator extends Validator {
+export default class UserValidator<T extends Entity> extends Validator<T> {
 
     protected caractersToExclude: string = '[-@<>?!/#~&()^=°+{}`à*%,;:§$¤]'
 
-    name(name: string): this {
+    name(name: keyof T): this {
         this.checkFieldError(name, (fieldInObj, field)=>{
             const errors = this.required(name)
                 .string(name)
@@ -20,11 +21,11 @@ export default class UserValidator extends Validator {
         return this
     }
 
-    firstname(firstname: string): this {
+    firstname(firstname: keyof T): this {
         return this.username(firstname)
     }
 
-    username(username: string): this
+    username(username: keyof T): this
     {
         this.checkFieldError(username, (fieldInOb, field)=>{
             const errors = this.required(username)
@@ -34,7 +35,7 @@ export default class UserValidator extends Validator {
                 .getErrors()
             
             if(errors !== null){
-                const f = username as ValidationErrorTypes
+                const f = username as ValidationErrorTypes<T>
                 this.addError(field, f)
             }
         })
@@ -42,7 +43,7 @@ export default class UserValidator extends Validator {
         return this
     }
 
-    email(field: string): this {
+    email(field: keyof T): this {
         this.checkFieldError(field, (fieldInObj, field)=>{
             this.caractersToExclude = this.caractersToExclude.replace("@", "")
             
@@ -58,7 +59,7 @@ export default class UserValidator extends Validator {
         return this
     }
 
-    password(field: string): this {
+    password(field: keyof T): this {
         this.checkFieldError(field, (fieldInObj, field)=>{
             const errors = this.required(field)
                 .string(field)

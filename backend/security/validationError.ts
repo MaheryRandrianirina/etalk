@@ -1,15 +1,16 @@
+import { Entity } from "../../types/Database"
 import {  UserSpecificValidationErrorTypes, ValidationErrorTypes, ValidationErrors } from "../../types/validator/errors"
 
-export default class ValidationError {
+export default class ValidationError<T extends Entity> {
 
     private errors: {[index: string]: string[]} = {}
     private currentField: string | number = ""
 
-    constructor(private validationErrors: ValidationErrors){
-        
+    
+    constructor(private validationErrors: ValidationErrors<T>){
         for(const type in this.validationErrors){
-            const t = type as ValidationErrorTypes
             
+            const t = type as ValidationErrorTypes<T>
             if(t !== "max_length" && 
                 t !== "min_length" && 
                 t !== "username" &&
@@ -18,14 +19,14 @@ export default class ValidationError {
                 && t !== "password" && t !== 'inequals'
             ){
                 this.validationErrors[t].forEach(field => {
-                    this.currentField = field
-                    if(t === "required" && field.length > 0){
+                    this.currentField = field as string
+                    if(t === "required" && this.currentField.length > 0){
                         this.pushError("Ce champ est requis")
-                    }else if(t === "string" && field.length > 0){
+                    }else if(t === "string" && this.currentField.length > 0){
                         this.pushError("Ce champ doit être une chaîne de caractères.")
-                    }else if (t === "exclude" && field.length > 0){
+                    }else if (t === "exclude" && this.currentField.length > 0){
                         this.pushError(`Ce champ ne peut pas contenir des caractères spéciaux.`)
-                    }else if(t === "number" && field.length > 0){
+                    }else if(t === "number" && this.currentField.length > 0){
                         this.pushError(`La valeur de ce champ doit être un nombre.`)
                     }
                 })
@@ -51,7 +52,7 @@ export default class ValidationError {
                 t === "firstname"){
                 this.pushErrorForSpecificField(t, `Ce champ ne contient pas un email valide`)
             }else if(t === 'inequals'){
-                this.currentField = this.validationErrors[t][1]
+                this.currentField = this.validationErrors[t][1] as string
                 if(typeof this.currentField === "string" && this.currentField.length > 0){
                     this.pushError(`Ce champ doit contenir la même valeur que le champ précédent`)
                 }
@@ -81,7 +82,7 @@ export default class ValidationError {
         const field = this.validationErrors[type]
 
         if(field !== "") {
-            this.currentField = field
+            this.currentField = field as string
             this.pushError(message)
         }
     }

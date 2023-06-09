@@ -15,6 +15,12 @@ html, body {
 
 .reception_box {
     position: relative;
+    overflow-y: scroll;
+    transition: transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.reception_box.flip {
+    transform: translateX(-100%);
 }
 body {
     padding: 0;
@@ -23,10 +29,6 @@ body {
     color: $white;
     background-color: $primaryBlack;
     font-family: "Roboto";
-}
-
-.reception_box {
-    overflow-y: scroll;
 }
 
 p {
@@ -45,8 +47,28 @@ p {
     background-color: $secondary;
 }
 
-.reception_box {
-    position: relative;
+.primary_button {
+    @include button();
+    display: block;
+    background: $primary;
+}
+
+.primary_button.create_conversation {
+    border-radius: 50%;
+    width: 40px;
+    box-shadow: 0 0 5px $primary;
+    position: fixed;
+    bottom: 95px;
+    right: 20px;
+    transition: transform .3s ease-in;
+    svg {
+        fill: $white;
+        width: 20px;
+        height: 20px;
+    }
+    &:hover {
+        transform: scale(1.1);
+    }
 }
 
 .login_page {
@@ -365,7 +387,7 @@ p {
     margin: auto;
     margin-top: 60px;
     width: 360px;
-    height: 520px;
+    height: auto;
     border-radius: 10px;
     background-color: $secondary;
     overflow-y: scroll;
@@ -375,10 +397,18 @@ p {
     }
 }
 
+.search_results.receivers {
+    top: -10px;
+}
+
 .user_conversation {
     position: relative;
+    height: 100%;
     background-color: $primaryBlack;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     .conversation_header {
+        position: relative;
         display: flex;
         justify-content: space-between;
         background-color: $secondaryBlack;
@@ -416,38 +446,68 @@ p {
 
     .conversation_content {
         padding: 40px;
-        .bubble {
-            width: 170px;
-            height: 50px;
-            padding: 10px;
+        .message {
             margin-top: 20px;
             position: relative;
         }
-        .bubble.incoming {
-            background-color: $secondary;
+
+        .datetime {
+            font-style: italic;
+            font-size: 13px;
+            color: $secondary;
+            margin-top: 5px;
+        }
+
+        .bubble {
+            width: 0;
+            height: 0;
+            padding: 10px;
+            border-radius: 10px;
+            transition: height .3s ease-in, width .3s;
+        }
+
+        .message.incoming {
             float: left;
-            &::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: -20px;
-                border-top: 20px solid $secondary;
-                border-left: 20px solid transparent;
-                border-bottom: 20px solid transparent;
+            .bubble {
+                background-color: $secondary;
+                &::before {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: -10px;
+                    border-top: 20px solid $secondary;
+                    border-left: 20px solid transparent;
+                    border-bottom: 20px solid transparent;
+                }
+            }
+            .datetime {
+                float: left;
             }
         }
-        .bubble.outgoing {
-            background-color: $primary;
+
+        .message.outgoing {
             float: right;
-            &::after {
-                content: "";
-                position: absolute;
-                right: -20px;
-                bottom: 0;
-                border-bottom: 20px solid $primary;
-                border-right: 20px solid transparent;
-                border-top: 20px solid transparent;
+            .bubble {
+                background-color: $primary;
+                &::after {
+                    content: "";
+                    position: absolute;
+                    right: -10px;
+                    bottom: 21px;
+                    border-bottom: 20px solid $primary;
+                    border-right: 20px solid transparent;
+                    border-top: 20px solid transparent;
+                }
             }
+            .datetime {
+                float: right;
+            }
+        }
+
+        .show_bubble .bubble {
+            transform-origin: bottom right;
+            height: auto;
+            width: 170px;
         }
     }
 
@@ -509,7 +569,14 @@ p {
                 stroke-width: 1px;
                 margin-bottom: 5px;
             }
+            .send_icon.disabled {
+                fill: $secondaryGreen;
+            }
         }
     }
+}
+
+.user_conversation.flip {
+    transform: translateX(0);
 }
 

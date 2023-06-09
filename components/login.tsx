@@ -2,10 +2,10 @@ import { ChangeEvent, ChangeEventHandler, Context, Dispatch, FormEventHandler, M
 import { InputCheckbox, InputPassword, InputText } from "./form/input";
 import { PrimaryButton } from "./widgets/button";
 import Link from "next/link";
-import { ButtonContext } from "./contexts/ButtonContext";
 import axios, { AxiosError } from "axios";
 import useFormErrors from "../lib/hooks/useFormErrors";
 import { LoginFormErrors } from "../types/errors";
+import Logo from "./decors/logo";
 
 export type LoginInputs = {
     username: string,
@@ -120,8 +120,7 @@ export default function Login(): JSX.Element {
         || inputsValues.password.length < 8
 
     return <div className="login_page">
-        {JSON.stringify(inputsValues)}
-        <div className="logo">LOGO</div>
+        <Logo/>
         <form action="" method="post" onSubmit={handleSubmit}>
             <InputText events={{
                 onChange: handleChangeInputs

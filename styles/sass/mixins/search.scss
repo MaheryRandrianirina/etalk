@@ -41,13 +41,15 @@
     width: 100%;
     height: 50px;
     border-bottom: 1px solid $secondaryBlack;
-    .profile_pic {
+    .profile_pic, .no_profile_pic {
         @include profile_pic();
         top: 0;
         bottom: 0;
         left: 10px;
         margin: auto;
+        fill: $white;
     }
+    
     .username {
         color: $primaryBlack;
         position: absolute;

@@ -20,6 +20,7 @@ import { PostDataReturnType } from "../types/registration/dataBaseCommunication"
 import { RegistrationStepThreeProperties } from "../types/registration/registration";
 import useFormErrors from "../lib/hooks/useFormErrors";
 import { RegistrationFormErrors } from "../types/errors";
+import { getServerSideProps } from "./api/authenticated";
 
 
 const PostDataforRegistration: (step: number, data: UserIdentity | UserUniqueProperties | {image:File})=>Promise<PostDataReturnType> 
@@ -262,3 +263,5 @@ export default function Register(): JSX.Element {
         </form> : <CongratsForSubscription/>}
     </div>
 }
+
+export {getServerSideProps}

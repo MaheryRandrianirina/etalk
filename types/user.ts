@@ -1,10 +1,11 @@
+import { GetAway } from "./utils"
+
 type User = {
     "id": number,
     "name": string,
     "firstname": string,
     "username": string,
     "password": string,
-    "salt": string,
     "sex": "man" | "woman",
     "image": string,
     "email": string,
@@ -27,4 +28,6 @@ type UserUniqueProperties = {
     password_confirmation: string
 }
 
-export type { User, UserIdentity, UserUniqueProperties }
+type AuthUser = GetAway<User, ["created_at","updated_at", "email", "remember_token", "password"]>
+
+export type { User, UserIdentity, UserUniqueProperties, AuthUser }

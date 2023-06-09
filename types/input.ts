@@ -1,4 +1,4 @@
-import { ChangeEventHandler } from "react"
+import { ChangeEventHandler, SyntheticEvent } from "react"
 
 type InputTypes = ["text", "number", "radio", "checkbox", "password", "email", "hidden", "search"]
 
@@ -22,6 +22,11 @@ type InputOptions<type extends InputTypes[number]> = {
     events?: InputEvents<type>
 }
 
+type SearchResultHandler = ((e: SyntheticEvent, receiver: {id:number,username:string})=>void | 
+    ((e: SyntheticEvent, receiver?: {id:number,username:string})=>void ))
+
+
 export type {
-    InputOptions, InputAttributes, InputTypes, InputEvents
+    InputOptions, InputAttributes, InputTypes, InputEvents,
+    SearchResultHandler
 }

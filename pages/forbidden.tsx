@@ -1,3 +1,7 @@
+import Logo from "../components/decors/logo";
+
 export default function Forbidden(): JSX.Element {
-    return <div className="forbidden">Accès refusé</div>
+    return <div className="forbidden">
+        <Logo/>
+    </div>
 }

@@ -7,7 +7,6 @@ import { UserIdentity } from "../../types/user";
 import styles from "../../styles/sass/modules/input.module.scss"
 import { UserUniqueProperties } from "../../types/user";
 import { ButtonContext } from "../contexts/ButtonContext";
-import { MouseEventHandler } from "react";
 import { RegistrationFormErrors } from "../../types/errors";
 
 

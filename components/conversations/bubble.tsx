@@ -1,5 +1,5 @@
-import { MessageType } from "../../types/messageType";
+import { ConversationMessage } from "../../types/conversation";
 
-export default function Bubble({type}: {type: MessageType}):JSX.Element {
-    return <div className={"bubble " + type}>salut mec</div>
+export default function Bubble({content}: {content?: ConversationMessage}):JSX.Element {
+    return <div className="bubble">{content ? content.texto : ""}</div>
 }

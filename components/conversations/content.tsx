@@ -1,8 +1,29 @@
+
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { ConversationMessage } from "../../types/conversation";
+import { AuthUser } from "../../types/user";
 import Message from "./message";
 
-export default function Content():JSX.Element {
+export default function Content({messages, showIntoBubble, user}: {
+    messages: ConversationMessage[],
+    showIntoBubble: boolean
+    user: AuthUser
+}):JSX.Element {
+    const [animationClass, setAnimationClass]: [
+        animationClass: string,
+        setAnimationClass: Dispatch<SetStateAction<string>>
+    ] = useState("")
+
+    useEffect(()=>{
+        setAnimationClass("show_bubble")
+    })
+    
     return <div className="conversation_content">
-        <Message type="incoming"/>
-        <Message type="outgoing"/>
+        {(messages.length > 0 && showIntoBubble) && 
+            messages.map(message => {
+                return <Message content={message} className={animationClass} type={user.id !== message.sender_id ? 
+                    "incoming" : "outgoing"}
+                />
+        })}
     </div>
 }

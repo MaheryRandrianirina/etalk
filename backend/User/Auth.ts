@@ -7,18 +7,17 @@ import PasswordGuard from "../security/password"
 import { User } from "../../types/user"
 import { File } from "buffer"
 import { LoginInputs } from "../../components/login"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import Str from "../Helpers/Str"
 import { MysqlError } from "mysql"
 
-
 export default class Auth {
 
-    private userTable = new UserTable()
+    private userTable = new UserTable<User>()
 
     private passwordGuard = new PasswordGuard()
 
-    private userValidator: UserValidator = new UserValidator()
+    private userValidator: UserValidator<User> = new UserValidator<User>()
 
     private errorMessage = {
         responseNull: "Impossible d'invoquer cetter methode si 'this.res' est null",
@@ -27,15 +26,16 @@ export default class Auth {
         }
     }
 
-    constructor(private req: NextApiRequest | NextRequest, private res?: NextApiResponse) {
+    constructor(private req: NextApiRequest, private res?: NextApiResponse) {
 
     }
 
     async registerUser() {
-        const d: BeforeStepThreeData | File = this.req.body
+        const body: BeforeStepThreeData | File = this.req.body
+
         if (this.res) {
-            if (d instanceof File === false) {
-                const { registrationStep, data } = d as BeforeStepThreeData
+            if (body instanceof File === false) {
+                const { registrationStep, data } = body as BeforeStepThreeData
 
                 this.userValidator.setData(data)
 
@@ -58,7 +58,7 @@ export default class Auth {
     
         try {
             if(this.res){
-                const errors: ValidationError | null = this.userValidator
+                const errors: ValidationError<User> | null = this.userValidator
                 .required("sex")
                 .string("sex")
                 .name('name')
@@ -198,7 +198,6 @@ export default class Auth {
     }
 
     private async handleRegistrationStepThree(imageFile:File) {
-        
         if(this.res && "session" in this.req){
             const authUser = this.req.session.user
             if (authUser !== undefined && authUser.id !== null) {
@@ -279,6 +278,19 @@ export default class Auth {
                 && authUser.is_online === true
         }else {
             throw Error(this.errorMessage.not.NextApiRequest)
+        }
+    }
+
+    async remembered(cookieValue: string): Promise<{
+        ok: boolean,
+        user: User
+    }> {
+        const userId = parseInt(cookieValue.split('-----')[0])
+        const [user] = await this.userTable.find(userId) 
+
+        return {
+            ok: user.remember_token === cookieValue,
+            user: user
         }
     }
 }

@@ -1,33 +1,15 @@
 import { MouseEventHandler } from "react"
 import Conversation from "./conversation"
+import { Conversation as userConversation} from "../../types/Database"
+import { User } from "../../types/user"
 
-export default function ListConversations(): JSX.Element {
-    const user: User = {
-        id: 1,
-        name: "RANDRIANIRINA",
-        firstname: "Mahery",
-        username: "mahery san",
-        password: "password",
-        sex: "man",
-        image: "image.png",
-        email: "mahery@gmail.com",
-        created_at: new Date(),
-        updated_at: new Date(),
-        is_online: true,
-        remember_token: "token"
-    }
+export default function ListConversations({conversations, user}: {
+    conversations: userConversation[],
+    user: User
+}): JSX.Element {
     return <div className="list_conversations">
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
-        <Conversation currentUser={user}/>
+        {conversations.map(conversation => {
+            return <Conversation conversation={conversation} key={conversation.id} currentUser={user}/>
+        })}
     </div>
 }

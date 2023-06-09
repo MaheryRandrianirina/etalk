@@ -1,4 +1,3 @@
 export default function Logo(): JSX.Element {
-    return <div className="logo_for_opening_loader">
-    </div>
+    return <div className="logo">LOGO</div>
 }

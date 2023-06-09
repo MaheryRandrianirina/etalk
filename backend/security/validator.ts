@@ -1,12 +1,15 @@
-import { TableColumns } from "../../types/Database/tables/TableColumns"
+import { ColumnsToFill, Entity } from "../../types/Database"
 import { ValidationErrorTypes, ValidationErrors } from "../../types/validator/errors"
 import ValidationError from "./validationError"
 
-export default class Validator {
 
-    protected data: TableColumns = {}
+type ValueOfInequals<T extends Entity> = [keyof ColumnsToFill<T>, keyof ColumnsToFill<T>]
 
-    protected errors: ValidationErrors = {
+export default class Validator<T extends Entity> {
+
+    protected data: ColumnsToFill<T> = {}
+
+    protected errors: ValidationErrors<T> = {
         "required": [],
         "string": [],
         "number": [],
@@ -29,12 +32,12 @@ export default class Validator {
         
     }
 
-    setData(data: TableColumns): this {
+    setData(data: ColumnsToFill<T>): this {
         this.data = data
         return this
     }
 
-    required(...fields: string[]): this {
+    required(...fields: (keyof ColumnsToFill<T>)[]): this {
         this.checkFieldError(fields, (fieldInObject, field)=>{
             if(this.data[fieldInObject] === null || this.data[fieldInObject] === "") {
                 this.addError(field, "required")
@@ -44,19 +47,21 @@ export default class Validator {
         return this
     }
 
-    protected checkFieldError(fields: string[] | string, callback: (fieldInObj: keyof TableColumns, field: string)=>void): void {
+    protected checkFieldError(fields: (keyof ColumnsToFill<T>)[] | keyof ColumnsToFill<T>, 
+        callback: (fieldInObj: keyof ColumnsToFill<T>, field: keyof ColumnsToFill<T>)=>void
+    ): void {
         if(fields instanceof Array){
             fields.forEach(field => {
-                const fieldInObject = field as keyof TableColumns
+                const fieldInObject = field as keyof ColumnsToFill<T>
                 callback(fieldInObject, field)
             })
         }else if(typeof fields === "string"){
-            const fieldInObject = fields as keyof TableColumns
+            const fieldInObject = fields as keyof ColumnsToFill<T>
             callback(fieldInObject, fields)
         }
     }
     
-    protected addError(field: string | [string, string], type: ValidationErrorTypes): void {
+    protected addError(field: keyof ColumnsToFill<T> | ValueOfInequals<T>, type: ValidationErrorTypes<T>): void {
         
         if(!this.lengthForFieldAreInit()
             && (type === "min_length" || type === "max_length") 
@@ -73,7 +78,7 @@ export default class Validator {
         ){
             this.errors[type].push(field)
         }else if(typeof field !== "string" && type === "inequals"){
-            this.errors[type] = field
+            this.errors[type] = field as ValueOfInequals<T>
         }
     }
 
@@ -82,12 +87,10 @@ export default class Validator {
         return this.lengthForField.min_length === 0 && this.lengthForField.max_length === 0
     }
 
-    string(...fields: string[]): this {
-        this.checkFieldError(fields, (fieldInObject: keyof TableColumns, field: string)=>{
+    string(...fields: (keyof ColumnsToFill<T>)[]): this {
+        this.checkFieldError(fields, (fieldInObject, field)=>{
             const fieldValue = this.data[fieldInObject]
-            
             if(typeof fieldValue === "string" && !isNaN(parseInt(fieldValue))) {
-                console.log('adazd')
                 this.addError(field, "string")
             }
         })
@@ -95,7 +98,7 @@ export default class Validator {
         return this
     }
 
-    length(field: string, min: number, max: number): this {
+    length(field: keyof ColumnsToFill<T>, min: number, max: number): this {
         this.lengthForField = {min_length: min, max_length: max}
         
         this.checkFieldError(field, (fieldInObj, field)=>{
@@ -113,7 +116,7 @@ export default class Validator {
         return this
     }
 
-    exclude(field: string): this {
+    exclude(field: keyof ColumnsToFill<T>): this {
         this.checkFieldError(field, (fieldInObj, field)=>{
             const fieldValue = this.data[fieldInObj]
 
@@ -130,8 +133,8 @@ export default class Validator {
 
 
     equals(fieldOne: string, fieldTwo: string): this {
-        const f_one = fieldOne as keyof TableColumns
-        const f_two  = fieldTwo as keyof TableColumns
+        const f_one = fieldOne as keyof ColumnsToFill<T>
+        const f_two  = fieldTwo as keyof ColumnsToFill<T>
         
         if(this.data[f_one] !== this.data[f_two]){
             this.addError([f_one, f_two], "inequals")
@@ -140,14 +143,14 @@ export default class Validator {
         return this
     }
 
-    getErrors(): ValidationError | null
+    getErrors(): ValidationError<T>| null
     {
         let errorsLength = 0
         for(const type in this.errors){
-            const t = type as ValidationErrorTypes
+            const t = type as ValidationErrorTypes<T>
             if(t !== "min_length" && t !== "max_length" 
                 && t !== "inequals"
-                && this.errors[t].length > 0
+                && (this.errors[t] as string | string[]).length > 0
             ){
                 errorsLength++
             }else if(t === "min_length" || t === "max_length"){
@@ -156,7 +159,8 @@ export default class Validator {
                 }
             }else if(t === "inequals"){
                 this.errors[t].forEach(field => {
-                    if(field.length > 0){
+                    const f = field as string
+                    if(f.length > 0){
                         errorsLength++
                     }
                 })

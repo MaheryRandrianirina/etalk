@@ -1,0 +1,37 @@
+@import "../colors.scss";
+@import "../mixins/input.scss";
+
+.empty_conversations {
+    width: 360px;
+    margin: 0 auto;
+    text-align: center;
+    margin-top: 110px;
+    color: $secondary;
+}
+
+.add_receiver {
+    @include input();
+    width: 300px;
+    background-color: $white;
+}
+
+.chosen_receivers {
+    position: fixed;
+    overflow-y: scroll;
+}
+
+.chosen_receiver {
+    font-size: 12px;
+    font-style: italic;
+    color: $secondaryBlack;
+    padding: 3px;
+    margin-left: 5px;
+    border-radius: 5px;
+    background-color: $secondaryGreen;
+    box-shadow: 0px 0px 5px $secondary;
+    svg {
+        width: 13px;
+        color: $white;
+        transform: translateY(7px);
+    }
+}

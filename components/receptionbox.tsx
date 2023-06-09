@@ -1,106 +1,118 @@
-import { ChangeEvent, ChangeEventHandler, EventHandler, Fragment, SyntheticEvent, useEffect, useState } from "react"
+import {  ChangeEventHandler, Dispatch, Fragment, MouseEventHandler, SetStateAction, SyntheticEvent, TransitionEvent, TransitionEventHandler, useEffect, useLayoutEffect, useState } from "react"
 import Opening from "./loaders/opening"
-import Login from "./login"
 import ListConversations from "./conversations/listConversations"
 import Header from "./app/header"
 import SearchBar from "./app/searchBar"
 import Footer from "./app/footer"
-import ListActiveFriends from "./friends/listActiveFriends"
 import SearchResults from "./app/searchResults"
+import { User } from "../types/user"
+import style from "../styles/sass/modules/conversations.module.scss"
+import { CreateConversationButton } from "./widgets/button"
+import { ButtonContext } from "./contexts/ButtonContext"
+import { SearchResultHandler } from "../types/input"
+import { UserConversations } from "../types/conversation"
 
 
-export default function ReceptionBox(): JSX.Element {
-    const [loading, setLoading]: [loading: boolean, setLoading: Function] =
-      useState(true);
 
-    const [activeSection, setActiveSection]: [
-      activeSection: number,
-      setActiveSection: Function
-    ] = useState(1);
+export default function ReceptionBox({
+  user,
+  conversations,
+  searchResults,
+  searchBar,
+  createConversations,
+  animationClassname,
+  footer,
+  backwarded,
+  setBackwarded,
+}: {
+  user: User;
+  conversations: UserConversations;
+  searchResults: {
+    appear: boolean;
+    handleClickSearchResult: SearchResultHandler;
+  };
+  searchBar: {
+    value: string;
+    handleChange: ChangeEventHandler<HTMLInputElement>;
+  };
+  createConversations: {
+    setter: Dispatch<SetStateAction<boolean>>;
+    handler: MouseEventHandler<HTMLButtonElement>;
+  };
+  animationClassname: string;
+  footer: {
+    onClickUserFriends: MouseEventHandler<HTMLDivElement>;
+    handleClickMessageCircle: MouseEventHandler<HTMLDivElement>;
+    activeSection: number;
+  };
+  backwarded: boolean;
+  setBackwarded: Dispatch<SetStateAction<boolean>>;
+}): JSX.Element {
 
-    const [searchBarValue, setSearchBarValue]: [
-      searchBarValue: string,
-      setSearchBarValue: Function
-    ] = useState("");
-
-    const [isSearchResultsAppear, setSearchResultsAppear]: [
-      isSearchResultsAppear: boolean,
-      setSearchResultsAppear: Function
-    ] = useState(false);
-
-    const session = "dzaed"
-
+  useEffect(() => {
+    const receptionBox = document.querySelector(
+      ".reception_box"
+    ) as HTMLDivElement;
+    receptionBox.offsetWidth;
     
-    useEffect(()=>{
-        setTimeout(()=>{
-            setLoading(false)
-        }, 5000)
-    }, [loading])
-
-    
-    const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
-        event.preventDefault()
-        setActiveSection(1)
+    if (backwarded) {
+      setBackwarded(false);
     }
+  }, []);
 
-    const handleClickUserFriends: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
-        event.preventDefault()
-        setActiveSection(2)
+  const handleTransitionend: TransitionEventHandler<HTMLDivElement> = (
+    e: TransitionEvent
+  ) => {
+    if (animationClassname.length > 0) {
+      createConversations.setter(true);
     }
+  };
 
-    const handleSearchBarChange: ChangeEventHandler<HTMLInputElement> = (event:ChangeEvent<HTMLInputElement>) => {
-        const value = event.currentTarget.value
-        setSearchBarValue(value)
+  return (
+    <div
+      className={
+        "reception_box " +
+        (animationClassname.length > 0
+          ? animationClassname
+          : backwarded
+          ? "flip"
+          : "")
+      }
+      onTransitionEnd={handleTransitionend}
+    >
+      <Fragment>
+        <Header />
+        <SearchBar
+          value={searchBar.value}
+          onSearchBarChange={searchBar.handleChange}
+        />
 
-        if(value !== ""){
-            setSearchResultsAppear(true)
-        }else {
-            setSearchResultsAppear(false)
-        }
-    }
-
-    return (
-      <div className="reception_box">
-        {loading && <Opening />}
-        {loading === false && session === null ? <Login /> : ""}
-        {loading === false && session !== null && activeSection === 1 ? (
-          <Fragment>
-            <Header />
-            <SearchBar
-              value={searchBarValue}
-              onSearchBarChange={handleSearchBarChange}
-            />
-            {isSearchResultsAppear === true && <SearchResults />}
-            <ListConversations />
-            <Footer
-              onClickUserFriends={handleClickUserFriends}
-              onClickMessageCircle={handleClickMessageCircle}
-              active={activeSection}
-            />
-          </Fragment>
-        ) : (
-          ""
+        {searchResults.appear && (
+          <SearchResults
+            clickResultHandler={searchResults.handleClickSearchResult}
+            results={[]}
+          />
         )}
 
-        {loading === false && session !== null && activeSection === 2 ? (
-          <Fragment>
-            <Header />
-            <SearchBar
-              value={searchBarValue}
-              onSearchBarChange={handleSearchBarChange}
-            />
-            {isSearchResultsAppear === true && <SearchResults />}
-            <ListActiveFriends />
-            <Footer
-              onClickUserFriends={handleClickUserFriends}
-              onClickMessageCircle={handleClickMessageCircle}
-              active={activeSection}
-            />
-          </Fragment>
+        {conversations && conversations.length > 0 ? (
+          <ListConversations user={user} conversations={conversations} />
         ) : (
-          ""
+          <div className={style.empty_conversations}>
+            Vous n&apos; avez aucune conversation. Veuillez en créer.
+          </div>
         )}
-      </div>
-    );
+
+        <ButtonContext.Provider value={createConversations.handler}>
+          <CreateConversationButton />
+        </ButtonContext.Provider>
+
+        <Footer
+          onClickUserFriends={footer.onClickUserFriends}
+          onClickMessageCircle={footer.handleClickMessageCircle}
+          active={footer.activeSection}
+        />
+      </Fragment>
+    </div>
+  );
 }
 
