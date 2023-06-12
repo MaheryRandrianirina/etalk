@@ -1,4 +1,4 @@
-import { ColumnsToFill, Entity, Join, JoinArray, Prefix, PrefixArray } from "../../types/Database"
+import { ColumnsToFill, Entity, Join, JoinArray, Orders, Prefix, PrefixArray, QueryConditions, TableColumns } from "../../types/Database"
 import { User } from "../../types/user"
 import Str from "../Helpers/Str"
 
@@ -10,8 +10,8 @@ export default class Query<T extends Entity> {
         this.table = table
     }
     
-    select<U extends Entity | undefined, Concat extends true | undefined>(
-        columns: U extends Entity ? (Concat extends true ? JoinArray<PrefixArray<ColumnsToFill<T>, T>, PrefixArray<ColumnsToFill<U>, U>> : PrefixArray<ColumnsToFill<T>, T>)  : (keyof ColumnsToFill<T>)[] | keyof ColumnsToFill<T> | string, 
+    select<U extends Entity, Concat extends any>(
+        columns: TableColumns<T, U, Concat>, 
         needAlias?: boolean
     ): this {
         let query: string = "SELECT "
@@ -48,9 +48,7 @@ export default class Query<T extends Entity> {
         return toJoin.join(', ')
     }
 
-    where<U extends Entity | undefined>(conditions: U extends Entity 
-        ? Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>> 
-        : ColumnsToFill<T> | (keyof ColumnsToFill<T>)[],
+    where<U extends any>(conditions: QueryConditions<T, U>,
         operator?: "OR" | "AND",
         like?: true
     ): this {
@@ -58,7 +56,7 @@ export default class Query<T extends Entity> {
         return this
     }
 
-    transformObjectToForConditions<U extends Entity | undefined>(conditions: U extends Entity 
+    transformObjectToForConditions<U extends any>(conditions: U extends Entity 
         ? Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>> 
         : ColumnsToFill<T> | (keyof ColumnsToFill<T>)[],
         operator?: "OR" | "AND",
@@ -81,9 +79,8 @@ export default class Query<T extends Entity> {
                 if(!like){
                     collections.push(i + " = " + conditions[index])
                 }else {
-                    collections.push(`${i} LIKE ${conditions[index]} `)
+                    collections.push(`${i} LIKE ${conditions[index]}`)
                 }
-                
             }
         }
         
@@ -101,19 +98,30 @@ export default class Query<T extends Entity> {
 
     join(context: {[table: string]: {alias: string, on: string, type?: string}}): this {
         let query = ""
+
         for(let table in context){
             const tableAttributes = context[table]
             const joinType = tableAttributes.type
             if(joinType){
                 query += `${joinType} JOIN `
             }else {
-                query += "JOIN"
+                query += " JOIN"
             }
     
             query += ` ${table} ${tableAttributes.alias} ON ${tableAttributes.on}`
         }
         
         this.queries.push(query)
+        return this
+    }
+
+    orderBy(what: string): this {
+        this.queries.push(`ORDER BY ${what}`)
+        return this
+    }
+
+    limit(number: number): this {
+        this.queries.push(`LIMIT ${number}`)
         return this
     }
 

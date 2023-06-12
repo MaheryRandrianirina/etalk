@@ -5,7 +5,7 @@ import { User } from '../types/user'
 import {NextResponse} from "next/server"
 import type {NextApiRequest, NextApiResponse} from "next"
 import Auth from '../backend/User/Auth'
-import { ChangeEvent, ChangeEventHandler, Dispatch, EventHandler, Fragment, MouseEventHandler, SetStateAction, SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, ChangeEventHandler, Context, Dispatch, EventHandler, Fragment, MouseEventHandler, SetStateAction, SyntheticEvent, createContext, useCallback, useEffect, useState } from 'react'
 import UserConversation from './conversation/[username]/[conversation_id]'
 import Header from '../components/app/header'
 import SearchBar from '../components/app/searchBar'
@@ -17,8 +17,11 @@ import axios from 'axios'
 import { UserConversations } from '../types/conversation'
 import { io, Socket } from 'socket.io-client'
 import { ClientToServerEvents, ServerToClientEvents } from '../types/socket/utils'
+import { AppSocketState, SocketStateDispatcher } from '../types/utils'
 
 type AnimationClassName = {receptionBox: string, conversation: string}
+
+export const SocketContext: Context<AppSocketState> = createContext(null as AppSocketState)
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents>
 
@@ -60,6 +63,11 @@ export default function Home({user}: {
     backwarded: boolean, 
     setBackwarded: Dispatch<SetStateAction<boolean>>
   ] = useState(false)
+
+  const [socketState, setSocket]: [
+    socketState: AppSocketState,
+    setSocket: SocketStateDispatcher
+  ] = useState(null as AppSocketState)
   
   useEffect(()=>{
       handleSocket()
@@ -71,11 +79,17 @@ export default function Home({user}: {
 
         socket = io()
         
+        setSocket(socket)
+        
         socket.on('connect', ()=>{
           console.log("connected")
         })
 
         socket.emit("get_conversations")
+
+        if(backwarded){
+          socket.emit("get_conversations")
+        }
 
         socket.on('conversations', (data)=>{
           setConversations(data)
@@ -133,8 +147,8 @@ export default function Home({user}: {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <SocketContext.Provider value={socket}>
       {conversations === null && <Opening />}
-
       {(createConversation === false && activeSection === 1) && <ReceptionBox 
           backwarded={backwarded}
           setBackwarded={setBackwared}
@@ -149,18 +163,18 @@ export default function Home({user}: {
 
       {conversations && activeSection === 2 ? (
           <Fragment>
-            <Header />
-            <SearchBar
-              value={searchBarValue}
-              onSearchBarChange={handleSearchBarChange}
-            />
-            {isSearchResultsAppear === true && <SearchResults clickResultHandler={handleClickSearchResult} results={[]}/>}
-            <ListActiveFriends />
-            <Footer
-              onClickUserFriends={handleClickUserFriends}
-              onClickMessageCircle={handleClickMessageCircle}
-              active={activeSection}
-            />
+              <Header />
+              <SearchBar
+                value={searchBarValue}
+                onSearchBarChange={handleSearchBarChange}
+              />
+              {isSearchResultsAppear === true && <SearchResults clickResultHandler={handleClickSearchResult} results={[]}/>}
+              <ListActiveFriends />
+              <Footer
+                onClickUserFriends={handleClickUserFriends}
+                onClickMessageCircle={handleClickMessageCircle}
+                active={activeSection}
+              />
           </Fragment>
         ) : (
           ""
@@ -171,6 +185,8 @@ export default function Home({user}: {
         }} setCreateConversation={setCreateConversation} create={true} user={user}
         setBackwarded={setBackwared}
       />}
+      
+      </SocketContext.Provider>
     </div>
   )
 }

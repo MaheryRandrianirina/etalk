@@ -1,15 +1,30 @@
 import { Connection, OkPacket } from "mysql"
 import Query from "../Query"
 import connection from "../mysqlConnection"
-import { ColumnsToFill, Data, Entity, Join, JoinArray, Prefix, PrefixArray } from "../../../types/Database"
+import { ColumnsToFill, Data, Entity, Join, JoinArray, Orders, Prefix, PrefixArray, QueryConditions, TableColumns, UnknownQueryConditions } from "../../../types/Database"
 import { User } from "../../../types/user"
 import Str from "../../Helpers/Str"
 
-
 export default class Table<T extends Entity> {
 
+    protected query?: Query<T>
+
     protected table: string = ""
+
     protected aliases: {[alias: string]: string} = {}
+
+    protected columnsToFetch?: string[]
+
+    protected conditions?: {
+        columns: UnknownQueryConditions,
+        data?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]
+    }
+
+    protected tableToJoin?: {[table: string]: {alias: string, on: string, type?: string}}
+
+    protected orders?: Orders<T>
+
+    protected fetchLimit: number = 0
 
     constructor(){
         const alias = Str.getTableAlias(this.table)
@@ -88,7 +103,7 @@ export default class Table<T extends Entity> {
     }
 
     protected getQueryBuilder(): Query<T> {
-        return new Query(this.table)
+        return new Query<T>(this.table)
     }
 
     protected getMysqlConnection(): Connection {
@@ -110,6 +125,57 @@ export default class Table<T extends Entity> {
         })
     }
 
+    all(): Promise<any[]> {
+        return new Promise((resolve, reject)=>{
+            this.getMysqlConnection().query(this.getQueryBuilder().select("*").__toString(), (err, results)=>{
+                if(err) reject(err)
+                resolve(results)
+            })
+        })
+    }
+
+    columns<U extends Entity | any, ConcatTypes extends true | undefined>(columns: U extends Entity ? 
+        (ConcatTypes extends true ? JoinArray<PrefixArray<ColumnsToFill<T>, T>, 
+            PrefixArray<ColumnsToFill<U>, U>> : PrefixArray<ColumnsToFill<T>, T>) 
+        : (keyof ColumnsToFill<T>)[]
+    ): this {
+
+        this.columnsToFetch = columns as string[]
+
+        return this
+    }
+
+    where<U extends unknown>(
+        conditions: QueryConditions<T, U>, 
+    dataForArrayConditions?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]): this {
+
+        this.conditions = {
+            columns: conditions as UnknownQueryConditions,
+            data: dataForArrayConditions
+        }
+
+        return this
+    }
+
+    join(table:{[table: string]: {alias: string, on: string, type?: string}}): this {
+        this.tableToJoin = table
+        return this
+    }
+
+    orderBy(column: keyof Prefix<T, T>, type: "DESC" | "ASC"): this {
+        this.orders = {
+            column: column,
+            type: type
+        }
+
+        return this
+    }
+
+    limit(number: number): this {
+        this.fetchLimit = number
+        return this
+    }
+
     /**
      * 
      * @param columns 
@@ -120,50 +186,66 @@ export default class Table<T extends Entity> {
      * @param dataForArrayConditions est seulement defini quand conditions est défini et sous forme de tableau.
      * @returns 
      */
-    get<U extends Entity | undefined, Concat extends true | undefined>(
-        columns: U extends Entity ? 
-            (Concat extends true ? JoinArray<PrefixArray<ColumnsToFill<T>, T>, 
-                PrefixArray<ColumnsToFill<U>, U>> : PrefixArray<ColumnsToFill<T>, T>) 
-            : (keyof ColumnsToFill<T>)[], 
-        conditions?: U extends Entity ? Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>> 
-            : ColumnsToFill<T> | (keyof ColumnsToFill<T>)[], 
-        dataForArrayConditions?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[],
-        join?: {[table: string]: {alias: string, on: string, type?: string}}
-    ): Promise<unknown> {
+    get<U extends Entity, ConcatTypes extends any>(): Promise<unknown> {
         return new Promise((resolve, reject)=>{
-            let query: Query<T>
             
-            if(columns.length > 0){
-                query = this.getQueryBuilder().select<U, Concat>(columns, join !== undefined)
+            if(this.columnsToFetch && this.columnsToFetch.length > 0){
+                this.query = this.getQueryBuilder().select<U, true>(this.columnsToFetch as TableColumns<T, U, ConcatTypes>, this.tableToJoin !== undefined)
             }else {
-                query = this.getQueryBuilder().select<undefined, undefined>("*", join !== undefined)
+                this.query = this.getQueryBuilder().select("*", this.tableToJoin !== undefined)
             }
 
-            if(join){
-                query = query.join(join)
+            if(this.tableToJoin !== undefined){
+                this.query = this.query.join(this.tableToJoin)
             }
 
-            if(conditions !== undefined){
-                query = query.where<U>(conditions)
+            if(this.conditions !== undefined){
+                this.query = this.query.where<U>(this.conditions.columns as QueryConditions<T, U>)
                 let data: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[] = []
                 
-                if(conditions instanceof Array){
-                    if(dataForArrayConditions){
-                        data = dataForArrayConditions
+                if(this.conditions instanceof Array){
+                    if(this.conditions.data){
+                        data = this.conditions.data
                     }
                 }
+
+                this.addOrder()
+                this.addLimit()
                 
-                this.getMysqlConnection().query(query.__toString(), data, (err, results)=>{
+                this.getMysqlConnection().query(this.query.__toString(), data, (err, results)=>{
                     if(err) reject(err)
                     resolve(results)
                 })
             }else {
-                this.getMysqlConnection().query(query.__toString(), (err, results)=>{
+
+                this.addOrder()
+                this.addLimit()
+
+                this.getMysqlConnection().query(this.query.__toString(), (err, results)=>{
                     if(err) reject(err)
                     resolve(results)
                 })
             } 
         })
+    }
+
+    /**
+     * Ajoute un ORDER BY au query si this.orders est défini
+     */
+    addOrder(): void {
+        if(this.orders && this.query){
+            this.query = this.query.orderBy(`${this.orders.column as string} ${this.orders.type}`)
+        }
+        
+    }
+
+    /**
+     * Ajoute un LIMIT au querysi this.fetchLimit > 0 donc défini.
+     */
+    addLimit(): void {
+        if(this.fetchLimit > 0 && this.query){
+            this.query = this.query.limit(this.fetchLimit)
+        }
     }
 
     search(columns:

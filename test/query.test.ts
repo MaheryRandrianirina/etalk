@@ -1,4 +1,5 @@
 import Query from "../backend/database/Query"
+import { Conversation } from "../types/Database"
 import { User } from "../types/user"
 
 describe('test querybuilder', ()=>{
@@ -53,7 +54,7 @@ describe('test querybuilder', ()=>{
         let query: Query<User> = new Query<User>('user')
         expect(query.select('*', true)
         .join({"conversation": {alias: "c", on: "c.user_id = u.id"}})
-            .where({"c.id": 2})
+            .where<Conversation>({"c.id": 2})
             .__toString())
             .toBe('SELECT * FROM user u JOIN conversation c ON c.user_id = u.id WHERE c.id = 2')
     })
@@ -66,4 +67,29 @@ describe('test querybuilder', ()=>{
             .toBe('SELECT * FROM user WHERE username LIKE % mah %')
     })
 
+    test("select with order", ()=>{
+        let query: Query<User> = new Query<User>('user')
+        expect(query.select('*')
+            .orderBy("created_at DESC")
+            .__toString())
+            .toBe('SELECT * FROM user ORDER BY created_at DESC')
+    })
+
+    test("select with limit", ()=>{
+        let query: Query<User> = new Query<User>('user')
+        expect(query.select('*')
+            .limit(2)
+            .__toString())
+            .toBe('SELECT * FROM user LIMIT 2')
+    })
+
+    test("select with conditions, order, limit", ()=>{
+        let query: Query<User> = new Query<User>('user')
+        expect(query.select('*')
+            .where(['created_at', "email"])
+            .orderBy("created_at DESC")
+            .limit(2)
+            .__toString())
+            .toBe('SELECT * FROM user WHERE created_at = ? AND email = ? ORDER BY created_at DESC LIMIT 2')
+    })
 })

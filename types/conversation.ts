@@ -12,6 +12,7 @@ type ConversationMessage = {
 } 
 
 type UserConversations = Conversation[] | null
-type SetMessage = Dispatch<SetStateAction<ConversationMessage | null>>
+type SetMessage<T extends {[index: string]: unknown} | undefined> = Dispatch<SetStateAction<T extends undefined 
+    ? ConversationMessage | null : (ConversationMessage & T) | null>>
 
 export type {Receiver, ChosenReceiver, SearchResultStyle, SetMessage, ConversationMessage, UserConversations}

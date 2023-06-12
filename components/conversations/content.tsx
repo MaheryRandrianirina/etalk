@@ -21,7 +21,7 @@ export default function Content({messages, showIntoBubble, user}: {
     return <div className="conversation_content">
         {(messages.length > 0 && showIntoBubble) && 
             messages.map(message => {
-                return <Message content={message} className={animationClass} type={user.id !== message.sender_id ? 
+                return <Message key={message.id} content={message} className={animationClass} type={user.id !== message.sender_id ? 
                     "incoming" : "outgoing"}
                 />
         })}

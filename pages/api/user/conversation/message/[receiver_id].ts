@@ -14,7 +14,7 @@ async function Message(req: NextApiRequest, res:NextApiResponse){
             const message = req.body as Message
             try {
                 const conversation = new Conversation(req)
-                const insertedConversationUserId = await conversation.new(user.id, message)
+                const insertedConversationUserId = await conversation.new(r_id, message)
     
                 if(typeof insertedConversationUserId === "number"){
                     res.status(200).json({success: true})

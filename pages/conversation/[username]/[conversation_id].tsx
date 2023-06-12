@@ -23,7 +23,7 @@ export default function UserConversation({create, user, setCreateConversation, a
 
     const [message, setMessage]: [
         message: ConversationMessage | null,
-        setMessage: SetMessage
+        setMessage: SetMessage<undefined>
     ] = useState(null as ConversationMessage | null)
 
     const [showMessageIntoBubble, setShowMessageIntoBubble]:[
@@ -75,7 +75,6 @@ export default function UserConversation({create, user, setCreateConversation, a
 
             chosenReceivers.forEach(chosenReceiver => {
                 data.post(`/api/user/conversation/message/${chosenReceiver.id}`, message).then(res => {
-                    console.log('message envoyé!')
                     setShowMessageIntoBubble(true)
                 }).catch(e => {
                     console.error(e)

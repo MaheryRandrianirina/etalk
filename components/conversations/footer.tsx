@@ -5,7 +5,7 @@ import { SetMessage,ConversationMessage } from "../../types/conversation";
 export default function ConversationFooter({submitForm, message, setMessage, disableButton, sender_id}: {
     submitForm: FormEventHandler<HTMLFormElement>,
     message: ConversationMessage | null,
-    setMessage: SetMessage,
+    setMessage: SetMessage<undefined>,
     disableButton: boolean,
     sender_id: number
 }): JSX.Element {

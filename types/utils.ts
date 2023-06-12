@@ -1,3 +1,6 @@
+import { Socket } from "socket.io-client"
+import { ClientToServerEvents, ServerToClientEvents } from "./socket/utils"
+import { Dispatch, SetStateAction } from "react"
 
 type ChangeType<T extends {}, item extends keyof T, newType> = {
     [key in keyof T] : key extends item ? newType : T[key]
@@ -7,5 +10,7 @@ type GetAway<T extends {[key: symbol]: string | Date | number | boolean}, U exte
     [key in keyof T as key extends U[number] ? never : key]: T[key]
 }
 
-const a: GetAway<{"username": string, name: string}, ["username"]> = {name: ""}
-export type { ChangeType, GetAway }
+type AppSocketState = Socket<ServerToClientEvents, ClientToServerEvents> | null
+type SocketStateDispatcher = Dispatch<SetStateAction<AppSocketState>>
+
+export type { ChangeType, GetAway, SocketStateDispatcher, AppSocketState }

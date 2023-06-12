@@ -22,7 +22,7 @@ export default class Conversation {
 
     async new(receiverId: number, message: Message): Promise<number> {
         const conversationTable = new ConversationTable()
-        const conversationId = await conversationTable.new({initializer_id:this.authUser?.id})
+        const conversationId = await conversationTable.new({initializer_id:this.authUser?.id, adressee_id: receiverId})
         
         await this.message(message, conversationId, receiverId)
         return await this.conversationUser(conversationId)

@@ -1,14 +1,16 @@
-import { Conversation } from "../Database";
+import { Conversation, Join } from "../Database";
+import { ConversationMessage } from "../conversation";
+import { AuthUser, User } from "../user";
+import { GetAway } from "../utils";
 
 interface ServerToClientEvents {
-    noArg: () => void;
-    conversations: (a: Conversation[])=>void
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
+    conversations: (a: Conversation[])=>void;
+    conversation_last_message: (message: Join<ConversationMessage, {sender: AuthUser}>) => void
 }
 
 interface ClientToServerEvents {
     get_conversations: () => void;
+    get_conversation_last_message: (conversation_id: number)=>void
 }
 
 interface InterServerEvents {
