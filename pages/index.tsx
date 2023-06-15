@@ -6,7 +6,7 @@ import {NextResponse} from "next/server"
 import type {NextApiRequest, NextApiResponse} from "next"
 import Auth from '../backend/User/Auth'
 import { ChangeEvent, ChangeEventHandler, Context, Dispatch, EventHandler, Fragment, MouseEventHandler, SetStateAction, SyntheticEvent, createContext, useCallback, useEffect, useState } from 'react'
-import UserConversation from './conversation/[username]/[conversation_id]'
+import UserConversation from './conversation/[adressee_id]/[conversation_id]'
 import Header from '../components/app/header'
 import SearchBar from '../components/app/searchBar'
 import ListActiveFriends from '../components/friends/listActiveFriends'
@@ -125,7 +125,7 @@ export default function Home({user}: {
   /* 
   * Ne fait qu'ajouter de l'animation à la boite de réception.
   * C'est juste après l'animation qu'on met createConversation à true. Càd dans la transitionend
-  * l'élément reception_box
+  * de l'élément reception_box
   */
   const handleCreateConversation: MouseEventHandler<HTMLButtonElement> = (e: SyntheticEvent) => {
     e.preventDefault()
@@ -149,7 +149,7 @@ export default function Home({user}: {
 
       <SocketContext.Provider value={socket}>
       {conversations === null && <Opening />}
-      {(createConversation === false && activeSection === 1) && <ReceptionBox 
+      {(createConversation === false && activeSection === 1 && conversations) && <ReceptionBox 
           backwarded={backwarded}
           setBackwarded={setBackwared}
           conversations={conversations} searchResults={{
@@ -194,6 +194,7 @@ export default function Home({user}: {
 export const getServerSideProps = withSessionSsr(async function getServerSideProps({req,res}){
   const response = NextResponse.next()
   const authCookie = response.cookies.get('auth')
+  
   let errorMessage: string = ""
   let loggedIn: boolean = false
 

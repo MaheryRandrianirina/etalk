@@ -11,11 +11,10 @@ async function Conversation(req: NextApiRequest, res: NextApiResponse) {
     if(user){
         try {
             const conversationTable = new ConversationTable<Conversation>()
-            const conversations = await conversationTable.get<ConversationUser, undefined>(
-                ["c.*"], {"cu.user_id": user.id}, 
-                [], 
-                {'conversation_user': {alias: "cu", on: "c.id = cu.conversation_id"}
-            })
+            const conversations = await conversationTable
+                .columns<ConversationUser, undefined>(["c.*"])
+                .join({'conversation_user': {alias: "cu", on: "c.id = cu.conversation_id"}})
+                .where<ConversationUser>({"cu.user_id": user.id}).get()
             
             res.status(200).json({success: true, conversations: conversations})
         }catch(e){

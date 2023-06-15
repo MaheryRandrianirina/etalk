@@ -6,11 +6,14 @@ import { withSessionRoute } from "../../backend/utilities/withSession"
 import { Socket as NetSocket } from "net"
 import axios from "axios"
 import ConversationTable from "../../backend/database/tables/ConversationTable"
-import { Conversation, ConversationUser, Message } from "../../types/Database"
+import { BlockedUsers, Conversation, ConversationUser, Message } from "../../types/Database"
 import { GetAway } from "../../types/utils"
-import { User } from "../../types/user"
+import { AuthUser, User } from "../../types/user"
 import MessageTable from "../../backend/database/tables/MessageTable"
 import UserTable from "../../backend/database/tables/UserTable"
+import { Conversation as UserConversation } from "../../backend/User/Conversation"
+import BlockedUsersTable from "../../backend/database/tables/BlockedUsers"
+import { join } from "path"
 
 interface SocketServer extends HTTPServer {
     io?: IOServer 
@@ -41,7 +44,11 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
         SocketData>(res.socket.server)
 
         res.socket.server.io = io
+
         const u = user as GetAway<User, ["created_at", "updated_at", "email", "remember_token", "password"]>
+
+        const userTable = new UserTable()
+        const messageTable = new MessageTable()
 
         io.on('connection', (socket)=>{
             socket.on('get_conversations', async()=>{
@@ -62,7 +69,6 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
             })
 
             socket.on('get_conversation_last_message', async(conversation_id)=>{
-                const messageTable = new MessageTable()
                 const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
                     .join({
                         "conversation_user": {alias: "cu", on: "cu.user_id = m.sender_id"},
@@ -73,10 +79,51 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
                     .limit(1)
                     .get() as Message[]
                 
-                const userTable = new UserTable()
                 const [user] = await userTable.find(message.sender_id) as GetAway<User, ["created_at", "updated_at", "email", "remember_token", "password"]>[]
                 
                 socket.emit('conversation_last_message', {...message, sender: user})
+            })
+
+            socket.on('get_conversation_owners', async(initializer_id, adressee_id)=>{
+                const [initializer] = await userTable.columns([
+                        "id", "name", "username", 
+                        "firstname", "email", "sex", 
+                        "image", "is_online"
+                    ]).find(initializer_id) as AuthUser[]
+
+                const [adressee] = await userTable.find(adressee_id) as AuthUser[]
+
+                socket.emit('conversation_owners', {
+                    initializer: initializer, 
+                    adressee: adressee
+                })
+            })
+
+            socket.on('get_conversation_messages', async (conversation_id, adressee_id)=>{
+                const userConversation = new UserConversation(req, conversation_id)
+                const messages = await userConversation.messages()
+
+                socket.emit('conversation_messages', messages)
+            })
+
+            socket.on('message', async(conversation_id, messageData)=>{
+                
+                try {
+                    const conversationTable = new ConversationTable()
+                    const conversation = await conversationTable.find(conversation_id)
+                    const userConversation = new UserConversation(req, conversation_id)
+                    
+                    if(conversation.length === 0){
+                        await userConversation.new(messageData.adressee_id, messageData.message)
+                    }else {
+                        await userConversation.message(messageData.message, conversation_id, messageData.adressee_id)
+                    }
+                    
+                    const messages = await userConversation.messages()
+                    socket.emit('conversation_messages', messages)
+                }catch(e){
+                    console.error(e)
+                }
             })
         })
     }

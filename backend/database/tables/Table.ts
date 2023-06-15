@@ -58,12 +58,10 @@ export default class Table<T extends Entity> {
                 data.push(columns[columnName])
             }
 
-            let query: Query<T> 
-
             if(type === "insert"){
-                query = this.getQueryBuilder().insert(arrayOfColumns)
+                this.query = this.getQueryBuilder().insert(arrayOfColumns)
             }else {
-                query = this.getQueryBuilder().update(arrayOfColumns)
+                this.query = this.getQueryBuilder().update(arrayOfColumns)
             }
 
             if(conditions !== undefined){
@@ -79,10 +77,10 @@ export default class Table<T extends Entity> {
                     }
                 }
                 
-                query = query.where<undefined>(conditions)
+                this.query = this.query.where<undefined>(conditions)
             }
 
-            const queryString: string = query.__toString() 
+            const queryString: string = this.query.__toString() 
             
             this.getMysqlConnection().query(queryString, data, (err, results)=>{
                 if(err) reject(err)
@@ -116,8 +114,18 @@ export default class Table<T extends Entity> {
 
     find(id: number): Promise<Data<T>[]> {
         return new Promise((resolve, reject)=>{
+            let query: Query<T>
+
+            if(this.columnsToFetch){
+                query = this.getQueryBuilder()
+                    .select(this.columnsToFetch)
+                    .where(['id'] as (keyof ColumnsToFill<T>)[])
+            }else {
+                query = this.getQueryBuilder().select("*").where(['id'] as (keyof ColumnsToFill<T>)[])
+            }
+
             this.getMysqlConnection().query(
-                this.getQueryBuilder().select("*").where(['id'] as (keyof ColumnsToFill<T>)[]).__toString(), 
+                query.__toString(), 
                 [id], (error, res)=>{
                     if(error) reject(error)
                     resolve(res)
@@ -147,7 +155,8 @@ export default class Table<T extends Entity> {
 
     where<U extends unknown>(
         conditions: QueryConditions<T, U>, 
-    dataForArrayConditions?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]): this {
+        dataForArrayConditions?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]
+    ): this {
 
         this.conditions = {
             columns: conditions as UnknownQueryConditions,

@@ -1,0 +1,51 @@
+@import "./position.scss";
+
+@mixin modal_container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: $modalContainerBg;
+    
+    .modal {
+        @include modal();
+    }
+}
+
+@mixin modal {
+    position: absolute;
+    @include centerAbsolutePosition();
+    transform: translateY(-55%);
+    background: $white;
+    text-align: cente;
+    border-radius: 5px;
+    color: $primaryBlack;
+    padding: 10px;
+    width: 80%;
+    height: 130px;
+    box-shadow: 0 0 10px $secondaryBlack;
+    opacity: 0;
+    transition: transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity .3s ease-in;
+
+    .message {
+        width: 250px;
+        margin: 0 auto;
+    }
+    .buttons {
+        display: flex;
+        float: right;
+        margin-top: 15px;
+    }
+    .primary_button, .secondary_button {
+        width: auto;
+    }
+    .primary_button {
+        margin-left: 10px;
+    }
+
+    &.visible {
+        transform: translateY(-45%);
+        opacity: 1;
+    }
+}

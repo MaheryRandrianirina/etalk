@@ -1,4 +1,4 @@
-import Data from "../../lib/data"
+import Data from "../data"
 
 export default class DateHelper {
 
@@ -32,11 +32,11 @@ export default class DateHelper {
         const timeDiff = jsDate.getTime() - date.getTime()
         if(timeDiff < this.minutesInMs){
             formatedDate = "A l'instant"
-        }else if(timeDiff < this.hourInMs){
+        }else if(timeDiff > this.minutesInMs && timeDiff < this.hourInMs){
             formatedDate = "Il y a " + Math.floor(this.getMinutes(timeDiff)) + " minutes"
         }else if(timeDiff === this.hourInMs){
             formatedDate = "Il y a 1h" 
-        }else if(timeDiff < this.dayInMS){
+        }else if(timeDiff > this.hourInMs && timeDiff < this.dayInMS){
             formatedDate = `${date.getHours()}: ${date.getMinutes()}`
         }else if(timeDiff > this.dayInMS && timeDiff < this.dayInMS * 2){
             formatedDate = "Hier à " + date.getHours() + ":" + date.getMinutes()

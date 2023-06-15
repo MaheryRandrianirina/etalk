@@ -1,8 +1,8 @@
-import { EventHandler, SyntheticEvent } from "react";
+import { EventHandler, MouseEvent, MouseEventHandler } from "react";
 
 export default function Footer({onClickUserFriends, onClickMessageCircle, active}: {
-  onClickUserFriends: EventHandler<SyntheticEvent>,
-  onClickMessageCircle: EventHandler<SyntheticEvent>, 
+  onClickUserFriends: MouseEventHandler<SVGElement>,
+  onClickMessageCircle: MouseEventHandler<SVGElement>, 
   active: number
 }): JSX.Element {
   const activeOne = active === 1 ? " active" : ""  

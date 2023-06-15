@@ -1,16 +1,20 @@
-import { Conversation, Join } from "../Database";
+import { Conversation, Join, Message } from "../Database";
 import { ConversationMessage } from "../conversation";
 import { AuthUser, User } from "../user";
-import { GetAway } from "../utils";
 
 interface ServerToClientEvents {
     conversations: (a: Conversation[])=>void;
-    conversation_last_message: (message: Join<ConversationMessage, {sender: AuthUser}>) => void
+    conversation_last_message: (message: Join<ConversationMessage, {sender: AuthUser}>) => void;
+    conversation_owners: (owners: {initializer: AuthUser, adressee:AuthUser}) => void;
+    conversation_messages: (messages: Message[]) => void
 }
 
 interface ClientToServerEvents {
     get_conversations: () => void;
-    get_conversation_last_message: (conversation_id: number)=>void
+    get_conversation_last_message: (conversation_id: number)=>void;
+    get_conversation_owners: (initializer_id: number, adressee_id: number) => void;
+    get_conversation_messages: (conversation_id: number, adressee_id: number) => void;
+    message: (conversation_id: number, {message, adressee_id}: {message: ConversationMessage, adressee_id: number}) => void
 }
 
 interface InterServerEvents {

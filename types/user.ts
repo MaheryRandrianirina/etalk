@@ -1,4 +1,5 @@
-import { GetAway } from "./utils"
+import { Join } from "./Database"
+import { GetAway, Undefine } from "./utils"
 
 type User = {
     "id": number,
@@ -28,6 +29,13 @@ type UserUniqueProperties = {
     password_confirmation: string
 }
 
-type AuthUser = GetAway<User, ["created_at","updated_at", "email", "remember_token", "password"]>
+type AuthUser = GetAway<Undefine<User>, ["created_at","updated_at", "remember_token", "password"]>
 
-export type { User, UserIdentity, UserUniqueProperties, AuthUser }
+type ConversationOwners = {
+    initializer: AuthUser,
+    adressee: AuthUser
+}
+export type { 
+    User, UserIdentity, 
+    UserUniqueProperties, 
+    AuthUser, ConversationOwners }

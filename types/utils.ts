@@ -13,4 +13,19 @@ type GetAway<T extends {[key: symbol]: string | Date | number | boolean}, U exte
 type AppSocketState = Socket<ServerToClientEvents, ClientToServerEvents> | null
 type SocketStateDispatcher = Dispatch<SetStateAction<AppSocketState>>
 
-export type { ChangeType, GetAway, SocketStateDispatcher, AppSocketState }
+type Undefine<T extends {[key: symbol]: any}> = {
+    [key in keyof T]?: T[key]
+}
+
+type MultipleClassnameForAnimation<T extends string[]> = {
+    [key in T[number]]: string
+}
+
+export type { 
+    ChangeType, 
+    GetAway, 
+    SocketStateDispatcher, 
+    AppSocketState, 
+    Undefine,
+    MultipleClassnameForAnimation
+}

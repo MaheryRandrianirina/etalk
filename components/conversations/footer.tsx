@@ -2,12 +2,13 @@ import { ChangeEvent, ChangeEventHandler, FormEventHandler, useState } from "rea
 import MessageTextarea from "./messageTextarea";
 import { SetMessage,ConversationMessage } from "../../types/conversation";
 
-export default function ConversationFooter({submitForm, message, setMessage, disableButton, sender_id}: {
+export default function ConversationFooter({submitForm, message, setMessage, disableButton, sender_id, blockedAdressee}: {
     submitForm: FormEventHandler<HTMLFormElement>,
     message: ConversationMessage | null,
     setMessage: SetMessage<undefined>,
     disableButton: boolean,
-    sender_id: number
+    sender_id: number,
+    blockedAdressee: boolean
 }): JSX.Element {
 
     const handleTextoChange: ChangeEventHandler = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -43,7 +44,14 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
                     </svg>
                 </div>
             </div>
-            <MessageTextarea events={{onChange: handleTextoChange}} attributes={{className: "message_textarea", name: "texto_content", value: message !== null ? message.texto : ""}}/>
+            <MessageTextarea events={{onChange: handleTextoChange}} 
+                attributes={{
+                    className: "message_textarea", 
+                    name: "texto_content", 
+                    value: message !== null ? message.texto : ""
+                }}
+                disabled={blockedAdressee ? blockedAdressee : undefined}
+            />
             <button type="submit" className="send_button" disabled={disableButton}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={"send_icon " + (disableButton ? "disabled" : "")}>
                     <line x1="22" y1="2" x2="11" y2="13"></line>

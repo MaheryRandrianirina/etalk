@@ -56,13 +56,12 @@ export default class Query<T extends Entity> {
         return this
     }
 
-    transformObjectToForConditions<U extends any>(conditions: U extends Entity 
-        ? Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>> 
-        : ColumnsToFill<T> | (keyof ColumnsToFill<T>)[],
+    transformObjectToForConditions<U extends any>(conditions: QueryConditions<T, U>,
         operator?: "OR" | "AND",
         like?: true
     ): string {
         let collections: string[] = []
+
         if(conditions instanceof Array){
             conditions.forEach(column => {
                 const c = column as string
@@ -75,9 +74,15 @@ export default class Query<T extends Entity> {
             })
         }else {
             for(const i in conditions){
-                const index = i as keyof Object
+                const index = i as keyof QueryConditions<T, U>
                 if(!like){
-                    collections.push(i + " = " + conditions[index])
+                    if(conditions[index] instanceof Array){
+                        const c = conditions[index] as string[]
+                        collections.push(`${i} = ${c[0]} OR ${i} = ${c[1]}`)
+                    }else {
+                        collections.push(i + " = " + conditions[index])
+                    }
+                    
                 }else {
                     collections.push(`${i} LIKE ${conditions[index]}`)
                 }

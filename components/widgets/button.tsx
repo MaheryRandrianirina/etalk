@@ -34,7 +34,7 @@ function SecondaryButton({children, className}: {
     children: ReactNode,
     className?: string
 }): JSX.Element {
-    return <Button className={"secondary_button " + (className ? className : undefined)}>{children}</Button>
+    return <Button className={"secondary_button " + (className ? className : "")}>{children}</Button>
 }
 
 function CreateConversationButton(): JSX.Element {

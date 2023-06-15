@@ -41,8 +41,8 @@ export default function ReceptionBox({
   };
   animationClassname: string;
   footer: {
-    onClickUserFriends: MouseEventHandler<HTMLDivElement>;
-    handleClickMessageCircle: MouseEventHandler<HTMLDivElement>;
+    onClickUserFriends: MouseEventHandler<SVGElement>;
+    handleClickMessageCircle: MouseEventHandler<SVGElement>;
     activeSection: number;
   };
   backwarded: boolean;

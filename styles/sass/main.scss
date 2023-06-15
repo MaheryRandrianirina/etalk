@@ -3,6 +3,8 @@
 @import "./mixins/buttons.scss";
 @import "./mixins/input.scss";
 @import "./mixins/search.scss";
+@import "./mixins/modal.scss";
+@import "./mixins/position.scss";
 
 html, body {
     height: 100%;
@@ -22,13 +24,101 @@ html, body {
 .reception_box.flip {
     transform: translateX(-100%);
 }
+
 body {
     padding: 0;
     margin: 0;
     font-size: 16px;
     color: $white;
     background-color: $primaryBlack;
-    font-family: "Roboto";
+    font-family: "Roboto"; 
+}
+
+.secondary_button {
+    @include secondary_button();
+}
+
+main {
+    position: relative;
+    .profile {
+        position: fixed;
+        @include centerAbsolutePosition();
+        height: 400px;
+        width: 85%;
+        background: $white;
+        border-radius: 10px;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity .2s ease-in, transform .2s cubic-bezier(0.645, 0.045, 0.355, 1);
+        box-shadow: 0 0 20px $secondaryBlack;
+
+        .close_icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: $primaryBlack;
+            z-index: 10;
+            transition: fill .3s, color .3s, transform .3s ease-in;
+            &:hover {
+                fill:$primaryBlack;
+                color: $white;
+                transform: scale(1.2);
+            }
+        }
+        
+        .profile_pic {
+            position: relative;
+            height: 45%;
+            background: $secondaryGreen;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            .user_icon {
+                position: absolute;
+                @include centerAbsolutePosition();
+                display: block;
+                height: 60%;
+                fill: $white;
+            }
+        }
+
+        .infos_container {
+            position: relative;
+            height: 55%;
+            .infos {
+                position: absolute;
+                width: 180px;
+                height: 190px;
+                letter-spacing: 2px;
+                line-height: 1.35;
+                @include centerAbsolutePosition();
+                color: $secondaryBlack;
+                .key {
+                    font-weight: bold;
+                }
+                .secondary_button {
+                    width: 180px;
+                    margin-top: 15px;
+                    color: $fail;
+                    transition: filter .3s ease-in;
+                }
+                .secondary_button:hover {
+                    filter: contrast(0.8);
+                }
+            }
+        }
+    }
+
+    .profile.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .modal_container {
+        @include modal_container();
+        .modal {
+            height: 145px;
+        }
+    }
 }
 
 p {
@@ -428,13 +518,18 @@ p {
             top: 0;
             right: 50px;
         }
-        .adressee .profile_pic {
+        .adressee .profile_pic, .adressee .no_profile_pic {
             position: absolute;
             top: 0;
             right: 0;
             width: 40px;
             height: 40px;
             border-radius: 50%;
+        }
+        .adressee .no_profile_pic {
+            @include no_profile_pic();
+            height: 30px;
+            width: 30px
         }
         .adressee .status_online {
             @include status_online();
@@ -445,7 +540,16 @@ p {
     }
 
     .conversation_content {
-        padding: 40px;
+        padding: 20px 40px 0 40px;
+        overflow-y: scroll;
+        scroll-behavior: smooth;
+        height: 320px;
+
+        .messages_container {
+            display: flex;
+            flex-direction: column;
+        }
+
         .message {
             margin-top: 20px;
             position: relative;
@@ -459,6 +563,7 @@ p {
         }
 
         .bubble {
+            display: inline-block;
             width: 0;
             height: 0;
             padding: 10px;
@@ -467,7 +572,7 @@ p {
         }
 
         .message.incoming {
-            float: left;
+            align-self: flex-start;
             .bubble {
                 background-color: $secondary;
                 &::before {
@@ -481,12 +586,14 @@ p {
                 }
             }
             .datetime {
-                float: left;
+                text-align: left;
             }
         }
 
         .message.outgoing {
-            float: right;
+            align-self: flex-end;
+            display: flex;
+            flex-direction: column;
             .bubble {
                 background-color: $primary;
                 &::after {
@@ -500,14 +607,14 @@ p {
                 }
             }
             .datetime {
-                float: right;
+                text-align: right;
             }
         }
 
         .show_bubble .bubble {
             transform-origin: bottom right;
             height: auto;
-            width: 170px;
+            width: auto;
         }
     }
 
@@ -517,6 +624,7 @@ p {
         width: 100%;
         height: 100px;
         padding: 20px;
+        background: $primaryBlack;
         border-top: 1px solid $white;
         .actions_buttons {
             display: flex;
@@ -578,5 +686,47 @@ p {
 
 .user_conversation.flip {
     transform: translateX(0);
+}
+
+.user_conversation.blocked {
+    .conversation_header {
+        .adressee .status_online {
+            display: none;
+        }
+
+        .blocked_user {
+            color: $fail;
+            font-size: 12px;
+            font-style: italic;
+            position: absolute;
+            right: 50px;
+            top: 25px;
+        }
+    }
+
+    .conversation_content {
+        .message .bubble {
+            background-color: $secondary;
+        }
+        .message .bubble::after {
+            border-bottom: 20px solid $secondary;
+        }
+    }
+
+    .conversation_footer {
+        .actions_buttons .uploads {
+            .add_image_button {
+                fill: $secondary;
+            }
+            .add_file_button{
+               stroke: $secondary;
+            }
+        }
+        .actions_buttons .peers {
+            .microphone_button, .video_call_button {
+                fill: $secondary;
+            }
+        }
+    }
 }
 

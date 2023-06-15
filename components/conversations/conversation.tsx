@@ -1,13 +1,14 @@
 import Image from "next/image"
 import ProfilPic from "../../public/20200823_120127_0.jpg"
 import Link from "next/link"
-import { AuthUser, User } from "../../types/user"
-import { useEffect, useState } from "react"
-import axios from "axios"
-import { Conversation as UserConversation, Message, Join } from "../../types/Database"
+import { AuthUser, ConversationOwners, User } from "../../types/user"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Conversation as UserConversation, Join } from "../../types/Database"
 import { ConversationMessage, SetMessage } from "../../types/conversation"
-import DateHelper from "../../backend/Helpers/Date"
+import DateHelper from "../../lib/helpers/Date"
 import { AppSocketState } from "../../types/utils"
+import { UserIcon } from "../icons/UserIcon"
+import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator"
 
 export default function Conversation({currentUser, conversation, socket}: {
     currentUser: User,
@@ -20,26 +21,55 @@ export default function Conversation({currentUser, conversation, socket}: {
         setMessage: SetMessage<{sender: AuthUser}>
     ] = useState(null as Join<ConversationMessage, {sender: AuthUser}> | null)
 
-    useEffect(()=>{
-        console.log(conversation)
-        if(socket){
-            socket.emit("get_conversation_last_message", conversation.id)
+    const [conversationOwners, setConversationOwners]: [
+        conversationOwners: ConversationOwners | null,
+        setConversationOwners: Dispatch<SetStateAction<ConversationOwners | null>>
+    ] = useState(null as ConversationOwners | null)
 
-            socket.on('conversation_last_message', (message)=>{
-                setMessage(message)
-            }) 
+    const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
+
+    useEffect(()=>{
+        if(socket){
+            if(message === null){
+                socket.emit("get_conversation_last_message", conversation.id)
+
+                socket.on('conversation_last_message', (message)=>{
+                    setMessage(message)
+                })
+            }
+
+            if(conversationOwners === null){
+                socket.emit('get_conversation_owners', conversation.initializer_id, conversation.adressee_id)
+
+                socket.on('conversation_owners', owners=>{
+                    setConversationOwners(owners)
+                })
+            } 
+        }
+
+        if(classnameForAnimation.length === 0){
+            setClassnameForAnimation("active")
         }
         
     }, [])
 
+    const profilPic = conversationOwners?.adressee?.id !== currentUser.id ? 
+        conversationOwners?.adressee.image : conversationOwners.initializer.image
+
     return <Link href={{
-        pathname: "/conversation/[username]/[conversation_id]",
-        query: { username: currentUser.username, conversation_id: currentUser.id}
+        pathname: "/conversation/[adressee_id]/[conversation_id]",
+        query: { adressee_id: conversationOwners?.adressee.id, conversation_id: conversation.id}
     }}>
-        {message !== null && <div className="conversation">
+        {message !== null && <div className={"conversation " + classnameForAnimation}>
             <div className="adressee">
-                <Image src={ProfilPic} alt="profile pic" className="profile_pic"/>
-                <p className="username">{currentUser.username}</p>
+                {profilPic && profilPic.length > 0 ? 
+                    <Image src={profilPic} alt="profile pic" className="profile_pic"/> :
+                    <UserIcon/>
+                }
+                
+                <p className="username">{conversationOwners?.adressee?.id !== currentUser.id ? 
+                    conversationOwners?.adressee.username : conversationOwners.initializer.username}
+                </p>
             </div>
             <div className="last_message">
                 <span className="sender">{message.sender_id === currentUser.id ? "Vous " : 

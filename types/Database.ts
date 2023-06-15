@@ -59,7 +59,7 @@ type Data<Table extends Entity> = {
  * Tables
  */
 type ColumnsToFill<T extends Entity> = {
-    [key in keyof T]?: T[key]
+    [key in keyof T]?: T[key] | (T[key])[] 
 }
 
 type Prefix<T extends ColumnsToFill<Entity>, U extends T> = {

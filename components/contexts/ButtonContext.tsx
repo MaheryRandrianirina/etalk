@@ -1,5 +1,5 @@
-import { Context, MouseEvent, MouseEventHandler, createContext } from "react"
+import { Context, MouseEvent, MouseEventHandler, SyntheticEvent, createContext } from "react"
 
-export const ButtonContext: Context<MouseEventHandler<HTMLButtonElement>> = createContext((e: MouseEvent<HTMLButtonElement, MouseEvent>)=>{
+export const ButtonContext: Context<MouseEventHandler<HTMLButtonElement>> = createContext((e: MouseEvent<HTMLButtonElement>): void =>{
     console.log(e)
 })

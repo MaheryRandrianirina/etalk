@@ -75,11 +75,23 @@
     background-color: $white;
     margin: 0 auto;
     margin-bottom: 10px;
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: opacity .3s ease-in, transform .3s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+
+    &.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
     .adressee {
         position: relative;
         height: 30px;
-        .profile_pic {
+        .profile_pic, .no_profile_pic {
             @include profile_pic();
+        }
+        .no_profile_pic {
+            @include no_profile_pic();
         }
         .username {
             position: absolute;
@@ -88,6 +100,7 @@
             color: $primaryBlack;
         }
     }
+
     .last_message {
         position: absolute;
         bottom: 10px;
@@ -97,6 +110,7 @@
             font-weight: bold;
         }
     }
+
     .datetime {
         position: absolute;
         right: 20px;
@@ -122,4 +136,12 @@
     background-color: $success;
     border-radius: 50%;
     box-shadow: 0 0 5px $success;
+}
+
+@mixin no_profile_pic {
+    background-color: $secondaryGreen;
+    height: 20px;
+    width: 20px;
+    padding: 5px;
+    fill: $white;
 }

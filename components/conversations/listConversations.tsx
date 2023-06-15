@@ -13,7 +13,11 @@ export default function ListConversations({conversations, user}: {
     
     return <div className="list_conversations">
         {conversations.map(conversation => {
-            return <Conversation socket={socket} conversation={conversation} key={conversation.id} currentUser={user}/>
+            return <Conversation socket={socket} 
+                conversation={conversation} 
+                key={conversation.id} 
+                currentUser={user}
+            />
         })}
     </div>
 }

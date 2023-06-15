@@ -4,7 +4,7 @@ import { GetAway } from "../../types/utils";
 import SearchResult from "./searchResult";
 import { SearchResultHandler } from "../../types/input";
 
-type SearchResultsType = GetAway<User, "password">[]
+type SearchResultsType = GetAway<User, ["password"]>[]
 
 type ResultsToShow = {
     lastIndex: number,
