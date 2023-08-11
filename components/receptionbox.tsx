@@ -1,4 +1,4 @@
-import {  ChangeEventHandler, Dispatch, Fragment, MouseEventHandler, SetStateAction, SyntheticEvent, TransitionEvent, TransitionEventHandler, useEffect, useLayoutEffect, useState } from "react"
+import {  ChangeEventHandler, Dispatch, Fragment, MouseEvent, MouseEventHandler, SetStateAction, SyntheticEvent, TransitionEvent, TransitionEventHandler, useEffect, useLayoutEffect, useState } from "react"
 import Opening from "./loaders/opening"
 import ListConversations from "./conversations/listConversations"
 import Header from "./app/header"
@@ -24,6 +24,7 @@ export default function ReceptionBox({
   footer,
   backwarded,
   setBackwarded,
+  onClickMenu
 }: {
   user: User;
   conversations: UserConversations;
@@ -47,6 +48,7 @@ export default function ReceptionBox({
   };
   backwarded: boolean;
   setBackwarded: Dispatch<SetStateAction<boolean>>;
+  onClickMenu: MouseEventHandler<HTMLDivElement>
 }): JSX.Element {
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function ReceptionBox({
       onTransitionEnd={handleTransitionend}
     >
       <Fragment>
-        <Header />
+        <Header onClickMenu={onClickMenu}/>
         <SearchBar
           value={searchBar.value}
           onSearchBarChange={searchBar.handleChange}

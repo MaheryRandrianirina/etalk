@@ -29,8 +29,7 @@
     - Voir le profil [v]
     - Remettre l'UI pour les personnes non-bloquées quand l'utilisateur débloque une personne [v]
     - Désactiver le bouton d'envoi de message vers les personnes bloquées dans le client [v] et le serveur [v] (A       chaque envoi de message, il faut toujours vérifier que le destinaire n'est pas bloqué. Ceci pour prévenir d'une quelconque tentatives de la part de certains utilisateurs)
-    - Modifier les colonnes liées à conversation_id afin de les supprimer lorsque ce dette dernière a été supprimée
-    (Ajouter un ON DELETE CASCADE)
+    - Voir la raison pourquoi l'heure JS change quand elle est dans la BDD
     - Regler l'heure des messages
     - Ajouter le menu déroulant
     - Ajouter la déconnexion

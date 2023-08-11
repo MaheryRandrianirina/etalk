@@ -189,7 +189,12 @@ export default function UserConversation({create, user, setCreateConversation, a
 
             socket?.on('conversation_messages', (messages)=>{
                 setShowMessageIntoBubble(true)
+
                 setConversationMessages(messages)
+
+                setMessage(m => {
+                    return {...m, texto: ""}
+                })
             })
         }
     }
