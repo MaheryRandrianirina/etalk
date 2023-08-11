@@ -147,7 +147,7 @@ export default function UserConversation({create, user, setCreateConversation, a
             }
         }
            
-    }, [chosenReceivers, message])
+    }, [chosenReceivers, message, blockUser])
 
     const handleSocket = async()=>{
         await axios.get("/api/socket")

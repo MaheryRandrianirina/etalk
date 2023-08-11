@@ -227,6 +227,7 @@ const ConversationHeader = memo(({
     
     if (!showAdresseeProfile) {
       toggleAdresseeProfile(true);
+
       setClassnameForAnimation(c => {
         return {...c, profile: "visible"}
       });
@@ -266,7 +267,6 @@ const ConversationHeader = memo(({
   }, [classnameForAnimation.modal])
 
   const handleClickBlockUntoggleBlockUserButton: MouseEventHandler<HTMLButtonElement> = async(e:MouseEvent) => {
-
     if(!adressee?.blocked){
       setModal({
         show: true, 

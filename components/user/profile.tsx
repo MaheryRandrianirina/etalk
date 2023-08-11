@@ -49,7 +49,7 @@ const Profile: FC<{
                 <div className="mail">
                     <span className="key">Adresse mail : </span><span className="value">{adressee.email}</span>
                 </div>
-                <SecondaryButton>{blockUserSuccess || adressee.blocked ? "Débloquer cette personne" : "Bloquer cette personne"}</SecondaryButton>
+                <SecondaryButton>{ adressee.blocked ? "Débloquer cette personne" : "Bloquer cette personne"}</SecondaryButton>
             </div>
             
         </div>
