@@ -29,6 +29,7 @@ const Profile: FC<{
 
     return <div className={"profile " + classnameForAnimation} onTransitionEnd={transitionendHandler} onClick={e => e.stopPropagation()}>
         <CloseIcon onClick={onClickCloseButton}/>
+        
         {adressee.image ? <ProfilePic imagePath={adressee.image}/> : <div className='profile_pic'>
             <UserIcon/>
         </div>}

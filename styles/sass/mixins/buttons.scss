@@ -49,3 +49,9 @@
     fill: $primary;
     stroke: none;
 }
+
+@mixin goBackButton {
+    color: $primary;
+    width: 30px;
+    height: 30px;
+}

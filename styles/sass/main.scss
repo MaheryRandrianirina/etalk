@@ -5,6 +5,7 @@
 @import "./mixins/search.scss";
 @import "./mixins/modal.scss";
 @import "./mixins/position.scss";
+@import "./mixins/icons.scss";
 
 html, body {
     height: 100%;
@@ -39,6 +40,7 @@ body {
 }
 
 main {
+    overflow-x: hidden;
     position: relative;
     .app_container {
         position: relative;
@@ -56,17 +58,7 @@ main {
         box-shadow: 0 0 20px $secondaryBlack;
 
         .close_icon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: $primaryBlack;
-            z-index: 10;
-            transition: fill .3s, color .3s, transform .3s ease-in;
-            &:hover {
-                fill:$primaryBlack;
-                color: $white;
-                transform: scale(1.2);
-            }
+            @include closeIcon();
         }
         
         .profile_pic {
@@ -509,9 +501,7 @@ p {
         height: 40px;
         color: $white;
         .go_back_button {
-            color: $primary;
-            width: 30px;
-            height: 30px;
+            @include goBackButton();
         }
         .adressee {
             position: relative;
@@ -741,10 +731,33 @@ p {
     height: 100%;
     z-index: 15;
     background-color: $secondaryBlack;
-    transition: width .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: width .3s cubic-bezier(0.785, 0.135, 0.15, 0.86);
 }
 
 .menu.active {
     width: 100%;
+    .go_back_button {
+        @include goBackButton();
+        margin-left: 10px;
+        margin-top: 10px;
+    }
+
+    ul {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    li {
+        list-style: none;
+        color: $primary;
+        background: $secondary;
+        padding: 10px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+    }
+
+    li.logout {
+        color: $fail;
+    }
 }
 

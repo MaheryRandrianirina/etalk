@@ -217,7 +217,7 @@ export default function Home({user}: {
         setBackwarded={setBackwared}
       />}
       
-      { <Menu className={classnameForAnimation}/> }
+      { <Menu className={classnameForAnimation} setShowMenu={setShowMenu}/> }
 
       </SocketContext.Provider>
     </div>
