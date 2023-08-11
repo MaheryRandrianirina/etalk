@@ -5,9 +5,10 @@ import { NextApiRequest } from "next"
 import { AuthUser } from "../../types/user"
 import ConversationUserTable from "../database/tables/ConversationUserTable"
 import { ConversationMessage } from "../../types/conversation"
-import { ConversationUser, Message } from "../../types/Database"
+import { BlockedUsers, ConversationUser, Message } from "../../types/Database"
 import { Conversation as ConversationType } from "../../types/Database"
 import UserFriends from "../database/tables/UserFriends"
+import BlockedUsersTable from "../database/tables/BlockedUsers"
 
 export class Conversation {
 
@@ -25,11 +26,22 @@ export class Conversation {
     }
 
     async new(receiver_id: number, message: ConversationMessage): Promise<void> {
-        const conversationId = await this.conversationTable.new({initializer_id:this.authUser?.id, adressee_id: receiver_id})
+        if(this.authUser){
+            const conversationId = await this.conversationTable.new({initializer_id:this.authUser?.id, adressee_id: receiver_id})
         
-        await this.message(message, conversationId, receiver_id)
-        await this.conversationUser(conversationId, receiver_id)
-        await this.createNewFriend(receiver_id)
+            const blockedUsersTable = new BlockedUsersTable();
+            const [blockedReceiver] = await blockedUsersTable
+                .where<undefined>(["blocked_user_id", "user_id"], [receiver_id, this.authUser.id])
+                .get() as BlockedUsers[];
+            
+            if(blockedReceiver){
+                throw new Error("Cet utilisateur est bloqué")
+            }
+
+            await this.message(message, conversationId, receiver_id)
+            await this.conversationUser(conversationId, receiver_id)
+            await this.createNewFriend(receiver_id)
+        }
     }
 
     async message(message: ConversationMessage, conversationId: number, receiverId: number): Promise<number> {
