@@ -1,9 +1,9 @@
-import { ChangeEvent, ChangeEventHandler, FormEventHandler, useState } from "react";
+import { ChangeEvent, ChangeEventHandler, MouseEventHandler, useEffect } from "react";
 import MessageTextarea from "./messageTextarea";
 import { SetMessage,ConversationMessage } from "../../types/conversation";
 
 export default function ConversationFooter({submitForm, message, setMessage, disableButton, sender_id, blockedAdressee}: {
-    submitForm: FormEventHandler<HTMLFormElement>,
+    submitForm: MouseEventHandler<HTMLButtonElement>,
     message: ConversationMessage | null,
     setMessage: SetMessage<undefined>,
     disableButton: boolean,
@@ -12,18 +12,20 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
 }): JSX.Element {
 
     const handleTextoChange: ChangeEventHandler = (event: ChangeEvent<HTMLTextAreaElement>) => {
+        
         setMessage(m => {
             if(m === null){
                 return {texto: event.target.value, created_at: new Date(), sender_id: sender_id}
             }else {
                 return {...m, texto: event.target.value, created_at: new Date(), sender_id: sender_id}
             }
-            
         })
+
+        console.log(message)
     }
 
     return <div className="conversation_footer">
-        <form action="" method="post" onSubmit={submitForm}>
+        <form action="" method="post">
             <div className="actions_buttons">
                 <div className="uploads">
                     <svg viewBox="0 0 384 512" className="add_image_button">
@@ -52,7 +54,7 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
                 }}
                 disabled={blockedAdressee ? blockedAdressee : undefined}
             />
-            <button type="submit" className="send_button" disabled={disableButton}>
+            <button type="submit" className="send_button" disabled={disableButton} onClick={submitForm}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={"send_icon " + (disableButton ? "disabled" : "")}>
                     <line x1="22" y1="2" x2="11" y2="13"></line>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>

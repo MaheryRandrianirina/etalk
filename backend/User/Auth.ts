@@ -231,7 +231,7 @@ export default class Auth {
             if(errors === null){
                 try {
                     const [user] = await this.userTable
-                        .where([], [loginData.username])
+                        .where<undefined>(["username"], [loginData.username])
                         .get() as [User | undefined]
                         
                     if(user !== undefined){

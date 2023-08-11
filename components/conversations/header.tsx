@@ -47,7 +47,8 @@ const ConversationHeader = memo(({
   chosenReceivers,
   setChosenReceivers,
   handleBackward,
-  blockUser
+  blockUser,
+  conversation_id
 }: {
   addReceiver?: true;
   user: AuthUser;
@@ -58,7 +59,8 @@ const ConversationHeader = memo(({
   blockUser: {
     state: BlockUser,
     set: Dispatch<SetStateAction<BlockUser>>
-  }
+  },
+  conversation_id: number
 }): JSX.Element => {
 
   const [receiver, setReceiver]: [
@@ -121,7 +123,7 @@ const ConversationHeader = memo(({
     const searchInput = document.querySelector(
       ".search_input"
     ) as HTMLInputElement;
-
+    
     if (addReceiver) {
       setSearchResultStyle({
         left: `${searchInput.offsetLeft}px`,
@@ -129,7 +131,7 @@ const ConversationHeader = memo(({
       });
 
       if (receiver.length > 2) {
-        searchReceiver(receiver)
+        searchReceiver(receiver, user.id, conversation_id)
           .then((users) => {
             setFoundReceivers(users);
           })
@@ -159,10 +161,12 @@ const ConversationHeader = memo(({
   }, [classnameForAnimation.profile])
 
   const searchReceiver: (
-    receiver: string
-  ) => Promise<GetAway<User, ["password"]>[]> = async (receiver) => {
+    receiver: string, 
+    sender_id: number,
+    conversation_id: number
+  ) => Promise<GetAway<User, ["password"]>[]> = async (receiver, sender_id, conversation_id) => {
     try {
-      const res = await axios.get(`/api/user?name=${receiver}`);
+      const res = await axios.get(`/api/user?name=${receiver}&sender_id=${sender_id}`);
       if (res.statusText === "OK") {
         const users = res.data.users as Receiver[];
 
@@ -261,16 +265,24 @@ const ConversationHeader = memo(({
     })
   }, [classnameForAnimation.modal])
 
-  const handleClickBlockAdresseeButton: MouseEventHandler<HTMLButtonElement> = async(e:MouseEvent) => {
-    setModal({
-      show: true, 
-      type: "confirmation", 
-      data: `Vous vous apprêtez à bloquer ${adressee?.username}. \n Etes-vous sûr de poursuivre ?`
-    });
+  const handleClickBlockUntoggleBlockUserButton: MouseEventHandler<HTMLButtonElement> = async(e:MouseEvent) => {
 
-    setClassnameForAnimation(c => {
-      return {...c, modal: "visible"}
-    });
+    if(!adressee?.blocked){
+      setModal({
+        show: true, 
+        type: "confirmation", 
+        data: `Vous vous apprêtez à bloquer ${adressee?.username}. \n Etes-vous sûr de poursuivre ?`
+      });
+
+      setClassnameForAnimation(c => {
+        return {...c, modal: "visible"}
+      });
+    }else {
+      const unblocked = await toggleBlockUser()
+      if(unblocked){
+        resetProfileClassnameForAnimation()
+      }
+    }
   }
 
   const handleModalTransitionend: TransitionEventHandler<HTMLDivElement> = (e: TransitionEvent) => {
@@ -287,7 +299,7 @@ const ConversationHeader = memo(({
     }
   }
 
-  const blockAdressee = async()=>{
+  const toggleBlockUser = async()=>{
     try {
       const res = await axios.post("/api/user/block", {adressee_id: adressee?.id})
       if(res.statusText === "OK"){
@@ -311,7 +323,7 @@ const ConversationHeader = memo(({
     switch(modal.type) {
       case "confirmation":
         if(e.currentTarget.classList.contains('ok')){
-          const success = await blockAdressee()
+          const success = await toggleBlockUser()
           if(success){
             resetModalClassnameForAnimation()
           }
@@ -382,7 +394,7 @@ const ConversationHeader = memo(({
       {showAdresseeProfile &&
         adressee &&
         createPortal(
-            <ButtonContext.Provider value={handleClickBlockAdresseeButton}>
+            <ButtonContext.Provider value={handleClickBlockUntoggleBlockUserButton}>
               <Profile
                 className={classnameForAnimation.profile}
                 transitionendHandler={handleAdresseeProfileTransitionend}

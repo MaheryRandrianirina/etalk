@@ -92,4 +92,10 @@ describe('test querybuilder', ()=>{
             .__toString())
             .toBe('SELECT * FROM user WHERE created_at = ? AND email = ? ORDER BY created_at DESC LIMIT 2')
     })
+
+    test("delete query", ()=>{
+        let query: Query<User> = new Query<User>('user')
+        expect(query.delete().__toString())
+            .toBe('DELETE FROM user')
+    })
 })

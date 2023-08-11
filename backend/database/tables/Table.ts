@@ -135,14 +135,17 @@ export default class Table<T extends Entity> {
 
     all(): Promise<any[]> {
         return new Promise((resolve, reject)=>{
-            this.getMysqlConnection().query(this.getQueryBuilder().select("*").__toString(), (err, results)=>{
+            this.getMysqlConnection().query(
+                this.getQueryBuilder().select("*").__toString(), 
+                (err, results)=>{
+
                 if(err) reject(err)
                 resolve(results)
             })
         })
     }
 
-    columns<U extends Entity | any, ConcatTypes extends true | undefined>(columns: U extends Entity ? 
+    columns<U extends Entity | any, ConcatTypes extends unknown>(columns: U extends Entity ? 
         (ConcatTypes extends true ? JoinArray<PrefixArray<ColumnsToFill<T>, T>, 
             PrefixArray<ColumnsToFill<U>, U>> : PrefixArray<ColumnsToFill<T>, T>) 
         : (keyof ColumnsToFill<T>)[]
@@ -155,14 +158,18 @@ export default class Table<T extends Entity> {
 
     where<U extends unknown>(
         conditions: QueryConditions<T, U>, 
-        dataForArrayConditions?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]
+        dataForArrayConditions?: U extends undefined ? (ColumnsToFill<T>[keyof ColumnsToFill<T>])[] :
+        (U extends Entity ? 
+            (Join<ColumnsToFill<T>, ColumnsToFill<U>>[keyof Join<ColumnsToFill<T>, ColumnsToFill<U>>])[] :
+            never
+        )
     ): this {
-
+        
         this.conditions = {
             columns: conditions as UnknownQueryConditions,
             data: dataForArrayConditions
         }
-
+        
         return this
     }
 
@@ -207,17 +214,17 @@ export default class Table<T extends Entity> {
             if(this.tableToJoin !== undefined){
                 this.query = this.query.join(this.tableToJoin)
             }
-
+            
             if(this.conditions !== undefined){
                 this.query = this.query.where<U>(this.conditions.columns as QueryConditions<T, U>)
                 let data: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[] = []
                 
-                if(this.conditions instanceof Array){
+                if(this.conditions.columns instanceof Array){
                     if(this.conditions.data){
                         data = this.conditions.data
                     }
                 }
-
+                
                 this.addOrder()
                 this.addLimit()
                 
@@ -229,7 +236,7 @@ export default class Table<T extends Entity> {
 
                 this.addOrder()
                 this.addLimit()
-
+                
                 this.getMysqlConnection().query(this.query.__toString(), (err, results)=>{
                     if(err) reject(err)
                     resolve(results)
@@ -241,7 +248,7 @@ export default class Table<T extends Entity> {
     /**
      * Ajoute un ORDER BY au query si this.orders est défini
      */
-    addOrder(): void {
+    protected addOrder(): void {
         if(this.orders && this.query){
             this.query = this.query.orderBy(`${this.orders.column as string} ${this.orders.type}`)
         }
@@ -251,7 +258,7 @@ export default class Table<T extends Entity> {
     /**
      * Ajoute un LIMIT au querysi this.fetchLimit > 0 donc défini.
      */
-    addLimit(): void {
+    protected addLimit(): void {
         if(this.fetchLimit > 0 && this.query){
             this.query = this.query.limit(this.fetchLimit)
         }
@@ -271,6 +278,10 @@ export default class Table<T extends Entity> {
                 query = this.getQueryBuilder().select("*")
             }
 
+            if(this.tableToJoin !== undefined){
+                this.query = query.join(this.tableToJoin)
+            }
+
             if(dataForArrayConditions && conditions instanceof Array){
                 query.where<undefined>(conditions, dataForArrayConditions.operator , true)
 
@@ -284,6 +295,35 @@ export default class Table<T extends Entity> {
                 this.getMysqlConnection().query(query.__toString(), (err, results)=>{
                     if(err) reject(err)
                     resolve(results)
+                })
+            }
+        })
+    }
+
+    delete(identifiant: number | (keyof ColumnsToFill<T>)[] | ColumnsToFill<T>, 
+        dataForArrayIdentifiant?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]
+    ) {
+        return new Promise((resolve, reject)=>{
+            if(typeof identifiant === "number"){
+                this.query = this.getQueryBuilder().delete().where(['id'] as (keyof ColumnsToFill<T>)[])
+
+                this.getMysqlConnection().query(this.query.__toString(), identifiant, (err, result)=>{
+                    if(err) reject(err)
+                    resolve(result)
+                })
+            }else if(identifiant instanceof Array && dataForArrayIdentifiant) {
+                this.query = this.getQueryBuilder().delete().where<undefined>(identifiant)
+
+                this.getMysqlConnection().query(this.query.__toString(), dataForArrayIdentifiant, (err, result)=>{
+                    if(err) reject(err)
+                    resolve(result)
+                })
+            }else {
+                this.query = this.getQueryBuilder().delete().where<undefined>(identifiant)
+
+                this.getMysqlConnection().query(this.query.__toString(), (err, result)=>{
+                    if(err) reject(err)
+                    resolve(result)
                 })
             }
         })

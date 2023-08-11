@@ -97,7 +97,9 @@ function InputSearch({attributes, events}:{
 function AddReceiverInput({onChangeInput}: {
     onChangeInput: ChangeEventHandler<HTMLInputElement>
 }): JSX.Element {
-    return <InputSearch events={{onChange: onChangeInput}} attributes={{className: `search_input ${conversationStyles.add_receiver}`, placeholder: "A : "}}/>
+    return <InputSearch events={{onChange: onChangeInput}} attributes={{
+        className: `search_input ${conversationStyles.add_receiver}`, 
+        placeholder: "A : "}}/>
 }
 
 export {

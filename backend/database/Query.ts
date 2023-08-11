@@ -56,7 +56,7 @@ export default class Query<T extends Entity> {
         return this
     }
 
-    transformObjectToForConditions<U extends any>(conditions: QueryConditions<T, U>,
+    transformObjectToForConditions<U extends unknown>(conditions: QueryConditions<T, U>,
         operator?: "OR" | "AND",
         like?: true
     ): string {
@@ -98,19 +98,28 @@ export default class Query<T extends Entity> {
     }
 
     delete(): this {
+        this.queries.push(`DELETE FROM ${this.table}`)
         return this
     }
 
     join(context: {[table: string]: {alias: string, on: string, type?: string}}): this {
         let query = ""
+        let countJointure = 0
 
         for(let table in context){
+            countJointure++
             const tableAttributes = context[table]
+
             const joinType = tableAttributes.type
             if(joinType){
                 query += `${joinType} JOIN `
             }else {
-                query += " JOIN"
+                if(countJointure === 1){
+                    query += "JOIN"
+                }else{
+                    query += " JOIN"
+                }
+                
             }
     
             query += ` ${table} ${tableAttributes.alias} ON ${tableAttributes.on}`

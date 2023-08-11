@@ -2,23 +2,61 @@ import UserTable from "../../../backend/database/tables/UserTable";
 import { withSessionRoute } from "../../../backend/utilities/withSession";
 import { NextApiRequest, NextApiResponse } from "next/types";
 import { User } from "../../../types/user";
-import BlockedUsersTable from "../../../backend/database/tables/BlockedUsers";
-import { BlockedUsers } from "../../../types/Database";
+import { ConversationUser } from "../../../types/Database";
+import ConversationUserTable from "../../../backend/database/tables/ConversationUserTable";
+
 export default withSessionRoute(User)
 
 async function User(req: NextApiRequest, res: NextApiResponse){
     const userTable = new UserTable<User>()
+    const conversationUserTable = new ConversationUserTable<ConversationUser>()
+
     const {user} = req.session
     if(user && req.method === "GET"){
-        const {name, id} = req.query
-        if(name !== undefined && typeof name === "string"){
+        const {name, sender_id, id } = req.query
+        if(name !== undefined 
+            && typeof name === "string"
+            && sender_id !== undefined
+            && typeof sender_id === "string"
+        ){
             const users = await userTable.search(
                 ["username", "firstname", "name", "id"], 
                 ["username", "name", "firstname"],
-                {values: [`%${name}%`, `%${name}%`, `%${name}%`], operator: "OR"}
-            )
+                { values: [`%${name}%`, `%${name}%`, `%${name}%`], operator: "OR"}
+            ) as User[]
             
-            res.status(200).json({success: true, users: users})
+            const authUserConversations = await conversationUserTable.where<undefined>(
+                ["user_id"],
+                [user.id]
+            ).get() as ConversationUser[]
+
+            let usersWithNoConversationWithAuthUser: User[] = []
+            for(let i = 0; i < users.length; i++){
+                const foundUser = users[i];
+                const receiverConversations = await conversationUserTable.where<undefined>(
+                    ["user_id"],
+                    [foundUser.id]
+                ).get() as ConversationUser[]
+                    
+                if(receiverConversations.length > 0
+                    && authUserConversations.length > 0
+                    
+                ){
+                    receiverConversations.forEach(receiverConversation => {
+                        authUserConversations.forEach(authUserConversation => {
+                            if(receiverConversation.conversation_id === authUserConversation.conversation_id){
+                                usersWithNoConversationWithAuthUser = usersWithNoConversationWithAuthUser.concat(users.filter((value)=>{
+                                        return value !== foundUser
+                                    })
+                                ) 
+                            }
+                        })
+                    })
+                    
+                }
+            }
+            console.log(usersWithNoConversationWithAuthUser)
+            res.status(200).json({success: true, users: usersWithNoConversationWithAuthUser})
         }else if(id !== undefined && typeof id === "string"){
             const [foundUser] = await userTable.columns([
                 "id", "name", "username", 

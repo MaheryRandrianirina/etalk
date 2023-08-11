@@ -7,6 +7,7 @@ import ConversationUserTable from "../database/tables/ConversationUserTable"
 import { ConversationMessage } from "../../types/conversation"
 import { ConversationUser, Message } from "../../types/Database"
 import { Conversation as ConversationType } from "../../types/Database"
+import UserFriends from "../database/tables/UserFriends"
 
 export class Conversation {
 
@@ -14,6 +15,7 @@ export class Conversation {
 
     private conversationTable = new ConversationTable()
     private messageTable = new MessageTable()
+    private userFriends = new UserFriends()
 
     constructor(req: NextApiRequest, private id?: number){
         if(this.authUser === null){
@@ -22,11 +24,12 @@ export class Conversation {
         
     }
 
-    async new(receiverId: number, message: ConversationMessage): Promise<void> {
-        const conversationId = await this.conversationTable.new({initializer_id:this.authUser?.id, adressee_id: receiverId})
+    async new(receiver_id: number, message: ConversationMessage): Promise<void> {
+        const conversationId = await this.conversationTable.new({initializer_id:this.authUser?.id, adressee_id: receiver_id})
         
-        await this.message(message, conversationId, receiverId)
-        await this.conversationUser(conversationId, receiverId)
+        await this.message(message, conversationId, receiver_id)
+        await this.conversationUser(conversationId, receiver_id)
+        await this.createNewFriend(receiver_id)
     }
 
     async message(message: ConversationMessage, conversationId: number, receiverId: number): Promise<number> {
@@ -40,7 +43,6 @@ export class Conversation {
     }
 
     async messages(): Promise<Message[]>{
-
         if(this.id && this.authUser){
             const messages = await this.messageTable.columns<ConversationUser, undefined>(['m.*'])
                 .join({
@@ -57,4 +59,14 @@ export class Conversation {
             throw new Error("La propriété id est undefined")
         }
     } 
+
+    async createNewFriend(receiver_id: number): Promise<number> {
+        if(this.authUser){
+            const createdUserFriend = await this.userFriends
+                .new({"user_id": this.authUser.id, "friend_id": receiver_id})
+            return createdUserFriend
+        }else {
+            throw new Error("Vous n'êtes pas connecté!")
+        }
+    }
 }

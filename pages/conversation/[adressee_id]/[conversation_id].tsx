@@ -5,7 +5,6 @@ import Content from "../../../components/conversations/content"
 import { AuthUser, User } from "../../../types/user"
 import { Dispatch, 
     FormEvent, 
-    FormEventHandler, 
     MouseEventHandler, 
     SetStateAction, 
     SyntheticEvent, 
@@ -19,7 +18,7 @@ import Data from "../../../lib/data"
 import { withSessionSsr } from "../../../backend/utilities/withSession"
 import { AppSocketState } from "../../../types/utils"
 import {io} from "socket.io-client"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import { Join } from "../../../types/Database"
 
 
@@ -92,10 +91,10 @@ export default function UserConversation({create, user, setCreateConversation, a
 
     useEffect(()=>{
         document.title = "Conversation"
-
+        
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
-
+        
         if(create){
             setAnimate(true)
 
@@ -124,7 +123,11 @@ export default function UserConversation({create, user, setCreateConversation, a
                     setAdressee(res.data.adressee)
                 }
             }).catch(e => {
-                console.error(e)
+                const error = e as AxiosError<{success: boolean, message?: string}>
+                const errorData = error.response && error.response.data
+                if(errorData && !errorData.success && errorData.message){
+                    document.location.href = "/404"
+                }
             })
 
             if(!message){
@@ -147,7 +150,6 @@ export default function UserConversation({create, user, setCreateConversation, a
     }, [chosenReceivers, message])
 
     const handleSocket = async()=>{
-        console.log(socket)
         await axios.get("/api/socket")
 
         socket = io()
@@ -155,20 +157,24 @@ export default function UserConversation({create, user, setCreateConversation, a
         socket.on('connect', () => {
             console.log("socket connected")
         })
-
+        
         socket.emit("get_conversation_messages", ids.conversation_id, ids.adressee_id)
 
         socket.on('conversation_messages', (messages) => {
             setShowMessageIntoBubble(true)
             setConversationMessages(messages)
         })
+
+        socket.on('conversation_messages_error', (error)=>{
+            document.location.href = "/404"
+        })
     }
 
-    const handleSubmitForm: FormEventHandler<HTMLFormElement> = (e:FormEvent<HTMLFormElement>)=>{
+    const handleSubmitForm: MouseEventHandler<HTMLButtonElement> = (e:FormEvent<HTMLButtonElement>)=>{
         e.preventDefault()
 
         const data = new Data()
-        
+
         if(create && chosenReceivers.length > 0 && message){
             chosenReceivers.forEach(chosenReceiver => {
                 data.post(`/api/user/conversation/message/${chosenReceiver.id}`, message).then(res => {
@@ -190,10 +196,12 @@ export default function UserConversation({create, user, setCreateConversation, a
 
     const handleBackward: MouseEventHandler<SVGElement> = useCallback((e: SyntheticEvent)=>{
         e.preventDefault()
-
-        if(create){
+        
+        if(create && setCreateConversation){
             setAnimate(false)
             setBackwarded(true)
+            console.log('back', animate, create, animation)
+            //setCreateConversation(false)
         }else {
             document.location.href = "/"
         }
@@ -215,14 +223,17 @@ export default function UserConversation({create, user, setCreateConversation, a
         }
     }
     
-    return <div className={"user_conversation " + (blockUser.success || adressee?.blocked ? "blocked " : "") + (animate && animation ? animation.className : "flip")} onTransitionEnd={handleTransitionend}>
+    return <div className={"user_conversation " + (blockUser.success || adressee?.blocked ? "blocked " : "") + (animate && animation ? animation.className : (!animate && animation ? "" : "flip"))} onTransitionEnd={handleTransitionend}>
         <ConversationHeader blockUser={{
             state: blockUser,
             set: setBlockUser
         }} user={user} handleBackward={handleBackward} addReceiver={create} adressee={adressee ? adressee : undefined} 
             chosenReceivers={chosenReceivers} setChosenReceivers={setChosenReceivers}
+            conversation_id={ids.conversation_id}
         />
-        <Content showIntoBubble={showMessageIntoBubble} messages={conversationMessages} user={user}/>
+
+        <Content showIntoBubble={showMessageIntoBubble} messages={create && message ? [message] : conversationMessages} user={user}/>
+        
         <ConversationFooter blockedAdressee={blockUser.success ? blockUser.success : (adressee ? adressee.blocked : false)} sender_id={user.id} disableButton={disableButton} 
             submitForm={handleSubmitForm} message={message} 
             setMessage={setMessage}

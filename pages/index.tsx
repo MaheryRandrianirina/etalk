@@ -18,6 +18,8 @@ import { UserConversations } from '../types/conversation'
 import { io, Socket } from 'socket.io-client'
 import { ClientToServerEvents, ServerToClientEvents } from '../types/socket/utils'
 import { AppSocketState, SocketStateDispatcher } from '../types/utils'
+import session from 'express-session'
+import user from './api/user'
 
 type AnimationClassName = {receptionBox: string, conversation: string}
 
@@ -71,6 +73,7 @@ export default function Home({user}: {
   
   useEffect(()=>{
       handleSocket()
+
   }, [])
 
   const handleSocket = async()=>{
@@ -86,7 +89,7 @@ export default function Home({user}: {
         })
 
         socket.emit("get_conversations")
-
+        
         if(backwarded){
           socket.emit("get_conversations")
         }
@@ -200,6 +203,7 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
 
   const urlForAuth = req.url === "/login" || req.url === "/register"
   let user = req.session.user
+  
   if(!urlForAuth && !user){
       loggedIn = false
 

@@ -91,7 +91,8 @@ type UnknownQueryConditions = string[] | Join<{[index: string]: string}, {"OR"?:
 
 type QueryConditions<T extends Entity, U extends any> = U extends Entity ? 
     Join<Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>>, 
-    {"OR"?: {[index: string]: string}}>
+    {"OR"?: {[index: string]: string}}> | (keyof Join<Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>>, 
+        {"OR"?: {[index: string]: string}}>)[]
 : ColumnsToFill<T> | (keyof ColumnsToFill<T>)[]
 
 type TableColumns<T extends Entity, U extends any, Concat extends any> = U extends Entity ? 

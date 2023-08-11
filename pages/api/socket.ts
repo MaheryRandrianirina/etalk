@@ -61,10 +61,9 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
                         .get() as Conversation[]
 
                     socket.broadcast.emit('conversations', conversations)
-                    res.status(200).end()
                     
                 }catch(e){
-                    res.status(500).json({success: false})
+                    console.error(e)
                 }
             })
 
@@ -100,6 +99,12 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
             })
 
             socket.on('get_conversation_messages', async (conversation_id, adressee_id)=>{
+                
+                if(adressee_id === u.id){
+                    socket.emit('conversation_messages_error', {status: 404, message: "Cette conversation n'existe pas"})
+                    return
+                }
+                
                 const userConversation = new UserConversation(req, conversation_id)
                 const messages = await userConversation.messages()
 

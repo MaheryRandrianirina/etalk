@@ -1,9 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { withSessionRoute } from "../../../../backend/utilities/withSession";
 import MessageTable from "../../../../backend/database/tables/MessageTable";
-import {Conversation as UserConversation} from "../../../../backend/User/Conversation";
 import { BlockedUsers, ConversationUser, Message } from "../../../../types/Database";
-import ConversationTable from "../../../../backend/database/tables/ConversationTable";
 import BlockedUsersTable from "../../../../backend/database/tables/BlockedUsers";
 import UserTable from "../../../../backend/database/tables/UserTable";
 import { User } from "../../../../types/user";
@@ -48,6 +46,13 @@ async function getLastMessage(id: number, userId: number, res: NextApiResponse):
 
 async function getConversationAdressee(adressee_id: number | string, user_id: number, res: NextApiResponse){
     const id = typeof adressee_id === "string" ? parseInt(adressee_id) : adressee_id
+    console.log(id,user_id)
+
+    if(id === user_id){
+        res.status(404).json({success: false, error: "Cette conversation n'existe pas."})
+        return
+    }
+
     try {
         const userTable = new UserTable()
         const [foundUser] = await userTable.columns([
@@ -55,7 +60,7 @@ async function getConversationAdressee(adressee_id: number | string, user_id: nu
             "firstname", "email", "sex", 
             "image", "is_online"
         ]).find(id) as User[]
-
+        
         const blockedUsersTable = new BlockedUsersTable()
         const [blocked_adressee] = await blockedUsersTable
             .columns<BlockedUsers, undefined>(['bu.*'])
@@ -66,10 +71,12 @@ async function getConversationAdressee(adressee_id: number | string, user_id: nu
                     type: 'LEFT'
                 }
             })
-            .where({ "blocked_user_id": id, "user_id": user_id })
+            .where<User>({"bu.blocked_user_id": id, "bu.user_id": user_id})
             .get() as BlockedUsers[]
         
-        res.status(200).json({success: true, adressee: {...foundUser, blocked: id === blocked_adressee.blocked_user_id}})
+        res.status(200).json({success: true, adressee: {...foundUser, blocked: (
+            blocked_adressee ? id === blocked_adressee.blocked_user_id : false
+        )}})
     }catch(e){
         console.error(e)
     }
