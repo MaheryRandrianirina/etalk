@@ -234,7 +234,7 @@ export default function UserConversation({create, user, setCreateConversation, a
 
         <Content showIntoBubble={showMessageIntoBubble} messages={create && message ? [message] : conversationMessages} user={user}/>
         
-        <ConversationFooter blockedAdressee={blockUser.success ? blockUser.success : (adressee ? adressee.blocked : false)} sender_id={user.id} disableButton={disableButton} 
+        <ConversationFooter blockedAdressee={ adressee ? adressee.blocked : false } sender_id={user.id} disableButton={disableButton} 
             submitForm={handleSubmitForm} message={message} 
             setMessage={setMessage}
         />

@@ -177,7 +177,7 @@ const ConversationHeader = memo(({
           chosenReceivers.forEach((chosenReceiver) => {
             chosenReceiversUsername.push(chosenReceiver.username);
           });
-          console.log()
+          
           return (
             userValue.username !== user.username || userValue.name !== user.name
           );
