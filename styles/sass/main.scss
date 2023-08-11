@@ -43,7 +43,7 @@ main {
     .profile {
         position: fixed;
         @include centerAbsolutePosition();
-        height: 400px;
+        height: 440px;
         width: 85%;
         background: $white;
         border-radius: 10px;
@@ -87,7 +87,7 @@ main {
             .infos {
                 position: absolute;
                 width: 180px;
-                height: 190px;
+                height: 210px;
                 letter-spacing: 2px;
                 line-height: 1.35;
                 @include centerAbsolutePosition();

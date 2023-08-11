@@ -44,7 +44,7 @@ const Profile: FC<{
                     <span className="key">Pseudo : </span><span className="value">{adressee.username}</span>
                 </div>
                 <div className="sex">
-                    <span className="key">Sexe : </span><span className="value">{adressee.sex}</span>
+                    <span className="key">Sexe : </span><span className="value">{adressee.sex === "man" ? "Homme" : "Femme"}</span>
                 </div>
                 <div className="mail">
                     <span className="key">Adresse mail : </span><span className="value">{adressee.email}</span>

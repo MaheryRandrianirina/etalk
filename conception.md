@@ -26,14 +26,16 @@
     - Implementer la véritable logique du blocage d'utilisateur dans le fichier block [v]
     - Dès le chargement de la conversation, faire une requête pour savoir si le
         destinataire est bloqué ou non. Si oui, ajouter la classe "blocked" dans user_converstion [v]
+    - Voir le profil [v]
     - Remettre l'UI pour les personnes non-bloqués quand l'utilisateur débloque une personne
     - Désactiver le bouton d'envoi de message vers les personnes bloquées dans le client et le serveur (A       chaque envoi de message, il faut toujours vérifier que le destinaire n'est pas bloqué. Ceci pour prévenir d'une quelconque tentatives de la part de certains utilisateurs)
     - Désactiver les autres boutons d'action.
     - Modifier les colonnes liées à conversation_id afin de les supprimer lorsque ce dette dernière a été supprimée
     (Ajouter un ON DELETE CASCADE)
     - Regler l'heure des messages
-    - Voir le profil [v]
-    - Bloquer la personne
+    - Ajouter le menu déroulant
+    - Ajouter la déconnexion
+    - Refaire une récupération via le websocket lors du retour après la création de conversation
     - Envoi d'images
     - Envoi de fichiers
     - Suppression des messages
