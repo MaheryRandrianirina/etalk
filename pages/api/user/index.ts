@@ -30,7 +30,8 @@ async function User(req: NextApiRequest, res: NextApiResponse){
                 [user.id]
             ).get() as ConversationUser[]
 
-            let usersWithNoConversationWithAuthUser: User[] = []
+            let usersWithNoConversationWithAuthUser: User[] = [];
+            
             for(let i = 0; i < users.length; i++){
                 const foundUser = users[i];
                 const receiverConversations = await conversationUserTable.where<undefined>(

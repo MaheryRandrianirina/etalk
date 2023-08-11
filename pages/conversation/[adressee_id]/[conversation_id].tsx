@@ -94,7 +94,7 @@ export default function UserConversation({create, user, setCreateConversation, a
         
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
-        
+        console.log(blockUser, adressee)
         if(create){
             setAnimate(true)
 
@@ -223,7 +223,7 @@ export default function UserConversation({create, user, setCreateConversation, a
         }
     }
     
-    return <div className={"user_conversation " + (blockUser.success || adressee?.blocked ? "blocked " : "") + (animate && animation ? animation.className : (!animate && animation ? "" : "flip"))} onTransitionEnd={handleTransitionend}>
+    return <div className={"user_conversation " + (adressee?.blocked ? "blocked " : "") + (animate && animation ? animation.className : (!animate && animation ? "" : "flip"))} onTransitionEnd={handleTransitionend}>
         <ConversationHeader blockUser={{
             state: blockUser,
             set: setBlockUser

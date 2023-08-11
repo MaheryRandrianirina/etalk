@@ -131,8 +131,9 @@ const ConversationHeader = memo(({
       });
 
       if (receiver.length > 2) {
-        searchReceiver(receiver, user.id, conversation_id)
+        searchReceiver(receiver, user.id)
           .then((users) => {
+            console.log(users)
             setFoundReceivers(users);
           })
           .catch((err) => {
@@ -147,6 +148,7 @@ const ConversationHeader = memo(({
   const handleBodyClick = useCallback(()=>{
     document.body.addEventListener('click', (e) => {
       e.preventDefault()
+
       if (classnameForAnimation.profile.length > 0) {
         console.log(showAdresseeProfile)
         resetProfileClassnameForAnimation()
@@ -162,24 +164,22 @@ const ConversationHeader = memo(({
 
   const searchReceiver: (
     receiver: string, 
-    sender_id: number,
-    conversation_id: number
-  ) => Promise<GetAway<User, ["password"]>[]> = async (receiver, sender_id, conversation_id) => {
+    sender_id: number
+  ) => Promise<GetAway<User, ["password"]>[]> = async (receiver, sender_id) => {
     try {
       const res = await axios.get(`/api/user?name=${receiver}&sender_id=${sender_id}`);
       if (res.statusText === "OK") {
         const users = res.data.users as Receiver[];
-
-        const searchedUsers = users.filter((value) => {
+        console.log(users)
+        const searchedUsers = users.filter((userValue) => {
           let chosenReceiversUsername: string[] = [];
 
           chosenReceivers.forEach((chosenReceiver) => {
             chosenReceiversUsername.push(chosenReceiver.username);
           });
-
+          console.log()
           return (
-            value.username !== user.username &&
-            chosenReceiversUsername.includes(value.username) === false
+            userValue.username !== user.username || userValue.name !== user.name
           );
         });
 
