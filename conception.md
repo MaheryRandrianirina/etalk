@@ -29,12 +29,13 @@
     - Voir le profil [v]
     - Remettre l'UI pour les personnes non-bloquées quand l'utilisateur débloque une personne [v]
     - Désactiver le bouton d'envoi de message vers les personnes bloquées dans le client [v] et le serveur [v] (A       chaque envoi de message, il faut toujours vérifier que le destinaire n'est pas bloqué. Ceci pour prévenir d'une quelconque tentatives de la part de certains utilisateurs) [v]
-    - Afficher les erreurs de connexion et d'inscription
+    - Afficher les erreurs de connexion et d'inscription [v]
+    - Ajouter le menu déroulant [v]
+    - Ajouter la déconnexion [v]
+    - Régler le bug "doublon de message"
     - Ajouter un package de token csrf
     - Voir la raison pourquoi l'heure JS change quand elle est dans la BDD
     - Regler l'heure des messages
-    - Ajouter le menu déroulant
-    - Ajouter la déconnexion
     - Refaire une récupération via le websocket lors du retour après la création de conversation
     - Envoi d'images
     - Envoi de fichiers

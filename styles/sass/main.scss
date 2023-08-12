@@ -564,13 +564,13 @@ p {
         .message.incoming {
             align-self: flex-start;
             .bubble {
-                background-color: $secondary;
+                background-color: $secondaryGreen;
                 &::before {
                     content: "";
                     position: absolute;
                     top: 0;
                     left: -10px;
-                    border-top: 20px solid $secondary;
+                    border-top: 20px solid $secondaryGreen;
                     border-left: 20px solid transparent;
                     border-bottom: 20px solid transparent;
                 }
@@ -668,7 +668,7 @@ p {
                 margin-bottom: 5px;
             }
             .send_icon.disabled {
-                fill: $secondaryGreen;
+                fill: $secondary;
             }
         }
     }
