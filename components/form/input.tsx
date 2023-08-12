@@ -33,23 +33,24 @@ function InputText({label, attributes, events, errors}: {
     label?: string, 
     attributes: InputAttributes<"text">,
     events?: InputEvents<"text">, 
-    errors?: string[] | null
+    errors?: string | null
 }): JSX.Element {
     
     return <div className={"form_group form_group_" + attributes.className}>
         {label && <label htmlFor={attributes.id}>{label}</label>}
         <Input type="text" attributes={attributes} events={events}/>
-        {errors !== null && errors !== undefined && <small className={styles.error}>{errors[0]}</small>}
+        {errors !== null && errors !== undefined && <small className={styles.error}>{errors}</small>}
     </div>
 }
 
-function InputPassword({label, attributes, events}: {
+function InputPassword({label, attributes, events,errors}: {
     label?: string, attributes: InputAttributes<"password">,
-    events?: InputEvents<"password">
+    events?: InputEvents<"password">, errors?: string | null
 }): JSX.Element {
     return <div className={"form_group form_group_" + attributes.className}>
         {label && <label htmlFor={attributes.id}>{label}</label>}
         <Input type="password" attributes={attributes} events={events}/>
+        {errors !== null && errors !== undefined && <small className={styles.error}>{errors}</small>}
     </div>
 }
 

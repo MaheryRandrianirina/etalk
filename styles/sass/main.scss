@@ -175,10 +175,6 @@ p {
                 @include input();
                 background: $white;
             }
-    
-            .password_input {
-                margin-bottom: 30px;
-            }
             
             .remember_me_input {
                 @include input();
@@ -193,7 +189,8 @@ p {
     
         .form_group.form_group_remember_me_input {
             position: relative;
-            text-align: center
+            text-align: center;
+            margin-top: 30px;
         }
 
         .primary_button {

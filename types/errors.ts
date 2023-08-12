@@ -7,7 +7,7 @@ type RegistrationFormErrors = {
 }
 
 type LoginFormErrors = {
-    [key in keyof LoginInputs]?: key extends "remember_me" ? never : LoginInputs[key][]
+    [key in keyof LoginInputs]?: key extends "remember_me" ? never : LoginInputs[key]
 }
 
 export type { RegistrationFormErrors, LoginFormErrors }

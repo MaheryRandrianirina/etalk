@@ -84,7 +84,7 @@ export default function Login(): JSX.Element {
             ){
                 if("errors" in errorResponse.data){
                     const errors = errorResponse.data.errors as LoginFormErrors
-
+                    console.log(errors)
                     if("username" in errors
                         || "password" in errors
                     ){
@@ -128,7 +128,7 @@ export default function Login(): JSX.Element {
             
             <InputPassword events={{
                 onChange: handleChangeInputs
-            }} attributes={{className: "password_input", name: "password", value: inputsValues.password, placeholder: "Mot de passe"}}/>
+            }} errors={formErrors.password !== undefined ? formErrors.password : null} attributes={{className: "password_input", name: "password", value: inputsValues.password, placeholder: "Mot de passe"}}/>
             
             <InputCheckbox events={{
                 onChange: handleChangeInputs
