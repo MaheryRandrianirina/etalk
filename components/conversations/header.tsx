@@ -34,12 +34,7 @@ import ConfirmationModal from "../modals/confirmationModal";
 import { BlockUser } from "../../pages/conversation/[adressee_id]/[conversation_id]";
 import { Join } from "../../types/Database";
 import BackIcon from "../icons/backIcon";
-
-type ModalData<T extends "confirmation"> = {
-  show: boolean, 
-  type: T,
-  data: T extends "confirmation" ? string : never
-}
+import { ModalData } from "../../types/modal";
 
 const ConversationHeader = memo(({
   addReceiver,
@@ -48,8 +43,7 @@ const ConversationHeader = memo(({
   chosenReceivers,
   setChosenReceivers,
   handleBackward,
-  blockUser,
-  conversation_id
+  blockUser
 }: {
   addReceiver?: true;
   user: AuthUser;
@@ -60,8 +54,7 @@ const ConversationHeader = memo(({
   blockUser: {
     state: BlockUser,
     set: Dispatch<SetStateAction<BlockUser>>
-  },
-  conversation_id: number
+  }
 }): JSX.Element => {
 
   const [receiver, setReceiver]: [
@@ -134,7 +127,6 @@ const ConversationHeader = memo(({
       if (receiver.length > 2) {
         searchReceiver(receiver, user.id)
           .then((users) => {
-            console.log(users)
             setFoundReceivers(users);
           })
           .catch((err) => {
@@ -151,7 +143,6 @@ const ConversationHeader = memo(({
       e.preventDefault()
 
       if (classnameForAnimation.profile.length > 0) {
-        console.log(showAdresseeProfile)
         resetProfileClassnameForAnimation()
       }
     })
@@ -171,7 +162,7 @@ const ConversationHeader = memo(({
       const res = await axios.get(`/api/user?name=${receiver}&sender_id=${sender_id}`);
       if (res.statusText === "OK") {
         const users = res.data.users as Receiver[];
-        console.log(users)
+        
         const searchedUsers = users.filter((userValue) => {
           let chosenReceiversUsername: string[] = [];
 

@@ -7,7 +7,6 @@ export default withSessionRoute(Conversation)
 
 async function Conversation(req: NextApiRequest, res: NextApiResponse) {
     const user = req.session.user
-    console.log('conversation api')
     if(user){
         try {
             const conversationTable = new ConversationTable<Conversation>()

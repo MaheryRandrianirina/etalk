@@ -26,20 +26,24 @@
     height: 130px;
     box-shadow: 0 0 10px $secondaryBlack;
     opacity: 0;
+    z-index: 15;
     transition: transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity .3s ease-in;
 
     .message {
         width: 250px;
         margin: 0 auto;
     }
+    
     .buttons {
         display: flex;
         float: right;
         margin-top: 15px;
     }
+    
     .primary_button, .secondary_button {
         width: auto;
     }
+    
     .primary_button {
         margin-left: 10px;
     }

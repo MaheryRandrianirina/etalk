@@ -7,8 +7,8 @@ export default withSessionRoute(Register)
 function Register(req: NextApiRequest, res: NextApiResponse) {
     
     if(req.method === "POST"){
-        const auth = new Auth(req, res)
         try {
+            const auth = new Auth(req, res)
             auth.registerUser()
         }catch(e){
             console.error(e)

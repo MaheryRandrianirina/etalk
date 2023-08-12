@@ -234,7 +234,6 @@ export default function UserConversation({create, user, setCreateConversation, a
             set: setBlockUser
         }} user={user} handleBackward={handleBackward} addReceiver={create} adressee={adressee ? adressee : undefined} 
             chosenReceivers={chosenReceivers} setChosenReceivers={setChosenReceivers}
-            conversation_id={ids.conversation_id}
         />
 
         <Content showIntoBubble={showMessageIntoBubble} messages={create && message ? [message] : conversationMessages} user={user}/>

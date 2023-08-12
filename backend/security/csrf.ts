@@ -7,7 +7,7 @@ export default class CsrfClass {
 
     }
     
-    generate(): Promise<any> {
+    generate(): Promise<Buffer> {
         return new Promise((resolve, reject)=>{
             randomBytes(32, (err, buf)=>{
                 if(err) reject(err)

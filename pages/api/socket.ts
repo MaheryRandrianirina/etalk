@@ -78,7 +78,7 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
                     .limit(1)
                     .get() as Message[]
                 
-                const [user] = await userTable.find(message.sender_id) as GetAway<User, ["created_at", "updated_at", "email", "remember_token", "password"]>[]
+                const [user] = await userTable.find(message.sender_id) as GetAway<User, ["created_at", "updated_at", "remember_token", "password"]>[]
                 
                 socket.emit('conversation_last_message', {...message, sender: user})
             })
