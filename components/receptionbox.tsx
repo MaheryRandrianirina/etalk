@@ -55,6 +55,7 @@ export default function ReceptionBox({
     const receptionBox = document.querySelector(
       ".reception_box"
     ) as HTMLDivElement;
+
     receptionBox.offsetWidth;
     
     if (backwarded) {

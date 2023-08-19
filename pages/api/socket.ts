@@ -68,7 +68,8 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
             })
 
             socket.on('get_conversation_last_message', async(conversation_id)=>{
-                const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
+                try {
+                    const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
                     .join({
                         "conversation_user": {alias: "cu", on: "cu.user_id = m.sender_id"},
                         "user": {alias: "u", on: "u.id = cu.user_id"}
@@ -77,10 +78,13 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
                     .orderBy("m.created_at", "DESC")
                     .limit(1)
                     .get() as Message[]
-                
-                const [user] = await userTable.find(message.sender_id) as GetAway<User, ["created_at", "updated_at", "remember_token", "password"]>[]
-                
-                socket.emit('conversation_last_message', {...message, sender: user})
+                    debugger
+                    const [user] = await userTable.find(message.sender_id) as GetAway<User, ["created_at", "updated_at", "remember_token", "password"]>[]
+                    
+                    socket.emit('conversation_last_message', {...message, sender: user})
+                }catch(e){
+                    console.error(e)
+                }
             })
 
             socket.on('get_conversation_owners', async(initializer_id, adressee_id)=>{

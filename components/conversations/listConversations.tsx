@@ -1,4 +1,4 @@
-import { MouseEventHandler, useContext } from "react"
+import { MouseEventHandler, useContext, useEffect } from "react"
 import Conversation from "./conversation"
 import { Conversation as userConversation} from "../../types/Database"
 import { User } from "../../types/user"

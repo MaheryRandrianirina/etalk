@@ -32,6 +32,8 @@
     - Afficher les erreurs de connexion et d'inscription [v]
     - Ajouter le menu déroulant [v]
     - Ajouter la déconnexion [v]
+    - Ajouter un opérateur "OR" dans le where sql. Ceci pour resoudre l'erreur "undefined sender_id" car on n'a fait que récupérer le message envoyé par l'utilisateur courant. Parfois l'utilisateur courant n'a pas encore envoyé de message d'autant plus qu'on devait récuperer le dernier message de la
+    conversation.
     - Régler le bug "doublon de message"
     - Ajouter un package de token csrf
     - Voir la raison pourquoi l'heure JS change quand elle est dans la BDD

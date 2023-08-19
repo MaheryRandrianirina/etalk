@@ -56,7 +56,7 @@ async function User(req: NextApiRequest, res: NextApiResponse){
                     
                 }
             }
-            console.log(usersWithNoConversationWithAuthUser)
+            
             res.status(200).json({success: true, users: usersWithNoConversationWithAuthUser})
         }else if(id !== undefined && typeof id === "string"){
             const [foundUser] = await userTable.columns([

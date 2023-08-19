@@ -91,7 +91,7 @@ export default function Home({user}: {
       }else {
         setClassnameForAnimation("")
       }
-  }, [showMenu])
+  }, [showMenu, backwarded])
 
   const handleSocket = async()=>{
       try {
@@ -104,7 +104,7 @@ export default function Home({user}: {
         socket.on('connect', ()=>{
           console.log("connected")
         })
-
+        
         socket.emit("get_conversations")
         
         if(backwarded){
@@ -133,6 +133,7 @@ export default function Home({user}: {
 
   const handleSearchBarChange: ChangeEventHandler<HTMLInputElement> = (event:ChangeEvent<HTMLInputElement>) => {
       const value = event.currentTarget.value
+
       setSearchBarValue(value)
 
       if(value !== ""){
@@ -164,7 +165,7 @@ export default function Home({user}: {
     
     setShowMenu(show => !show)    
   }
-
+  
   return (
     <div className='app_container' style={{height:"100%"}}>
       <Head>
@@ -174,7 +175,9 @@ export default function Home({user}: {
       </Head>
 
       <SocketContext.Provider value={socket}>
+
       {conversations === null && <Opening />}
+
       {(createConversation === false && activeSection === 1 && conversations) && <ReceptionBox 
           onClickMenu={handleClickMenu}
           backwarded={backwarded}

@@ -32,12 +32,12 @@ export default function Conversation({currentUser, conversation, socket}: {
         if(socket){
             if(message === null){
                 socket.emit("get_conversation_last_message", conversation.id)
-
+                
                 socket.on('conversation_last_message', (message)=>{
                     setMessage(message)
                 })
             }
-
+            
             if(conversationOwners === null){
                 socket.emit('get_conversation_owners', conversation.initializer_id, conversation.adressee_id)
 
