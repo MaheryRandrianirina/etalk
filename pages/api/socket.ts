@@ -74,11 +74,14 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
                         "conversation_user": {alias: "cu", on: "cu.user_id = m.sender_id"},
                         "user": {alias: "u", on: "u.id = cu.user_id"}
                     })
-                    .where<ConversationUser>({"m.conversation_id": conversation_id, "m.sender_id": u.id})
+                    .where<ConversationUser>({
+                        "m.conversation_id": conversation_id, 
+                        "OR": {"m.sender_id": u.id, "m.receiver_id": u.id}}
+                    )
                     .orderBy("m.created_at", "DESC")
                     .limit(1)
                     .get() as Message[]
-                    debugger
+                    
                     const [user] = await userTable.find(message.sender_id) as GetAway<User, ["created_at", "updated_at", "remember_token", "password"]>[]
                     
                     socket.emit('conversation_last_message', {...message, sender: user})

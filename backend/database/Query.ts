@@ -53,6 +53,7 @@ export default class Query<T extends Entity> {
         like?: true
     ): this {
         this.queries.push(`WHERE ${this.transformObjectToForConditions<U>(conditions, operator, like)}`)
+
         return this
     }
 
@@ -75,10 +76,23 @@ export default class Query<T extends Entity> {
         }else {
             for(const i in conditions){
                 const index = i as keyof QueryConditions<T, U>
+                
                 if(!like){
                     if(conditions[index] instanceof Array){
                         const c = conditions[index] as string[]
                         collections.push(`${i} = ${c[0]} OR ${i} = ${c[1]}`)
+                    }else if(index === "OR"){
+                        const ORConditions = conditions[index]
+                        let ORQuery: string = ""
+                        
+                        for(const idx in ORConditions){
+                            ORQuery += ORQuery.length === 0 ? 
+                                idx + " = " + ORConditions[idx] : " OR " 
+                                + idx + " = " + ORConditions[idx]
+                        }
+
+                        collections.push(ORQuery)
+                        
                     }else {
                         collections.push(i + " = " + conditions[index])
                     }

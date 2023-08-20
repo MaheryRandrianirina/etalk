@@ -13,7 +13,7 @@ async function Conversation(req: NextApiRequest, res: NextApiResponse){
 
     if(req.method === "GET" && user){
         const {id, adressee_id} = req.query
-        
+        console.log(req.query)
         if(typeof id === "string" && adressee_id === undefined && user.id){
             await getLastMessage(parseInt(id), user.id, res)
         }else if(typeof adressee_id === "string" && user.id){
@@ -46,7 +46,6 @@ async function getLastMessage(id: number, userId: number, res: NextApiResponse):
 
 async function getConversationAdressee(adressee_id: number | string, user_id: number, res: NextApiResponse){
     const id = typeof adressee_id === "string" ? parseInt(adressee_id) : adressee_id
-    console.log(id,user_id)
 
     if(id === user_id){
         res.status(404).json({success: false, error: "Cette conversation n'existe pas."})

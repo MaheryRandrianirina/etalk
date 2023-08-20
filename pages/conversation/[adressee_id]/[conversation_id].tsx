@@ -94,7 +94,7 @@ export default function UserConversation({create, user, setCreateConversation, a
         
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
-        console.log(blockUser, adressee)
+        
         if(create){
             setAnimate(true)
 
@@ -116,15 +116,16 @@ export default function UserConversation({create, user, setCreateConversation, a
             }
         }else {
             handleSocket()
-
+            
             axios.get(`/api/user/conversation/${ids.conversation_id}?adressee_id=${ids.adressee_id}`).then(res => {
-                
                 if(res.statusText === "OK"){
                     setAdressee(res.data.adressee)
                 }
+
             }).catch(e => {
                 const error = e as AxiosError<{success: boolean, message?: string}>
                 const errorData = error.response && error.response.data
+
                 if(errorData && !errorData.success && errorData.message){
                     document.location.href = "/404"
                 }

@@ -162,7 +162,7 @@ export default class Table<T extends Entity> {
         (U extends Entity ? 
             (Join<ColumnsToFill<T>, ColumnsToFill<U>>[keyof Join<ColumnsToFill<T>, ColumnsToFill<U>>])[] :
             never
-        )
+        ),
     ): this {
         
         this.conditions = {
@@ -230,6 +230,7 @@ export default class Table<T extends Entity> {
                 console.log(this.query.__toString())
                 this.getMysqlConnection().query(this.query.__toString(), data, (err, results)=>{
                     if(err) reject(err)
+
                     resolve(results)
                 })
             }else {
@@ -239,6 +240,7 @@ export default class Table<T extends Entity> {
                 
                 this.getMysqlConnection().query(this.query.__toString(), (err, results)=>{
                     if(err) reject(err)
+
                     resolve(results)
                 })
             } 
