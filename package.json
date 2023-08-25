@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@emotion/css": "^11.11.2",
     "@glidejs/glide": "^3.6.0",
     "@next-auth/typeorm-legacy-adapter": "^2.0.2",
     "@peculiar/webcrypto": "^1.4.3",
@@ -49,7 +50,9 @@
     "next": "13.2.4",
     "next-auth": "^4.22.1",
     "next-connect": "^1.0.0",
+    "next-csrf": "^0.2.1",
     "nextjs-progressbar": "^0.0.16",
+    "node-emoji": "^2.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "sass": "^1.60.0",

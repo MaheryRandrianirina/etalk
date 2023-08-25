@@ -27,29 +27,27 @@
     - Dès le chargement de la conversation, faire une requête pour savoir si le
         destinataire est bloqué ou non. Si oui, ajouter la classe "blocked" dans user_converstion [v]
     - Voir le profil [v]
+    - Désactiver les autres boutons d'action vers les personnes bloquées. [v]
     - Remettre l'UI pour les personnes non-bloquées quand l'utilisateur débloque une personne [v]
     - Désactiver le bouton d'envoi de message vers les personnes bloquées dans le client [v] et le serveur [v] (A       chaque envoi de message, il faut toujours vérifier que le destinaire n'est pas bloqué. Ceci pour prévenir d'une quelconque tentatives de la part de certains utilisateurs) [v]
     - Afficher les erreurs de connexion et d'inscription [v]
     - Ajouter le menu déroulant [v]
     - Ajouter la déconnexion [v]
     - Ajouter un opérateur "OR" dans le where sql. Ceci pour resoudre l'erreur "undefined sender_id" car on n'a fait que récupérer le message envoyé par l'utilisateur courant. Parfois l'utilisateur courant n'a pas encore envoyé de message d'autant plus qu'on devait récuperer le dernier message de la
-    conversation.
-    - Régler le bug "doublon de message"
-    - Ajouter un package de token csrf
-    - Voir la raison pourquoi l'heure JS change quand elle est dans la BDD
+    conversation. [v]
+    - Régler le bug "doublon de message" [v]
+    - Finir l'étape 3 d'inscription
+    - Ajouter l'animation au congratsForSubscription
     - Regler l'heure des messages
-    - Refaire une récupération via le websocket lors du retour après la création de conversation
-    - Envoi d'images
-    - Envoi de fichiers
-    - Désactiver les autres boutons d'action pour vers les personnes bloquées.
     - Suppression des messages
     - Recherche sur l'ajout de support d'emojis dans les applis web
     - Ajouter le support d'amojis
     - Recherche de conversation
+    - Refaire une récupération via le websocket lors du retour après la création de conversation
+    - Ajouter le statut en ligne de l'utilisateur dans le BDD lorsqu'il se connecte
     - Liste d'amis et leur statut en ligne
-    - Déconnexion
-    - Finir l'étape 3
-    - Ajouter l'animation au congratsForSubscription
+    - Envoi d'images
+    - Envoi de fichiers
     - Vocal
     - Appel vidéo
     
