@@ -91,9 +91,13 @@ type UnknownQueryConditions = string[] | Join<{[index: string]: string}, {"OR"?:
 
 type QueryConditions<T extends Entity, U extends any> = U extends Entity ? 
     Join<Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>>, 
-    {"OR"?: {[index: string]: string | number}}> | (keyof Join<Join<Prefix<ColumnsToFill<T>, T>, Prefix<ColumnsToFill<U>, U>>, 
+    {"OR"?: {[index: string]: string | number}}> | (keyof Join<Join<OptionalSuffix<T, Prefix<ColumnsToFill<T>, T>, "!=">, OptionalSuffix<U, Prefix<ColumnsToFill<U>, U>, "!=">>, 
         {"OR"?: {[index: string]: string}}>)[]
 : ColumnsToFill<T> | (keyof ColumnsToFill<T>)[]
+
+type OptionalSuffix<U extends Entity, T extends Prefix<ColumnsToFill<U>, U>, S extends "!="> = {
+    [key in keyof T as key extends string ? (`${key} ${S}` & string) | key : key] : T[key]
+}
 
 type TableColumns<T extends Entity, U extends any, Concat extends any> = U extends Entity ? 
     (Concat extends true ? JoinArray<PrefixArray<ColumnsToFill<T>, T>, PrefixArray<ColumnsToFill<U>, U>> : 

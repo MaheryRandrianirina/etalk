@@ -227,7 +227,7 @@ export default class Table<T extends Entity> {
                 
                 this.addOrder()
                 this.addLimit()
-                console.log(this.query.__toString())
+                
                 this.getMysqlConnection().query(this.query.__toString(), data, (err, results)=>{
                     if(err) reject(err)
 

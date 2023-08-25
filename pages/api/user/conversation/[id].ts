@@ -13,11 +13,11 @@ async function Conversation(req: NextApiRequest, res: NextApiResponse){
 
     if(req.method === "GET" && user){
         const {id, adressee_id} = req.query
-        console.log(req.query)
+        
         if(typeof id === "string" && adressee_id === undefined && user.id){
             await getLastMessage(parseInt(id), user.id, res)
-        }else if(typeof adressee_id === "string" && user.id){
-            await getConversationAdressee(adressee_id, user.id, res)
+        }else if(typeof adressee_id === "string" && user.id && typeof id === "string"){
+            await getConversationAdressee(adressee_id, id, user.id, res)
         }
     }else {
         res.status(403).redirect("/forbidden")
@@ -44,21 +44,36 @@ async function getLastMessage(id: number, userId: number, res: NextApiResponse):
     }
 }
 
-async function getConversationAdressee(adressee_id: number | string, user_id: number, res: NextApiResponse){
-    const id = typeof adressee_id === "string" ? parseInt(adressee_id) : adressee_id
-
-    if(id === user_id){
-        res.status(404).json({success: false, error: "Cette conversation n'existe pas."})
-        return
-    }
-
+async function getConversationAdressee(
+    adressee_id: number | string,
+    conversation_id: number | string, 
+    user_id: number, 
+    res: NextApiResponse
+){
+    const nb_adressee_id = typeof adressee_id === "string" ? parseInt(adressee_id) : adressee_id
+    const nb_conversation_id = typeof conversation_id === "string" ? parseInt(conversation_id) : conversation_id
     try {
         const userTable = new UserTable()
-        const [foundUser] = await userTable.columns([
-            "id", "name", "username", 
-            "firstname", "email", "sex", 
-            "image", "is_online"
-        ]).find(id) as User[]
+        let foundUser: User
+
+        if(nb_adressee_id === user_id){
+            [foundUser] = await userTable.columns<ConversationUser, undefined>(["u.*"])
+                .join({"conversation_user": {
+                    alias: "cu",
+                    on: "u.id = cu.user_id"
+                }, 
+                    "conversation": {alias: "c", on: "cu.conversation_id = c.id"}
+                }).where<ConversationUser>(
+                    ["cu.user_id !=", "cu.conversation_id"],
+                    [nb_adressee_id, nb_conversation_id]
+                ).get() as User[]
+        }else {
+            [foundUser] = await userTable.columns([
+                "id", "name", "username", 
+                "firstname", "email", "sex", 
+                "image", "is_online"
+            ]).find(nb_adressee_id) as User[]
+        }
         
         const blockedUsersTable = new BlockedUsersTable()
         const [blocked_adressee] = await blockedUsersTable
@@ -70,11 +85,11 @@ async function getConversationAdressee(adressee_id: number | string, user_id: nu
                     type: 'LEFT'
                 }
             })
-            .where<User>({"bu.blocked_user_id": id, "bu.user_id": user_id})
+            .where<User>({"bu.blocked_user_id": nb_adressee_id, "bu.user_id": user_id})
             .get() as BlockedUsers[]
         
         res.status(200).json({success: true, adressee: {...foundUser, blocked: (
-            blocked_adressee ? id === blocked_adressee.blocked_user_id : false
+            blocked_adressee ? nb_adressee_id === blocked_adressee.blocked_user_id : false
         )}})
     }catch(e){
         console.error(e)

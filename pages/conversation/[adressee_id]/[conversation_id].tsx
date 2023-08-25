@@ -95,6 +95,8 @@ export default function UserConversation({create, user, setCreateConversation, a
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
         
+        handleSocket()
+        
         if(create){
             setAnimate(true)
 
@@ -114,14 +116,11 @@ export default function UserConversation({create, user, setCreateConversation, a
             ){
                 setDisableButton(true)
             }
-        }else {
-            handleSocket()
-            
+        }else { 
             axios.get(`/api/user/conversation/${ids.conversation_id}?adressee_id=${ids.adressee_id}`).then(res => {
                 if(res.statusText === "OK"){
                     setAdressee(res.data.adressee)
                 }
-
             }).catch(e => {
                 const error = e as AxiosError<{success: boolean, message?: string}>
                 const errorData = error.response && error.response.data
@@ -148,7 +147,7 @@ export default function UserConversation({create, user, setCreateConversation, a
             }
         }
            
-    }, [chosenReceivers, message, blockUser])
+    }, [chosenReceivers, message, blockUser, adressee !== null])
 
     const handleSocket = async()=>{
         await axios.get("/api/socket")
@@ -159,12 +158,14 @@ export default function UserConversation({create, user, setCreateConversation, a
             console.log("socket connected")
         })
         
-        socket.emit("get_conversation_messages", ids.conversation_id, ids.adressee_id)
+        if(adressee && adressee.id){
+            socket.emit("get_conversation_messages", ids.conversation_id, adressee.id)
 
-        socket.on('conversation_messages', (messages) => {
-            setShowMessageIntoBubble(true)
-            setConversationMessages(messages)
-        })
+            socket.on('conversation_messages', (messages) => {
+                setShowMessageIntoBubble(true)
+                setConversationMessages(messages)
+            })
+        }
 
         socket.on('conversation_messages_error', (error)=>{
             document.location.href = "/404"
@@ -206,13 +207,12 @@ export default function UserConversation({create, user, setCreateConversation, a
         if(create && setCreateConversation){
             setAnimate(false)
             setBackwarded(true)
-            console.log('back', animate, create, animation)
             //setCreateConversation(false)
         }else {
             document.location.href = "/"
         }
 
-    }, [animate])
+    }, [animate, adressee])
 
     const handleTransitionend: TransitionEventHandler<HTMLDivElement> = (e:TransitionEvent)=>{
         e.preventDefault()

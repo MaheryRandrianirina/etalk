@@ -67,11 +67,10 @@ export default class Query<T extends Entity> {
             conditions.forEach(column => {
                 const c = column as string
                 if(!like){
-                    collections.push(`${c} = ?`)
+                    collections.push(`${c.includes('!=') ? c + " ?" : c + " = ?"}`)
                 }else {
                     collections.push(`${c} LIKE ?`)
                 }
-                
             })
         }else {
             for(const i in conditions){
