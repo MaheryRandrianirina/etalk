@@ -1,7 +1,8 @@
 import { InputAttributes, InputEvents, InputOptions, InputTypes } from "../../types/input";
 import styles from "../../styles/sass/modules/input.module.scss"
 import conversationStyles from "../../styles/sass/modules/conversations.module.scss"
-import { ChangeEventHandler } from "react";
+import { ChangeEventHandler, Dispatch, MouseEvent, MouseEventHandler, SetStateAction, useState } from "react";
+import EyeIcon from "../icons/eyeIcon";
 
 function Input({type, attributes, events}: InputOptions<InputTypes[number]>): JSX.Element {
     return (
@@ -43,13 +44,29 @@ function InputText({label, attributes, events, errors}: {
     </div>
 }
 
-function InputPassword({label, attributes, events,errors}: {
+function InputPassword({
+    label, 
+    attributes, 
+    events,errors
+}: {
     label?: string, attributes: InputAttributes<"password">,
     events?: InputEvents<"password">, errors?: string | null
 }): JSX.Element {
+    const [showEye, setShowEye]: [
+        showEye: boolean,
+        setShowEye: Dispatch<SetStateAction<boolean>>
+    ] = useState(false)
+
+    const handleEyeClick: MouseEventHandler<SVGElement> = (e: MouseEvent) => {
+        e.preventDefault()
+
+        setShowEye(show => !show)
+    }
+
     return <div className={"form_group form_group_" + attributes.className}>
         {label && <label htmlFor={attributes.id}>{label}</label>}
-        <Input type="password" attributes={attributes} events={events}/>
+        <Input type={showEye ? "text" : "password"} attributes={attributes} events={events}/>
+        <EyeIcon onClick={handleEyeClick}/>
         {errors !== null && errors !== undefined && <small className={styles.error}>{errors}</small>}
     </div>
 }

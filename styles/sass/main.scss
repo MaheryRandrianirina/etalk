@@ -193,7 +193,17 @@ p {
                 color: $primary;
             }
         }
-    
+        .form_group.form_group_password_input {
+            position: relative;
+            .eye-icon {
+                position: absolute;
+                height: 20px;
+                top: 12px;
+                right: 10px;
+                color: $primary;
+            }
+        }
+
         .form_group.form_group_remember_me_input {
             position: relative;
             text-align: center;

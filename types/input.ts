@@ -1,4 +1,4 @@
-import { ChangeEventHandler, SyntheticEvent } from "react"
+import { ChangeEventHandler, MouseEventHandler, SyntheticEvent } from "react"
 
 type InputTypes = ["text", "number", "radio", "checkbox", "password", "email", "hidden", "search"]
 
@@ -12,7 +12,7 @@ type InputAttributes<type extends InputTypes[number]> = {
 }
 
 type InputEvents<type extends InputTypes[number]> = {
-    onChange?: ChangeEventHandler<HTMLInputElement>
+    onChange?: ChangeEventHandler<HTMLInputElement>,
 }
 
 type InputOptions<type extends InputTypes[number]> = {

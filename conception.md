@@ -38,9 +38,10 @@
     - Régler le bug "doublon de message" [v]
     - Ajouter nodemon [v]
     - Finir l'étape 3 d'inscription [v]
-    - Diminuer la hauteur du modal confirmation du logout
-    - Ajouter l'oeil sur les inputs de mot de passe avec la possibilié de voir les MDP
-    - Ajouter l'animation au congratsForSubscription
+    - Diminuer la hauteur du modal confirmation du logout [v]
+    - Ajouter l'oeil sur les inputs de mot de passe avec la possibilié de voir les MDP [v]
+    - Ajouter l'animation au congratsForSubscription [v]
+    - Installer react-test-renderer, @testing-library/react
     - Regler l'heure des messages
     - Suppression des messages
     - Ajouter le support d'amojis 
