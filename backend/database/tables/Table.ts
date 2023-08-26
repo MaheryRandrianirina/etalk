@@ -161,7 +161,7 @@ export default class Table<T extends Entity> {
         dataForArrayConditions?: U extends undefined ? (ColumnsToFill<T>[keyof ColumnsToFill<T>])[] :
         (U extends Entity ? 
             (Join<ColumnsToFill<T>, ColumnsToFill<U>>[keyof Join<ColumnsToFill<T>, ColumnsToFill<U>>])[] :
-            never
+            undefined
         ),
     ): this {
         

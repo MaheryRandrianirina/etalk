@@ -21,29 +21,45 @@ import { RegistrationStepThreeProperties } from "../types/registration/registrat
 import useFormErrors from "../lib/hooks/useFormErrors";
 import { RegistrationFormErrors } from "../types/errors";
 import { getServerSideProps } from "./api/authenticated";
+import FileError from "../lib/errors/FileError";
+import UploadError from "../lib/errors/UploadError";
 
 
-const PostDataforRegistration: (step: number, data: UserIdentity | UserUniqueProperties | {image:File})=>Promise<PostDataReturnType> 
-    = async (step, data): Promise<any> => {
+const PostDataforRegistration: (
+    step: number, 
+    data: UserIdentity | UserUniqueProperties | {image:File}
+) => Promise<PostDataReturnType> = async (step, data): Promise<any> => {
     try {
         let res: AxiosResponse<{success: boolean}, unknown> | undefined
 
         if("image" in data){
             const imageSizeAccepted: boolean = data.image.size <= 10*1024*1024
+            
+            if(!data.image.type.includes("image")){
+                throw new FileError("Le format de votre fichier n\'est pas supporté")
+            }
+
             if(imageSizeAccepted){
                 const formdata = new FormData()
                 formdata.append("profile_photo", data.image)
 
-                res = await axios.post("/api/upload", formdata) as AxiosResponse<{success: boolean}, unknown>
-                console.log(res)
-                if(res.data.success){
-                    console.log("success e")
+                const uploadRes = await axios.post("/api/upload", formdata) as AxiosResponse<{success: boolean, file?: string}, unknown>
+                
+                if(uploadRes.data.success){
+                    res = await axios.post(
+                        "/api/register", 
+                        { 
+                            registrationStep: step, 
+                            data: {file: uploadRes.data.file}
+                        }
+                    ) as AxiosResponse<{success: boolean}, unknown>
+                }else {
+                    throw new UploadError("Le téléversement de votre fichier a échoué.\nVeuillez réessayer s'il vous plait")
                 }
             }else {
-                console.error("Le fichier est trop volumineux")
+                throw new FileError("Le fichier est trop volumineux")
             }
         }else {
-            console.log(step)
             res = await axios.post("/api/register", {registrationStep: step, data: data})
         }
         
@@ -112,14 +128,7 @@ export default function Register(): JSX.Element {
             }else if(registerStep === 3){
                 const activeButton = stepThreeProperties.activeButton
                 if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
-                    PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage})
-                        .then(res => {
-                            if("success" in res && res.success === true){
-                                setRegisterStep((s: number) => s + 1)
-                            }else {
-                                console.error("Echec de l'insertion de l'image. Veuillez réessayer.")
-                            }
-                    })
+                    res = await PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage})
                 }else if(activeButton === "ignore") {
                     setRegisterStep((s: number) => s + 1)
                 }
@@ -163,6 +172,10 @@ export default function Register(): JSX.Element {
                 }else {
                     console.error(error)
                 }
+            }else if(error instanceof FileError
+                || error instanceof UploadError
+            ){
+                console.error(error.message)
             }
             
         }
@@ -216,6 +229,7 @@ export default function Register(): JSX.Element {
         const fileInput = document.querySelector('.hidden_file_input') as HTMLInputElement
         if(fileInput && fileInput.type === "file"){
             fileInput.click()
+
             fileInput.addEventListener('change', ()=>{
                 setStepThreeProperties(s =>{
                     const file = fileInput.files !== null ? fileInput.files[0] : null

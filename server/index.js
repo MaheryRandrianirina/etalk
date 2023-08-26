@@ -9,16 +9,24 @@ const handle = app.getRequestHandler()
 
 app.prepare()
     .then(() => {
-        const upload = multer({dest: "../storage/"})
+        const storage = multer.diskStorage({
+            destination: "storage/public/user/profile_photo/",
+            filename: function (req, file, cb) {
+              const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+              cb(null, file.originalname)
+            }
+        })
+
+        const upload = multer({storage: storage})
         
         const server = express()
 
-        server.get("*",(req, res) => {
+        server.get("*", (req, res) => {
             return handle(req, res)
         }) 
         
-        server.post("/api/upload", upload.single('profile_photo'), (req, res,next) => {
-            console.log(req)
+        server.post("/api/upload", upload.single('profile_photo'), (req, res, next) => {
+            res.status(200).json({success: true, file: req.file.originalname})
         })
 
         server.post("*", (req, res) => {
@@ -26,7 +34,7 @@ app.prepare()
         })
         
         server.listen(port)
-        
+
     }).catch(err => {
         console.error(err)
     })

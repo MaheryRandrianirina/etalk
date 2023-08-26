@@ -2,21 +2,28 @@ import { withIronSessionSsr } from "iron-session/next/dist";
 import { useEffect } from "react";
 import { withSessionSsr } from "../backend/utilities/withSession";
 import axios from "axios";
+import useClassnameAnimator from "../lib/hooks/useClassnameAnimator";
 
 export default function CongratsForSubscription({className}: {
   className?: string
 }): JSX.Element {
   const timeOut: number = 2000
 
+  const { classnameForAnimation, setClassnameForAnimation } = useClassnameAnimator('')
+
   useEffect(()=>{
-    setTimeout(()=>{
-      window.location.href = "/"
-    }, timeOut)
-  })
+    setClassnameForAnimation('show')
+
+    if(classnameForAnimation.length > 0){
+      setTimeout(()=>{
+        window.location.href = "/"
+      }, timeOut)
+    }
+  }, [classnameForAnimation])
 
   return (
-    <div className="congrats_for_subscription">
-      <div className="subscribed visible">Vous êtes inscrit !</div>
+    <div className={"congrats_for_subscription " + classnameForAnimation}>
+      <div className="subscribed">Vous êtes inscrit !</div>
       <svg
         enableBackground="new 0 0 3000 3000"
         viewBox="0 0 3000 3000"

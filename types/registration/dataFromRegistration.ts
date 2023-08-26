@@ -7,7 +7,7 @@ type DataFromRegistration = {
     email: string,
     password: string,
     password_confirmation: string,
-    image: string
+    file: string
 }
 
 export type { DataFromRegistration }

@@ -340,7 +340,8 @@ p {
         width: 400px;
         height: 600px;
         margin: 0 auto;
-        transform: translateY(30%);
+        transform: translateY(20%);
+
         .subscribed {
             text-align: center;
             color: $success;
@@ -349,10 +350,7 @@ p {
             opacity: 0;
             transition: opacity .3s, transform .3s ease-out;
         }
-        .subscribed.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+
         .man_flying_with_welcome_banner {
             display: block;
             z-index: 5;
@@ -360,17 +358,27 @@ p {
             opacity: 0;
             transition: transform 1.5s, opacity .3s;
         }
-        .man_flying_with_welcome_banner.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
+        
         a {
             text-decoration: none;
         }
+
         .primary_button {
             @include primary_button();
             margin: 0 auto;
             z-index: 20;
+        }
+    }
+
+    .congrats_for_subscription.show {
+        .subscribed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .man_flying_with_welcome_banner {
+            transform: translateY(0);
+            opacity: 1;
         }
     }
 }

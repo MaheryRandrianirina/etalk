@@ -32,9 +32,9 @@ export default class Auth {
 
     async registerUser() {
         const body: BeforeStepThreeData = this.req.body 
-        console.log(this.req.body)
+        
         if (this.res) {
-            const { registrationStep, data } = body as BeforeStepThreeData
+            const { registrationStep, data } = body
 
             this.userValidator.setData(data)
 
@@ -44,6 +44,9 @@ export default class Auth {
                     break
                 case 2:
                     this.handleRegistrationStepTwo(data)
+                    break
+                case 3:
+                    this.handleRegistrationStepThree(data.file)
                     break
             }
             //this.handleRegistrationStepThree(d)
@@ -57,12 +60,12 @@ export default class Auth {
         try {
             if(this.res){
                 const errors: ValidationError<User> | null = this.userValidator
-                .required("sex")
-                .string("sex")
-                .name('name')
-                .firstname("firstname")
-                .username("username")
-                .getErrors()
+                    .required("sex")
+                    .string("sex")
+                    .name('name')
+                    .firstname("firstname")
+                    .username("username")
+                    .getErrors()
             
                 if(errors === null && "session" in this.req){
                     try {
@@ -195,13 +198,13 @@ export default class Auth {
         return user.id + "-----" + Str.random(64)
     }
 
-    private async handleRegistrationStepThree(imageFile:File) {
+    private async handleRegistrationStepThree(file: string) {
         if(this.res && "session" in this.req){
             const authUser = this.req.session.user
             if (authUser !== undefined && authUser.id !== null) {
                 try {
-                    
-                    
+                    await this.userTable.update({image: file})
+                    this.res.status(200).json({ success: true})
                 } catch (error) {
                     this.res.status(500).json({success: false, sqlError: error})
                 }
