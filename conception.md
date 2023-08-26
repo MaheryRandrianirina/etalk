@@ -37,7 +37,7 @@
     conversation. [v]
     - Régler le bug "doublon de message" [v]
     - Ajouter nodemon [v]
-    - Finir l'étape 3 d'inscription
+    - Finir l'étape 3 d'inscription [v]
     - Diminuer la hauteur du modal confirmation du logout
     - Ajouter l'oeil sur les inputs de mot de passe avec la possibilié de voir les MDP
     - Ajouter l'animation au congratsForSubscription

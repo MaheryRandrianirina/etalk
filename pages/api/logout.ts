@@ -5,7 +5,6 @@ export default withSessionRoute(Logout)
 
 async function Logout(req: NextApiRequest, res: NextApiResponse) {
     const session = req.session
-    console.log(req.body)
     if(session.user && req.method?.toLocaleLowerCase() === "post"){
         session.destroy()
 

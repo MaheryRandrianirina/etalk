@@ -16,10 +16,16 @@ export default function Menu({
     className: string,
     setShowMenu: Dispatch<SetStateAction<boolean>>
 }): JSX.Element {
+
     const [modal, setModal]: [
         modal: ModalData<"confirmation">,
         setModal: Dispatch<SetStateAction<ModalData<"confirmation">>>
-    ] = useState({show: false, type: "confirmation", data: ""} as ModalData<"confirmation">)
+    ] = useState({
+        show: false, 
+        type: "confirmation", 
+        data: "", 
+        className: ""
+    } as ModalData<"confirmation">)
 
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator('')
 
@@ -28,7 +34,6 @@ export default function Menu({
     }, [classnameForAnimation])
 
     const handleBodyClick = useCallback(()=>{
-        console.log("click body")
         document.body.addEventListener('click', (e) => {
           e.preventDefault()
     
@@ -47,7 +52,8 @@ export default function Menu({
             setModal({
                 show: true, 
                 type: "confirmation", 
-                data: `Vous êtes sûr de vouloir vous déconnecter ?`
+                data: `Vous êtes sûr de vouloir vous déconnecter ?`,
+                className: "logout_modal"
             });
 
             setClassnameForAnimation('visible');
@@ -117,7 +123,7 @@ export default function Menu({
           createPortal(
           <ButtonContext.Provider value={handleClickModalButtons}>
             <ConfirmationModal transitionendHandler={handleModalTransitionend} 
-              className={classnameForAnimation} data={modal.data}
+              className={ (modal.className ? modal.className + " " : " ") + classnameForAnimation } data={modal.data}
               onClickCloseButton={handleClickCloseButton}
             />
           </ButtonContext.Provider>, 

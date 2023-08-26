@@ -113,6 +113,13 @@ main {
         .modal {
             height: 145px;
         }
+        .modal.logout_modal {
+            height: 125px;
+            text-align: unset;
+            .message {
+                text-align: center;
+            }
+        }
     }
 }
 
