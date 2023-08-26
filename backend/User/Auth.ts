@@ -203,7 +203,11 @@ export default class Auth {
             const authUser = this.req.session.user
             if (authUser !== undefined && authUser.id !== null) {
                 try {
-                    await this.userTable.update({image: file})
+                    await this.userTable.update(
+                        { image: file }, 
+                        { id: this.req.session.userId as number }
+                    )
+
                     this.res.status(200).json({ success: true})
                 } catch (error) {
                     this.res.status(500).json({success: false, sqlError: error})
