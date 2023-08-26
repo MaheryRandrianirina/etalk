@@ -3,7 +3,7 @@ import { DataFromRegistration } from "./registration/dataFromRegistration"
 
 
 type RegistrationFormErrors = {
-    [key in keyof DataFromRegistration]?: key extends "sex" ? never : DataFromRegistration[key][]
+    [key in keyof DataFromRegistration]?: key extends "sex" ? never : DataFromRegistration[key]
 }
 
 type LoginFormErrors = {

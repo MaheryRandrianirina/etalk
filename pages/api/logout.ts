@@ -1,5 +1,6 @@
 import { withSessionRoute } from "../../backend/utilities/withSession";
 import { NextApiRequest, NextApiResponse } from "next"
+
 export default withSessionRoute(Logout)
 
 async function Logout(req: NextApiRequest, res: NextApiResponse) {

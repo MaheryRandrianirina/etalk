@@ -6,6 +6,8 @@ import {
   GetServerSidePropsResult,
   NextApiHandler,
 } from "next";
+import { NextHandler } from "next-connect";
+import { RouteHandler } from "next/dist/server/future/route-handlers/route-handler";
 import type { NextRequest, NextResponse } from "next/server";
 
 const sessionOptions = {

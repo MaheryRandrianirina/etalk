@@ -29,7 +29,7 @@ type UserUniqueProperties = {
     password_confirmation: string
 }
 
-type AuthUser = GetAway<User, ["created_at","updated_at", "remember_token", "password"]>
+type AuthUser = GetAway<User, ["created_at","updated_at", "email", "remember_token", "password"]>
 
 type ConversationOwners = {
     initializer: AuthUser,

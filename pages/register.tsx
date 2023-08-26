@@ -14,7 +14,7 @@ import CongratsForSubscription from "../components/congratsForSubscription";
 import styles from "../styles/sass/modules/buttons.module.scss";
 import Link from "next/link";
 import {UserIdentity, UserUniqueProperties} from "../types/user";
-import axios, {AxiosError} from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import {DataFromRegistration} from "../types/registration/dataFromRegistration";
 import { PostDataReturnType } from "../types/registration/dataBaseCommunication"
 import { RegistrationStepThreeProperties } from "../types/registration/registration";
@@ -26,21 +26,24 @@ import { getServerSideProps } from "./api/authenticated";
 const PostDataforRegistration: (step: number, data: UserIdentity | UserUniqueProperties | {image:File})=>Promise<PostDataReturnType> 
     = async (step, data): Promise<any> => {
     try {
-        let res
+        let res: AxiosResponse<{success: boolean}, unknown> | undefined
+
         if("image" in data){
-            const imageSizeAccepted: boolean = data.image.size <= 10 * 1024 *1024
+            const imageSizeAccepted: boolean = data.image.size <= 10*1024*1024
             if(imageSizeAccepted){
                 const formdata = new FormData()
                 formdata.append("profile_photo", data.image)
-                res = await axios.postForm("/api/register", formdata, {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
-                })
+
+                res = await axios.post("/api/upload", formdata) as AxiosResponse<{success: boolean}, unknown>
+                console.log(res)
+                if(res.data.success){
+                    console.log("success e")
+                }
             }else {
                 console.error("Le fichier est trop volumineux")
             }
         }else {
+            console.log(step)
             res = await axios.post("/api/register", {registrationStep: step, data: data})
         }
         
@@ -101,21 +104,21 @@ export default function Register(): JSX.Element {
 
         try {
             let res: PostDataReturnType | undefined
+
             if(registerStep === 1){
                 res = await PostDataforRegistration(registerStep, identity)
             }else if(registerStep === 2){
                 res = await PostDataforRegistration(registerStep, userUniqueProperties)
             }else if(registerStep === 3){
-                console.log("register step 3")
                 const activeButton = stepThreeProperties.activeButton
                 if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
-                    
-                    PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage}).then(res => {
-                        if("success" in res && res.success === true){
-                            setRegisterStep((s: number) => s + 1)
-                        }else {
-                            console.error("Echec de l'insertion de l'image. Veuillez réessayer.")
-                        }
+                    PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage})
+                        .then(res => {
+                            if("success" in res && res.success === true){
+                                setRegisterStep((s: number) => s + 1)
+                            }else {
+                                console.error("Echec de l'insertion de l'image. Veuillez réessayer.")
+                            }
                     })
                 }else if(activeButton === "ignore") {
                     setRegisterStep((s: number) => s + 1)
@@ -132,6 +135,7 @@ export default function Register(): JSX.Element {
         }catch(error){
             if(error instanceof AxiosError && error.response !== undefined){
                 const errorData = error.response.data
+
                 if("errors" in errorData){
                     setFormErrors(errorData.errors)
                 }else if("sqlError" in errorData){
@@ -141,15 +145,15 @@ export default function Register(): JSX.Element {
 
                         if(sqlError.includes("username")){
                             setFormErrors(e=>{
-                                return {...e, username: [message]}
+                                return {...e, username: message}
                             })
                         }else if(sqlError.includes('password')){
                             setFormErrors(e=>{
-                                return {...e, password: [message]}
+                                return {...e, password: message}
                             })
                         }else if(sqlError.includes('email')){
                             setFormErrors(e=>{
-                                return {...e, email: [message]}
+                                return {...e, email: message}
                             })
                         }
 
@@ -205,11 +209,6 @@ export default function Register(): JSX.Element {
                 }
             })
         }
-    }
-
-    const handleStepThreeButtonClick: MouseEventHandler<HTMLButtonElement> = (e: SyntheticEvent) => {
-        e.preventDefault()
-        
     }
 
     const chooseProfilPic: MouseEventHandler = (event: SyntheticEvent) => {

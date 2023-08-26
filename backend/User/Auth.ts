@@ -7,7 +7,7 @@ import PasswordGuard from "../security/password"
 import { User } from "../../types/user"
 import { File } from "buffer"
 import { LoginInputs } from "../../components/login"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import Str from "../Helpers/Str"
 import { MysqlError } from "mysql"
 
@@ -31,22 +31,20 @@ export default class Auth {
     }
 
     async registerUser() {
-        const body: BeforeStepThreeData | File = this.req.body
-
+        const body: BeforeStepThreeData = this.req.body 
+        console.log(this.req.body)
         if (this.res) {
-            if (body instanceof File === false) {
-                const { registrationStep, data } = body as BeforeStepThreeData
+            const { registrationStep, data } = body as BeforeStepThreeData
 
-                this.userValidator.setData(data)
+            this.userValidator.setData(data)
 
-                switch (registrationStep) {
-                    case 1:
-                        this.handleRegistrationStepOne(data)
-                        break
-                    case 2:
-                        this.handleRegistrationStepTwo(data)
-                        break
-                }
+            switch (registrationStep) {
+                case 1:
+                    this.handleRegistrationStepOne(data)
+                    break
+                case 2:
+                    this.handleRegistrationStepTwo(data)
+                    break
             }
             //this.handleRegistrationStepThree(d)
         }else {
@@ -170,7 +168,7 @@ export default class Auth {
                 username: user.username,
                 image: user.image,
                 is_online: true,
-                sex: user.sex
+                sex: user.sex,
             }
 
             await this.req.session.save()

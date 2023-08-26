@@ -36,12 +36,13 @@
     - Ajouter un opérateur "OR" dans le where sql. Ceci pour resoudre l'erreur "undefined sender_id" car on n'a fait que récupérer le message envoyé par l'utilisateur courant. Parfois l'utilisateur courant n'a pas encore envoyé de message d'autant plus qu'on devait récuperer le dernier message de la
     conversation. [v]
     - Régler le bug "doublon de message" [v]
+    - Ajouter nodemon [v]
     - Finir l'étape 3 d'inscription
+    - Ajouter l'oeil sur les inputs de mot de passe avec la possibilié de voir les MDP
     - Ajouter l'animation au congratsForSubscription
     - Regler l'heure des messages
     - Suppression des messages
-    - Recherche sur l'ajout de support d'emojis dans les applis web
-    - Ajouter le support d'amojis
+    - Ajouter le support d'amojis 
     - Recherche de conversation
     - Refaire une récupération via le websocket lors du retour après la création de conversation
     - Ajouter le statut en ligne de l'utilisateur dans le BDD lorsqu'il se connecte
