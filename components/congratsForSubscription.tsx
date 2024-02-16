@@ -19,7 +19,7 @@ export default function CongratsForSubscription({className}: {
         window.location.href = "/"
       }, timeOut)
     }
-  }, [classnameForAnimation])
+  }, [classnameForAnimation, setClassnameForAnimation])
 
   return (
     <div className={"congrats_for_subscription " + classnameForAnimation}>

@@ -29,10 +29,6 @@ export default function Menu({
 
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator('')
 
-    useEffect(() => {
-        handleBodyClick()
-    }, [classnameForAnimation])
-
     const handleBodyClick = useCallback(()=>{
         document.body.addEventListener('click', (e) => {
           e.preventDefault()
@@ -41,7 +37,12 @@ export default function Menu({
             setClassnameForAnimation("")
           }
         })
-      }, [classnameForAnimation])
+      }, [classnameForAnimation, setClassnameForAnimation])
+
+    useEffect(() => {
+        handleBodyClick()
+    }, [classnameForAnimation, handleBodyClick])
+
 
     const handleClickItem: MouseEventHandler<HTMLLIElement> = (e: MouseEvent) => {
         e.preventDefault()
@@ -94,7 +95,7 @@ export default function Menu({
     
             break
         }
-    }, [])
+    }, [modal.type, setClassnameForAnimation])
 
     const handleModalTransitionend: TransitionEventHandler = (e:TransitionEvent) => {
         e.preventDefault()

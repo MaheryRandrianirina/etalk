@@ -21,8 +21,7 @@ export default function Content({messages, showIntoBubble, user}: {
         if(classnameForAnimation.length === 0){
             setClassnameForAnimation("show_bubble") 
         }
-
-    }, [classnameForAnimation, messages])
+    }, [classnameForAnimation, messages, setClassnameForAnimation])
     
     return <div className={"conversation_content"}>
         <div className='messages_container'>

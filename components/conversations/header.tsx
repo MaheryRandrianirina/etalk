@@ -36,7 +36,7 @@ import { Join } from "../../types/Database";
 import BackIcon from "../icons/backIcon";
 import { ModalData } from "../../types/modal";
 
-const ConversationHeader = memo(({
+const ConversationHeader = ({
   addReceiver,
   adressee,
   user,
@@ -113,30 +113,11 @@ const ConversationHeader = memo(({
     modal: ""
   } as MultipleClassnameForAnimation<["profile", "modal"]>);
 
-  useEffect(() => {
-    const searchInput = document.querySelector(
-      ".search_input"
-    ) as HTMLInputElement;
-    
-    if (addReceiver) {
-      setSearchResultStyle({
-        left: `${searchInput.offsetLeft}px`,
-        width: `${searchInput.offsetWidth}px`,
-      });
-
-      if (receiver.length > 2) {
-        searchReceiver(receiver, user.id)
-          .then((users) => {
-            setFoundReceivers(users);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
-    }
-
-    handleBodyClick()    
-  }, [receiver, showAdresseeProfile, classnameForAnimation]);
+  const resetProfileClassnameForAnimation = useCallback(()=>{
+    setClassnameForAnimation(c => {
+      return {...c, profile: ""}
+    });
+  }, [])
 
   const handleBodyClick = useCallback(()=>{
     document.body.addEventListener('click', (e) => {
@@ -146,18 +127,12 @@ const ConversationHeader = memo(({
         resetProfileClassnameForAnimation()
       }
     })
-  }, [showAdresseeProfile, classnameForAnimation])
-  
-  const resetProfileClassnameForAnimation = useCallback(()=>{
-    setClassnameForAnimation(c => {
-      return {...c, profile: ""}
-    });
-  }, [classnameForAnimation.profile])
+  }, [classnameForAnimation, resetProfileClassnameForAnimation])
 
   const searchReceiver: (
     receiver: string, 
     sender_id: number
-  ) => Promise<GetAway<User, ["password"]>[]> = async (receiver, sender_id) => {
+  ) => Promise<GetAway<User, ["password"]>[]> = useCallback(async (receiver, sender_id) => {
     try {
       const res = await axios.get(`/api/user?name=${receiver}&sender_id=${sender_id}`);
       if (res.statusText === "OK") {
@@ -182,7 +157,40 @@ const ConversationHeader = memo(({
     } catch (e) {
       throw e;
     }
-  };
+  }, [chosenReceivers, user]);
+
+  useEffect(() => {
+    const searchInput = document.querySelector(
+      ".search_input"
+    ) as HTMLInputElement;
+    
+    if (addReceiver) {
+      setSearchResultStyle({
+        left: `${searchInput.offsetLeft}px`,
+        width: `${searchInput.offsetWidth}px`,
+      });
+
+      if (receiver.length > 2) {
+        searchReceiver(receiver, user.id)
+          .then((users) => {
+            setFoundReceivers(users);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+
+    handleBodyClick()    
+  }, [
+    receiver, 
+    showAdresseeProfile, 
+    classnameForAnimation,
+    addReceiver,
+    searchReceiver,
+    user,
+    handleBodyClick
+  ]);
 
   const handleChooseReceiver = (
     e: SyntheticEvent,
@@ -256,7 +264,7 @@ const ConversationHeader = memo(({
     setClassnameForAnimation(c => {
       return {...c, modal: ""}
     })
-  }, [classnameForAnimation.modal])
+  }, [setClassnameForAnimation])
 
   const handleClickBlockUntoggleBlockUserButton: MouseEventHandler<HTMLButtonElement> = async(e:MouseEvent) => {
     if(!adressee?.blocked){
@@ -291,7 +299,7 @@ const ConversationHeader = memo(({
     }
   }
 
-  const toggleBlockUser = async()=>{
+  const toggleBlockUser = useCallback(async()=>{
     try {
       const res = await axios.post("/api/user/block", {adressee_id: adressee?.id})
       if(res.statusText === "OK"){
@@ -306,7 +314,7 @@ const ConversationHeader = memo(({
         return {...bu, error: e as Error}
       })
     }
-  }
+  }, [adressee, blockUser])
 
   const handleClickModalButtons: MouseEventHandler<HTMLButtonElement> = useCallback(async (e: MouseEvent) => {
     e.preventDefault();
@@ -325,7 +333,7 @@ const ConversationHeader = memo(({
 
         break
     }
-  }, [adressee])
+  }, [modal, resetModalClassnameForAnimation, toggleBlockUser])
 
   const showResults = foundReceivers.length > 0 && receiver.length > 2;
 
@@ -396,6 +404,6 @@ const ConversationHeader = memo(({
         }
     </div>
   );
-})
+}
 
 export default ConversationHeader

@@ -9,6 +9,7 @@ import DateHelper from "../../lib/helpers/Date"
 import { AppSocketState } from "../../types/utils"
 import { UserIcon } from "../icons/UserIcon"
 import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator"
+import path, { dirname } from "path"
 
 export default function Conversation({currentUser, conversation, socket}: {
     currentUser: User,
@@ -51,11 +52,19 @@ export default function Conversation({currentUser, conversation, socket}: {
             setClassnameForAnimation("active")
         }
         
-    }, [])
+    }, [
+        setClassnameForAnimation, 
+        setConversationOwners, 
+        socket,
+        classnameForAnimation,
+        conversation,
+        conversationOwners,
+        message
+    ])
 
     const profilPic = conversationOwners?.adressee?.id !== currentUser.id ? 
         conversationOwners?.adressee.image : conversationOwners.initializer.image
-
+    
     return <Link href={{
         pathname: "/conversation/[adressee_id]/[conversation_id]",
         query: { adressee_id: conversationOwners?.adressee.id, conversation_id: conversation.id}
@@ -63,7 +72,7 @@ export default function Conversation({currentUser, conversation, socket}: {
         {message !== null && <div className={"conversation " + classnameForAnimation}>
             <div className="adressee">
                 {profilPic && profilPic.length > 0 ? 
-                    <Image src={profilPic} alt="profile pic" className="profile_pic"/> :
+                    <Image width={30} height={30} src={("/../../storage/public/user/profile_photo/"+ profilPic)} alt="profile pic" className="profile_pic"/> :
                     <UserIcon/>
                 }
                 

@@ -12,6 +12,7 @@ import { Dispatch,
     TransitionEventHandler, 
     useCallback, 
     useEffect, 
+    useMemo, 
     useState } from "react"
 import { ChosenReceiver, ConversationMessage, SetMessage } from "../../../types/conversation"
 import Data from "../../../lib/data"
@@ -38,10 +39,12 @@ export default function UserConversation({create, user, setCreateConversation, a
 }): JSX.Element {
     const router = useRouter()
 
-    const ids = {
-        adressee_id: parseInt(router.query.adressee_id as string),
-        conversation_id: parseInt(router.query.conversation_id as string)
-    }
+    const ids = useMemo(()=>{
+        return {
+            adressee_id: parseInt(router.query.adressee_id as string),
+            conversation_id: parseInt(router.query.conversation_id as string)
+        }
+    }, [router]);
 
     const [chosenReceivers, setChosenReceivers]: [
         chosenReceivers: ChosenReceiver[], 
@@ -95,7 +98,30 @@ export default function UserConversation({create, user, setCreateConversation, a
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
         
-        handleSocket()
+        const handleSocket = async()=>{
+            await axios.get("/api/socket")
+    
+            socket = io()
+    
+            socket.on('connect', () => {
+                console.log("socket connected")
+            })
+            
+            if(adressee && adressee.id){
+                socket.emit("get_conversation_messages", ids.conversation_id, adressee.id)
+    
+                socket.on('conversation_messages', (messages) => {
+                    setShowMessageIntoBubble(true)
+                    setConversationMessages(messages)
+                })
+            }
+    
+            socket.on('conversation_messages_error', (error)=>{
+                document.location.href = "/404"
+            })
+        }
+
+        handleSocket();
         
         if(create){
             setAnimate(true)
@@ -147,30 +173,16 @@ export default function UserConversation({create, user, setCreateConversation, a
             }
         }
            
-    }, [chosenReceivers, message, blockUser, adressee !== null])
+    }, [
+        create, 
+        disableButton, 
+        adressee, 
+        ids,
+        chosenReceivers, 
+        message, 
+        blockUser
+    ]);
 
-    const handleSocket = async()=>{
-        await axios.get("/api/socket")
-
-        socket = io()
-
-        socket.on('connect', () => {
-            console.log("socket connected")
-        })
-        
-        if(adressee && adressee.id){
-            socket.emit("get_conversation_messages", ids.conversation_id, adressee.id)
-
-            socket.on('conversation_messages', (messages) => {
-                setShowMessageIntoBubble(true)
-                setConversationMessages(messages)
-            })
-        }
-
-        socket.on('conversation_messages_error', (error)=>{
-            document.location.href = "/404"
-        })
-    }
 
     const handleSubmitForm: MouseEventHandler<HTMLButtonElement> = (e:FormEvent<HTMLButtonElement>)=>{
         e.preventDefault()
@@ -212,7 +224,7 @@ export default function UserConversation({create, user, setCreateConversation, a
             document.location.href = "/"
         }
 
-    }, [animate, adressee])
+    }, [setAnimate, setBackwarded, create, setCreateConversation])
 
     const handleTransitionend: TransitionEventHandler<HTMLDivElement> = (e:TransitionEvent)=>{
         e.preventDefault()

@@ -84,42 +84,42 @@ export default function Home({user}: {
   const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
   
   useEffect(()=>{
-      handleSocket()
+        const handleSocket = async()=>{
+          try {
+            await axios.get("/api/socket")
+
+            socket = io()
+            
+            setSocket(socket)
+            
+            socket.on('connect', ()=>{
+              console.log("connected")
+            })
+            
+            socket.emit("get_conversations")
+            
+            if(backwarded){
+              socket.emit("get_conversations")
+            }
+
+            socket.on('conversations', (data)=>{
+              setConversations(data)
+            })
+            
+            return null
+          }catch(e){
+            console.error(e)
+          }
+      }
+
+      handleSocket();
       
       if(showMenu){
         setClassnameForAnimation("active")
       }else {
         setClassnameForAnimation("")
       }
-  }, [showMenu, backwarded])
-
-  const handleSocket = async()=>{
-      try {
-        await axios.get("/api/socket")
-
-        socket = io()
-        
-        setSocket(socket)
-        
-        socket.on('connect', ()=>{
-          console.log("connected")
-        })
-        
-        socket.emit("get_conversations")
-        
-        if(backwarded){
-          socket.emit("get_conversations")
-        }
-
-        socket.on('conversations', (data)=>{
-          setConversations(data)
-        })
-        
-        return null
-      }catch(e){
-        console.error(e)
-      }
-  }
+  }, [showMenu, backwarded, setClassnameForAnimation])
 
   const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
       event.preventDefault()

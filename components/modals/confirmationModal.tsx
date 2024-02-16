@@ -22,7 +22,7 @@ const ConfirmationModal: FC<{
     >
         <p className='message'>{data}</p>
         <div className="buttons">
-            <SecondaryButton className='ok'>Oui, j'en suis sûr</SecondaryButton>
+            <SecondaryButton className='ok'>Oui, j&apos;en suis sûr</SecondaryButton>
             <PrimaryButton className='cancel'>Annuler</PrimaryButton>
         </div>
     </Modal>

@@ -13,7 +13,7 @@ const Profile: FC<{
     transitionendHandler: TransitionEventHandler<HTMLDivElement>,
     className: string,
     onClickCloseButton: MouseEventHandler<SVGElement>
-}> = memo(({
+}> = ({
     adressee, 
     blockUserSuccess,
     transitionendHandler, 
@@ -55,6 +55,6 @@ const Profile: FC<{
             
         </div>
     </div>
-})
+}
 
 export default Profile

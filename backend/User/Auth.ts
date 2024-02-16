@@ -172,6 +172,7 @@ export default class Auth {
                 image: user.image,
                 is_online: true,
                 sex: user.sex,
+                email: user.email
             }
 
             await this.req.session.save()
@@ -208,12 +209,15 @@ export default class Auth {
                         { id: this.req.session.userId as number }
                     )
 
-                    this.res.status(200).json({ success: true})
+                    this.res.status(200).json({ success: true })
                 } catch (error) {
                     this.res.status(500).json({success: false, sqlError: error})
                 }
             } else {
-                this.res.status(500).json({ success: false, user: "Vous devez être connecté pour pouvoir faire cette action." })
+                this.res.status(500).json({ 
+                    success: false, 
+                    user: "Vous devez être connecté pour pouvoir faire cette action." 
+                })
             } 
         }else {
             throw Error(this.errorMessage.responseNull)
@@ -257,7 +261,6 @@ export default class Auth {
                             .json({success: false, errors: {username: "Aucun utilisateur ne possède ce pseudo"}})
                     }
                 }catch(e){
-                    
                     const error = e as MysqlError | Error
                     if("sqlMessage" in error){
                         this.res

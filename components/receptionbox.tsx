@@ -61,7 +61,7 @@ export default function ReceptionBox({
     if (backwarded) {
       setBackwarded(false);
     }
-  }, []);
+  }, [backwarded, setBackwarded]);
 
   const handleTransitionend: TransitionEventHandler<HTMLDivElement> = (
     e: TransitionEvent
