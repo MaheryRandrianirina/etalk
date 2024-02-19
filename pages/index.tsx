@@ -103,6 +103,7 @@ export default function Home({user}: {
             }
 
             socket.on('conversations', (data)=>{
+              console.log("conversations", data)
               setConversations(data)
             })
             

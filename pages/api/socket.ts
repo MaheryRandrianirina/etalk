@@ -52,6 +52,7 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
 
         io.on('connection', (socket)=>{
             socket.on('get_conversations', async()=>{
+                console.log("get conversations")
                 try {
                     const conversationTable = new ConversationTable<Conversation>()
                     const conversations = await conversationTable

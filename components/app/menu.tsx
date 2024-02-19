@@ -120,7 +120,7 @@ export default function Menu({
             <li className="item logout" onClick={handleClickItem}>Déconnexion</li>
         </ul>
         
-        {modal.show && (modal.type === "confirmation" ? 
+        {(modal.show && modal.type === "confirmation") && 
           createPortal(
           <ButtonContext.Provider value={handleClickModalButtons}>
             <ConfirmationModal transitionendHandler={handleModalTransitionend} 
@@ -128,7 +128,7 @@ export default function Menu({
               onClickCloseButton={handleClickCloseButton}
             />
           </ButtonContext.Provider>, 
-          document.querySelector('main') as HTMLElement) : "")
+          document.querySelector('main') as HTMLElement)
         }
     </div>
 }
