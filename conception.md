@@ -41,7 +41,10 @@
     - Diminuer la hauteur du modal confirmation du logout [v]
     - Ajouter l'oeil sur les inputs de mot de passe avec la possibilié de voir les MDP [v]
     - Ajouter l'animation au congratsForSubscription [v]
+    - Régler la récupération des messages
+    - Déconnecter l'utilisateur après un certains moment s'il a coché le 'se souvenir de moi'
     - Installer react-test-renderer, @testing-library/react
+    - Installer date-fns
     - Regler l'heure des messages
     - Suppression des messages
     - Ajouter le support d'amojis 

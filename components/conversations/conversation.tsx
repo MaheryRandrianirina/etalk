@@ -72,7 +72,7 @@ export default function Conversation({currentUser, conversation, socket}: {
         {message !== null && <div className={"conversation " + classnameForAnimation}>
             <div className="adressee">
                 {profilPic && profilPic.length > 0 ? 
-                    <Image width={30} height={30} src={("/../../storage/public/user/profile_photo/"+ profilPic)} alt="profile pic" className="profile_pic"/> :
+                    <Image width={30} height={30} src={("../../storage/public/user/profile_photo/"+ profilPic)} alt="profile pic" className="profile_pic"/> :
                     <UserIcon/>
                 }
                 

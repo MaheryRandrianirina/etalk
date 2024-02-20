@@ -23,9 +23,13 @@ export interface SocketWithIO extends NetSocket {
     server: SocketServer
 }
 
+export interface ResponseWithSocket<T> extends NextApiResponse<T>{
+    socket: SocketWithIO
+}
+
 export default withSessionRoute(socketHandler)
 
-function socketHandler (req: NextApiRequest, res: NextApiResponse){
+function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
     let {user} = req.session
     
     if(!user){
@@ -52,7 +56,6 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
 
         io.on('connection', (socket)=>{
             socket.on('get_conversations', async()=>{
-                console.log("get conversations")
                 try {
                     const conversationTable = new ConversationTable<Conversation>()
                     const conversations = await conversationTable
@@ -60,9 +63,8 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
                         .join({'conversation_user': {alias: "cu", on: "c.id = cu.conversation_id"}})
                         .where<ConversationUser>({'cu.user_id': u.id})
                         .get() as Conversation[]
-
-                    socket.broadcast.emit('conversations', conversations)
                     
+                    socket.emit('conversations', conversations)
                 }catch(e){
                     console.error(e)
                 }
@@ -83,7 +85,11 @@ function socketHandler (req: NextApiRequest, res: NextApiResponse){
                     .limit(1)
                     .get() as Message[]
                     
-                    const [user] = await userTable.find(message.sender_id) as GetAway<User, ["created_at", "updated_at", "remember_token", "password"]>[]
+                    const [user] = await userTable
+                        .find(message.sender_id) as GetAway<
+                                User, 
+                                ["created_at", "updated_at", "remember_token", "password"]
+                            >[]
                     
                     socket.emit('conversation_last_message', {...message, sender: user})
                 }catch(e){

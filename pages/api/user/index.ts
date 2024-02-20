@@ -1,14 +1,14 @@
 import UserTable from "../../../backend/database/tables/UserTable";
 import { withSessionRoute } from "../../../backend/utilities/withSession";
 import { NextApiRequest, NextApiResponse } from "next/types";
-import { User } from "../../../types/user";
+import { User as UserType } from "../../../types/user";
 import { ConversationUser } from "../../../types/Database";
 import ConversationUserTable from "../../../backend/database/tables/ConversationUserTable";
 
 export default withSessionRoute(User)
 
 async function User(req: NextApiRequest, res: NextApiResponse){
-    const userTable = new UserTable<User>()
+    const userTable = new UserTable<UserType>()
     const conversationUserTable = new ConversationUserTable<ConversationUser>()
 
     const {user} = req.session
@@ -23,14 +23,14 @@ async function User(req: NextApiRequest, res: NextApiResponse){
                 ["username", "firstname", "name", "id"], 
                 ["username", "name", "firstname"],
                 { values: [`%${name}%`, `%${name}%`, `%${name}%`], operator: "OR"}
-            ) as User[]
+            ) as UserType[]
             
             const authUserConversations = await conversationUserTable.where<undefined>(
                 ["user_id"],
                 [user.id]
             ).get() as ConversationUser[]
 
-            let usersWithNoConversationWithAuthUser: User[] = [];
+            let usersWithNoConversationWithAuthUser: UserType[] = [];
             
             for(let i = 0; i < users.length; i++){
                 const foundUser = users[i];
@@ -63,7 +63,7 @@ async function User(req: NextApiRequest, res: NextApiResponse){
                 "id", "name", "username", 
                 "firstname", "email", "sex", 
                 "image", "is_online"
-            ]).find(parseInt(id)) as User[]
+            ]).find(parseInt(id)) as UserType[]
 
             res.status(200).json({success: true, user: foundUser})
         }else {

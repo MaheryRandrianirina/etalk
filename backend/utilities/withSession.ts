@@ -5,10 +5,12 @@ import {
   GetServerSidePropsContext,
   GetServerSidePropsResult,
   NextApiHandler,
+  NextApiRequest,
 } from "next";
 import { NextHandler } from "next-connect";
 import { RouteHandler } from "next/dist/server/future/route-handlers/route-handler";
 import type { NextRequest, NextResponse } from "next/server";
+import { ResponseWithSocket } from "../../pages/api/socket";
 
 const sessionOptions = {
   password: process.env.COOKIE_PASSWORD !== undefined ? process.env.COOKIE_PASSWORD : "cookie_name",
@@ -19,8 +21,10 @@ const sessionOptions = {
   },
 };
 
-export function withSessionRoute(handler: NextApiHandler) {
-  return withIronSessionApiRoute(handler, sessionOptions);
+type CustomApiHandler<T> = (req: NextApiRequest, res: ResponseWithSocket<T>) => unknown | Promise<unknown>
+
+export function withSessionRoute(handler: CustomApiHandler<any>) {
+  return withIronSessionApiRoute(handler as NextApiHandler, sessionOptions);
 }
 
 export function withSessionSsr<
