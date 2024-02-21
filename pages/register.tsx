@@ -128,7 +128,10 @@ export default function Register(): JSX.Element {
             }else if(registerStep === 3){
                 const activeButton = stepThreeProperties.activeButton
                 if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
-                    res = await PostDataforRegistration(registerStep, {image: stepThreeProperties.chosenImage})
+                    res = await PostDataforRegistration(
+                        registerStep, 
+                        {image: stepThreeProperties.chosenImage}
+                    )
                 }else if(activeButton === "ignore") {
                     setRegisterStep((s: number) => s + 1)
                 }

@@ -10,7 +10,7 @@ const handle = app.getRequestHandler()
 app.prepare()
     .then(() => {
         const storage = multer.diskStorage({
-            destination: "storage/public/user/profile_photo/",
+            destination: "/public/images/user/profile_photo/",
             filename: function (req, file, cb) {
               const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
               cb(null, file.originalname)

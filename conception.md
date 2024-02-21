@@ -46,6 +46,7 @@
     - Installer react-test-renderer, @testing-library/react
     - Installer date-fns
     - Regler l'heure des messages
+    - Réduire les rerendus
     - Suppression des messages
     - Ajouter le support d'amojis 
     - Recherche de conversation

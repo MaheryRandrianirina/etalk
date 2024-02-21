@@ -10,6 +10,7 @@ import { AppSocketState } from "../../types/utils"
 import { UserIcon } from "../icons/UserIcon"
 import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator"
 import path, { dirname } from "path"
+import { profilePhotoPath } from "../../lib/func/path"
 
 export default function Conversation({currentUser, conversation, socket}: {
     currentUser: User,
@@ -72,7 +73,7 @@ export default function Conversation({currentUser, conversation, socket}: {
         {message !== null && <div className={"conversation " + classnameForAnimation}>
             <div className="adressee">
                 {profilPic && profilPic.length > 0 ? 
-                    <Image width={30} height={30} src={("../../storage/public/user/profile_photo/"+ profilPic)} alt="profile pic" className="profile_pic"/> :
+                    <Image width={30} height={30} src={profilePhotoPath(profilPic)} alt="profile pic" className="profile_pic"/> :
                     <UserIcon/>
                 }
                 

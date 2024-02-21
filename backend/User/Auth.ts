@@ -49,7 +49,6 @@ export default class Auth {
                     this.handleRegistrationStepThree(data.file)
                     break
             }
-            //this.handleRegistrationStepThree(d)
         }else {
             throw Error(this.errorMessage.responseNull)
         }
@@ -101,7 +100,6 @@ export default class Auth {
                 'sex': userIdentity.sex
             }) as number
             return userid
-            
         }catch(err){
             throw err
         }
