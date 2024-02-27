@@ -40,13 +40,13 @@ export default class Auth {
 
             switch (registrationStep) {
                 case 1:
-                    this.handleRegistrationStepOne(data)
+                    await this.handleRegistrationStepOne(data)
                     break
                 case 2:
-                    this.handleRegistrationStepTwo(data)
+                    await this.handleRegistrationStepTwo(data)
                     break
                 case 3:
-                    this.handleRegistrationStepThree(data.file)
+                    await this.handleRegistrationStepThree(data.file)
                     break
             }
         }else {
@@ -75,6 +75,7 @@ export default class Auth {
                         this.res.status(200).json({success: true}) 
                     }catch(e){
                         const error = e as Error
+                        console.error(error);
                         this.res.status(500).json({success: false, sqlError: error.message})
                     }
                 }else {
@@ -84,6 +85,7 @@ export default class Auth {
                 throw new Error(this.errorMessage.responseNull)
             }
         }catch(e){
+            console.error(e)
             throw e
         }
             

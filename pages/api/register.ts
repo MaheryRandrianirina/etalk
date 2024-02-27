@@ -6,11 +6,10 @@ import { RouteHandler } from "next/dist/server/future/route-handlers/route-handl
 export default withSessionRoute(Register) 
 
 async function Register(req: NextApiRequest, res: NextApiResponse) {
-    
     if(req.method === "POST"){
         try {
             const auth = new Auth(req, res)
-            auth.registerUser()
+            await auth.registerUser()
         }catch(e){
             console.error(e)
         }
