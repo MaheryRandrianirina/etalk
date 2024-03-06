@@ -6,10 +6,10 @@ export default withSessionRoute(Logout)
 async function Logout(req: NextApiRequest, res: NextApiResponse) {
     const session = req.session
     if(session.user && req.method?.toLocaleLowerCase() === "post"){
-        session.destroy()
+        session.destroy();
 
-        res.status(200).json({success: true})
+        res.status(200).json({success: true});
     }else {
-        res.status(301).json({success: false, forbidden: true})
+        res.status(301).json({success: false, forbidden: true});
     }
 }

@@ -1,5 +1,4 @@
 import { Dispatch, MouseEvent, MouseEventHandler, SetStateAction, TransitionEvent, TransitionEventHandler, useCallback, useEffect, useState } from "react"
-import CloseIcon from "../icons/closeIcon"
 import BackIcon from "../icons/backIcon"
 import { ModalData } from "../../types/modal"
 import { createPortal } from "react-dom"
@@ -69,7 +68,7 @@ export default function Menu({
 
     const handleClickModalButtons: MouseEventHandler<HTMLButtonElement> = useCallback(async (e: MouseEvent) => {
         e.preventDefault();
-        e.stopPropagation()
+        e.stopPropagation();
         
         switch(modal.type) {
           case "confirmation":
@@ -80,7 +79,7 @@ export default function Menu({
                     const res = await data
                         .post("/api/logout", {_csrf: await (new CsrfClass())
                             .generate()}) as {data: {success: boolean}}
-                            
+                    
                     if(res.data.success){
                         document.location.reload()
                     }
