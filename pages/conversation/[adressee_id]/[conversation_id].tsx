@@ -11,24 +11,24 @@ import { Dispatch,
     TransitionEvent, 
     TransitionEventHandler, 
     useCallback, 
+    useContext, 
     useEffect, 
     useMemo, 
     useState } from "react"
 import { ChosenReceiver, ConversationMessage, SetMessage } from "../../../types/conversation"
 import Data from "../../../lib/data"
 import { withSessionSsr } from "../../../backend/utilities/withSession"
-import { AppSocketState } from "../../../types/utils"
-import {io} from "socket.io-client"
 import axios, { AxiosError } from "axios"
 import { Join } from "../../../types/Database"
+import { CustomMessage } from "../../../types/ably"
+import { useChannel } from "ably/react"
+import { useCallAblyApi } from "../../../components/hooks"
 
 
 export type BlockUser = {
     success: boolean,
     error: Error | null
 }
-
-let socket: AppSocketState
 
 export default function UserConversation({create, user, setCreateConversation, animation, setBackwarded}: {
     create?: true,
@@ -85,12 +85,17 @@ export default function UserConversation({create, user, setCreateConversation, a
         adressee: Join<AuthUser, {blocked: boolean}> | null,
         setAdresse: Dispatch<SetStateAction<Join<AuthUser, {blocked: boolean}> | null>>
     ] = useState(null as Join<AuthUser, {blocked: boolean}> | null)
-
     
     const [blockUser, setBlockUser]: [
         blockUser: BlockUser, 
         setBlockUser: Dispatch<SetStateAction<BlockUser>>
-    ] = useState({success: false, error: null} as BlockUser)
+    ] = useState({success: false, error: null} as BlockUser);
+
+    const [calledAblyApi, setCalledAblyApi] = useCallAblyApi();
+
+    const {channel} = useChannel('chat_room', ()=>{
+        console.log('use chat_room channel')
+    });
 
     useEffect(()=>{
         document.title = "Conversation"
@@ -98,30 +103,40 @@ export default function UserConversation({create, user, setCreateConversation, a
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
         
-        const handleSocket = async()=>{
-            await axios.get("/api/socket")
-    
-            socket = io()
-    
-            socket.on('connect', () => {
-                console.log("socket connected")
-            })
+        const handleAblyConnection = async()=>{
+            if(!calledAblyApi){
+                try {
+                    await axios.get("/api/ably");
+                    setCalledAblyApi(true);
+                }catch(e){
+                    console.error(e);
+                }
+                
+            }
             
+            
+            if(channel === null){
+                return;
+            }
+
             if(adressee && adressee.id){
-                socket.emit("get_conversation_messages", ids.conversation_id, adressee.id)
+                channel.publish("get_conversation_messages", JSON.stringify({
+                    conversation_id: ids.conversation_id, 
+                    adressee_id: adressee.id
+                }));
     
-                socket.on('conversation_messages', (messages) => {
+                channel.subscribe('conversation_messages', (message: CustomMessage<ConversationMessage[]>) => {
                     setShowMessageIntoBubble(true)
-                    setConversationMessages(messages)
-                })
+                    setConversationMessages(message.data)
+                });
             }
     
-            socket.on('conversation_messages_error', (error)=>{
+            channel.subscribe('conversation_messages_error', (error)=>{
                 document.location.href = "/404"
-            })
+            });
         }
 
-        handleSocket();
+        handleAblyConnection();
         
         if(create){
             setAnimate(true)
@@ -180,7 +195,10 @@ export default function UserConversation({create, user, setCreateConversation, a
         ids,
         chosenReceivers, 
         message, 
-        blockUser
+        blockUser,
+        channel,
+        calledAblyApi,
+        setCalledAblyApi
     ]);
 
 
@@ -199,12 +217,16 @@ export default function UserConversation({create, user, setCreateConversation, a
             })
             
         }else if(!create && message){
-            socket?.emit("message", ids.conversation_id, {message: message, adressee_id: ids.adressee_id})
+            channel?.publish("message", JSON.stringify({
+                conversation_id: ids.conversation_id,
+                message: message, 
+                adressee_id: ids.adressee_id
+            }))
 
-            socket?.on('conversation_messages', (messages)=>{
+            channel?.subscribe('conversation_messages', (message)=>{
                 setShowMessageIntoBubble(true)
 
-                setConversationMessages(messages)
+                setConversationMessages(message.data)
 
                 setMessage(m => {
                     return {...m, texto: ""}

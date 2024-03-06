@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon server/index.js",
+    "dev": "concurrently \"next dev\" \"nodemon server/index.js\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -61,6 +61,7 @@
     "react-dom": "18.2.0",
     "sass": "^1.60.0",
     "sass-loader": "^13.2.2",
+    "sharp": "^0.33.2",
     "simple-peer": "^9.11.1",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
@@ -74,6 +75,7 @@
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.56",
     "@types/react-dom": "18.0.11",
+    "concurrently": "^8.2.2",
     "cypress": "^12.9.0",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
@@ -81,5 +83,10 @@
     "nodemon": "^2.0.20",
     "ts-jest": "^29.1.0",
     "typescript": "5.0.3"
+  },
+  "overrides": {
+    "cacheable-request": {
+      "keyv": "npm:@keyvhq/core@~1.6.6"
+    }
   }
 }

@@ -1,21 +1,23 @@
 import Image from "next/image"
-import ProfilPic from "../../public/20200823_120127_0.jpg"
 import Link from "next/link"
 import { AuthUser, ConversationOwners, User } from "../../types/user"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { Conversation as UserConversation, Join } from "../../types/Database"
 import { ConversationMessage, SetMessage } from "../../types/conversation"
 import DateHelper from "../../lib/helpers/Date"
-import { AppSocketState } from "../../types/utils"
 import { UserIcon } from "../icons/UserIcon"
 import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator"
-import path, { dirname } from "path"
 import { profilePhotoPath } from "../../lib/func/path"
+import { useChannel } from "ably/react"
+import axios from "axios"
+import { CustomMessage } from "../../types/ably"
+import { useCallAblyApi } from "../hooks"
+import { formatDistanceToNow } from "date-fns"; 
+import { fr } from "date-fns/locale"
 
-export default function Conversation({currentUser, conversation, socket}: {
+export default function Conversation({currentUser, conversation}: {
     currentUser: User,
-    conversation: UserConversation,
-    socket: AppSocketState
+    conversation: UserConversation
 }): JSX.Element {
 
     const [message, setMessage]: [
@@ -26,28 +28,49 @@ export default function Conversation({currentUser, conversation, socket}: {
     const [conversationOwners, setConversationOwners]: [
         conversationOwners: ConversationOwners | null,
         setConversationOwners: Dispatch<SetStateAction<ConversationOwners | null>>
-    ] = useState(null as ConversationOwners | null)
+    ] = useState(null as ConversationOwners | null);
+
+    const [calledAblyApi, setCalledAblyApi] = useCallAblyApi();
 
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
 
+    const {channel} = useChannel('chat_messages', "conversation_last_message", message => {
+        setMessage(message.data)
+    });
+
     useEffect(()=>{
-        if(socket){
-            if(message === null){
-                socket.emit("get_conversation_last_message", conversation.id)
+        const handleAblyConnexion = async()=>{
+            if(!calledAblyApi){
+                try {
+                    await axios.get("/api/ably");
+                    setCalledAblyApi(true);
+                }catch(e){
+                    console.error(e)
+                }
                 
-                socket.on('conversation_last_message', (message)=>{
-                    setMessage(message)
-                })
+            }
+
+            if(message === null){
+                channel.publish("get_conversation_last_message", `${conversation.id}`)
             }
             
             if(conversationOwners === null){
-                socket.emit('get_conversation_owners', conversation.initializer_id, conversation.adressee_id)
-
-                socket.on('conversation_owners', owners=>{
-                    setConversationOwners(owners)
-                })
-            } 
+                try {
+                    channel.publish('get_conversation_owners', JSON.stringify({
+                        initializer_id : conversation.initializer_id, 
+                        adressee_id :conversation.adressee_id
+                    }))
+        
+                    channel.subscribe('conversation_owners', (message: CustomMessage<ConversationOwners|null>) =>{
+                        setConversationOwners(message.data)
+                    })
+                }catch(e){
+                    console.error(e)
+                }
+                
+            }
         }
+        handleAblyConnexion();
 
         if(classnameForAnimation.length === 0){
             setClassnameForAnimation("active")
@@ -56,11 +79,13 @@ export default function Conversation({currentUser, conversation, socket}: {
     }, [
         setClassnameForAnimation, 
         setConversationOwners, 
-        socket,
+        message,
         classnameForAnimation,
         conversation,
         conversationOwners,
-        message
+        channel,
+        calledAblyApi,
+        setCalledAblyApi
     ])
 
     const profilPic = conversationOwners?.adressee?.id !== currentUser.id ? 
@@ -87,7 +112,10 @@ export default function Conversation({currentUser, conversation, socket}: {
                     : </span><span className="content">{message.texto}
                 </span>
             </div>
-            <div className="datetime">{(new DateHelper()).format(message.created_at as Date)}</div>
+            <div className="datetime">{(formatDistanceToNow(new Date(conversation.created_at), {
+                addSuffix: false,
+                locale: fr
+            }))}</div>
         </div>}
     </Link>
 }

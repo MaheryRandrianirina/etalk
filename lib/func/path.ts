@@ -1,5 +1,5 @@
 function profilePhotoPath(file: string) {
-    return "/storage/public/user/profile_photo/" + file;  
+    return "/images/user/profile_photo/" + file;  
 }
 
 export {

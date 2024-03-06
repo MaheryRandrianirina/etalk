@@ -261,7 +261,8 @@ export default class Auth {
                             .json({success: false, errors: {username: "Aucun utilisateur ne possède ce pseudo"}})
                     }
                 }catch(e){
-                    const error = e as MysqlError | Error
+                    const error = e as MysqlError | Error;
+                    console.error(error)
                     if("sqlMessage" in error){
                         this.res
                         .status(500)
