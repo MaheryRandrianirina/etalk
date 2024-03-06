@@ -111,9 +111,7 @@ export default function UserConversation({create, user, setCreateConversation, a
                 }catch(e){
                     console.error(e);
                 }
-                
             }
-            
             
             if(channel === null){
                 return;

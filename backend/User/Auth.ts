@@ -248,8 +248,8 @@ export default class Auth {
                             .authenticatedUser(loginData.password, user, loginData.remember_me)
                         if(authenticatedUser){
                             this.res
-                                .status(200)
-                                .json({success: true, redirection:{redirected: true, url: "/"}})
+                                .status(302)
+                                .redirect("/");
                         }else {
                             this.res
                                 .status(500)

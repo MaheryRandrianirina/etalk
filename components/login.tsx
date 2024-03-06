@@ -65,15 +65,15 @@ export default function Login(): JSX.Element {
         e.preventDefault();
 
         try {
-            const data = await PostLoginData(inputsValues) as {
-                success: true, message?: string, 
-                redirection?: {redirected: boolean, url: string}
-            }
-
-            if("redirection" in data && data.redirection?.redirected === true){
+            const data = await PostLoginData(inputsValues) /* as {
+                 success: true, message?: string, 
+                 redirection?: {redirected: boolean, url: string}
+             }
+            if(data.redirection?.redirected === true){
                 document.location.href = data.redirection.url
-            }
-        
+            }else {
+                console.error("redirection", data.redirection)
+            }*/        
         }catch(e){
             const error = e as AxiosError
             const errorResponse = error.response
