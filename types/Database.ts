@@ -1,6 +1,7 @@
 import { User } from "./user"
+import { RowDataPacket } from "mysql2";
 
-type Conversation = {
+interface Conversation extends RowDataPacket {
     id: number,
     initializer_id: number,
     adressee_id: number
@@ -8,7 +9,7 @@ type Conversation = {
     updated_at: Date
 }
 
-type Message = {
+interface Message extends RowDataPacket {
     id: number,
     texto: string,
     file: string,
@@ -20,29 +21,29 @@ type Message = {
     receiver_id: number,
 }
 
-type Calls = {
+interface Calls extends RowDataPacket {
     id: number,
     created_at: Date,
     caller_id: number,
     called_id: number
 }
 
-type UserCalls = {
+interface UserCalls extends RowDataPacket {
     user_id: number,
     call_id: number
 }
 
-type ConversationUser = {
+interface ConversationUser extends RowDataPacket {
     conversation_id: number,
     user_id: number
 }
 
-type UserFriends = {
+interface UserFriends extends RowDataPacket {
     user_id: number,
     friend_id: number
 }
 
-type BlockedUsers = {
+interface BlockedUsers extends RowDataPacket {
     user_id: number,
     blocked_user_id: number
 }

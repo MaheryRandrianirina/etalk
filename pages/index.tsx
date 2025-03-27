@@ -2,8 +2,8 @@ import Head from 'next/head'
 import ReceptionBox from '../components/receptionbox'
 import { withSessionSsr } from '../backend/utilities/withSession'
 import { User } from '../types/user'
-import {NextResponse} from "next/server"
-import type {NextApiRequest, NextApiResponse} from "next"
+import { NextResponse } from "next/server"
+import type { NextApiRequest, NextApiResponse } from "next"
 import Auth from '../backend/User/Auth'
 import { ChangeEvent, ChangeEventHandler, Context, Dispatch, EventHandler, Fragment, MouseEvent, MouseEventHandler, SetStateAction, SyntheticEvent, createContext, useCallback, useEffect, useState } from 'react'
 import UserConversation from './conversation/[adressee_id]/[conversation_id]'
@@ -15,8 +15,6 @@ import Footer from '../components/app/footer'
 import Opening from '../components/loaders/opening'
 import axios from 'axios'
 import { UserConversations } from '../types/conversation'
-// import session from 'express-session'
-// import user from './api/user'
 import Menu from '../components/app/menu'
 import useClassnameAnimator from '../lib/hooks/useClassnameAnimator';
 import { useChannel, useConnectionStateListener } from "ably/react";

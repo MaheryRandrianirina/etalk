@@ -1,7 +1,8 @@
 import { Join } from "./Database"
-import { GetAway, Undefine } from "./utils"
+import { GetAway } from "./utils"
+import { RowDataPacket } from "mysql2";
 
-type User = {
+interface User extends RowDataPacket {
     "id": number,
     "name": string,
     "firstname": string,
@@ -16,14 +17,14 @@ type User = {
     "remember_token": string
 }
 
-type UserIdentity = {
+interface UserIdentity extends RowDataPacket {
     name: string,
     firstname: string,
     username: string,
     sex: "man" | "woman"
 }
 
-type UserUniqueProperties = {
+interface UserUniqueProperties extends RowDataPacket {
     email: string,
     password: string,
     password_confirmation: string
