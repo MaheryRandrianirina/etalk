@@ -1,9 +1,9 @@
-import { Connection, OkPacket } from "mysql"
 import Query from "../Query"
 import connection from "../mysqlConnection"
 import { ColumnsToFill, Data, Entity, Join, JoinArray, Orders, Prefix, PrefixArray, QueryConditions, TableColumns, UnknownQueryConditions } from "../../../types/Database"
 import { User } from "../../../types/user"
 import Str from "../../Helpers/Str"
+import { Connection, FieldPacket, OkPacket, RowDataPacket } from "mysql2/promise"
 
 export default class Table<T extends Entity> {
 
@@ -48,7 +48,7 @@ export default class Table<T extends Entity> {
         columns: ColumnsToFill<T>, 
         conditions?: ColumnsToFill<T> | (keyof ColumnsToFill<T>)[]
     ): Promise<Type>{
-        return new Promise((resolve, reject)=>{
+        return new Promise(async(resolve, reject)=>{
             let arrayOfColumns: (keyof ColumnsToFill<T>)[] = []
             let data: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[] = []
 
@@ -82,11 +82,9 @@ export default class Table<T extends Entity> {
 
             const queryString: string = this.query.__toString() 
             
-            this.getMysqlConnection().query(queryString, data, (err, results)=>{
-                if(err) reject(err)
-
-                const res = results as OkPacket
-                
+            try {
+                const res = await this.getMysqlConnection().query(queryString, data);
+    
                 if(type === "insert" 
                     && res !== undefined 
                     && "insertId" in res
@@ -95,8 +93,9 @@ export default class Table<T extends Entity> {
                 }else {
                     resolve(true as Type)
                 }
-                
-            })
+            }catch(e){
+                reject(e);
+            }
         })
     }
 
@@ -112,8 +111,8 @@ export default class Table<T extends Entity> {
         return this.queryTypeInsertion<true>('update', columns, conditions)
     }
 
-    find(id: number): Promise<Data<T>[]> {
-        return new Promise((resolve, reject)=>{
+    find(id: number): Promise<Entity[]> {
+        return new Promise(async(resolve, reject)=>{
             let query: Query<T>
 
             if(this.columnsToFetch){
@@ -124,24 +123,27 @@ export default class Table<T extends Entity> {
                 query = this.getQueryBuilder().select("*").where(['id'] as (keyof ColumnsToFill<T>)[])
             }
 
-            this.getMysqlConnection().query(
-                query.__toString(), 
-                [id], (error, res)=>{
-                    if(error) reject(error)
-                    resolve(res)
-            })
+            try {
+                const res = await this.getMysqlConnection().query<Entity[]>(
+                    query.__toString(), 
+                    [id]);
+
+                resolve(res[0]);
+            }catch(e){
+                reject(e)
+            }
         })
     }
 
-    all(): Promise<any[]> {
-        return new Promise((resolve, reject)=>{
-            this.getMysqlConnection().query(
-                this.getQueryBuilder().select("*").__toString(), 
-                (err, results)=>{
+    all(): Promise<Entity[]> {
+        return new Promise(async(resolve, reject)=>{
+            try {
+                const res = await this.getMysqlConnection().query<Entity[]>(this.getQueryBuilder().select("*").__toString());
 
-                if(err) reject(err)
-                resolve(results)
-            })
+                resolve(res[0]);
+            }catch(e){
+                reject(e)
+            }
         })
     }
 
@@ -203,7 +205,7 @@ export default class Table<T extends Entity> {
      * @returns 
      */
     get<U extends Entity, ConcatTypes extends any>(): Promise<unknown> {
-        return new Promise((resolve, reject)=>{
+        return new Promise(async(resolve, reject)=>{
             
             if(this.columnsToFetch && this.columnsToFetch.length > 0){
                 this.query = this.getQueryBuilder().select<U, true>(this.columnsToFetch as TableColumns<T, U, ConcatTypes>, this.tableToJoin !== undefined)
@@ -228,21 +230,22 @@ export default class Table<T extends Entity> {
                 this.addOrder()
                 this.addLimit()
                 
-                this.getMysqlConnection().query(this.query.__toString(), data, (err, results)=>{
-                    if(err) reject(err)
-
-                    resolve(results)
-                })
+                try {
+                    const results = await this.getMysqlConnection().query<Entity[]>(this.query.__toString(), data) ;
+                    resolve(results[0])
+                }catch(e) {
+                    reject(e)
+                }
             }else {
-
                 this.addOrder()
                 this.addLimit()
                 
-                this.getMysqlConnection().query(this.query.__toString(), (err, results)=>{
-                    if(err) reject(err)
-
-                    resolve(results)
-                })
+                try {
+                    const res = await this.getMysqlConnection().query<Entity[]>(this.query.__toString());
+                    resolve(res[0])
+                 }catch(e) {
+                     reject(e)
+                 }
             } 
         })
     }
@@ -271,7 +274,7 @@ export default class Table<T extends Entity> {
         conditions: ColumnsToFill<T> | (keyof ColumnsToFill<T>)[],
         dataForArrayConditions?: {values: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[], operator?: "OR" | "AND"}
     ): Promise<ColumnsToFill<Entity>[]>{
-        return new Promise((resolve, reject)=>{
+        return new Promise(async(resolve, reject)=>{
             let query: Query<T>
 
             if(columns.length > 0){
@@ -280,53 +283,64 @@ export default class Table<T extends Entity> {
                 query = this.getQueryBuilder().select("*")
             }
 
-            if(this.tableToJoin !== undefined){
+            if(this.tableToJoin){
                 this.query = query.join(this.tableToJoin)
             }
 
             if(dataForArrayConditions && conditions instanceof Array){
                 query.where<undefined>(conditions, dataForArrayConditions.operator , true)
-
-                this.getMysqlConnection().query(query.__toString(), dataForArrayConditions.values, (err, results)=>{
-                    if(err) reject(err)
-                    resolve(results)
-                })
+                
+                try {
+                    const res = await this.getMysqlConnection().query<Entity[]>(query.__toString(), dataForArrayConditions.values)
+                    resolve(res[0])
+                }catch(e){
+                    reject(e)
+                }
+                
             }else  {
                 query.where<undefined>(conditions, undefined , true)
 
-                this.getMysqlConnection().query(query.__toString(), (err, results)=>{
-                    if(err) reject(err)
-                    resolve(results)
-                })
+                try {
+                    const res = await this.getMysqlConnection().query<Entity[]>(query.__toString())
+                    resolve(res[0])
+                }catch(e){
+                    reject(e)
+                }
             }
         })
     }
 
-    delete(identifiant: number | (keyof ColumnsToFill<T>)[] | ColumnsToFill<T>, 
-        dataForArrayIdentifiant?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]
+    delete(credential: number | (keyof ColumnsToFill<T>)[] | ColumnsToFill<T>, 
+        dataForArrayCredential?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]
     ) {
-        return new Promise((resolve, reject)=>{
-            if(typeof identifiant === "number"){
+        return new Promise(async(resolve, reject)=>{
+            if(typeof credential === "number"){
                 this.query = this.getQueryBuilder().delete().where(['id'] as (keyof ColumnsToFill<T>)[])
 
-                this.getMysqlConnection().query(this.query.__toString(), identifiant, (err, result)=>{
-                    if(err) reject(err)
-                    resolve(result)
-                })
-            }else if(identifiant instanceof Array && dataForArrayIdentifiant) {
-                this.query = this.getQueryBuilder().delete().where<undefined>(identifiant)
+                try {
+                    const res = await this.getMysqlConnection().query<Entity[]>(this.query.__toString(), credential)
+                    resolve(res[0])
+                }catch(e){
+                    reject(e)
+                }
+            }else if(credential instanceof Array && dataForArrayCredential) {
+                this.query = this.getQueryBuilder().delete().where<undefined>(credential)
 
-                this.getMysqlConnection().query(this.query.__toString(), dataForArrayIdentifiant, (err, result)=>{
-                    if(err) reject(err)
-                    resolve(result)
-                })
+                try {
+                    const res = await this.getMysqlConnection().query<Entity[]>(this.query.__toString(), dataForArrayCredential)
+                    resolve(res[0])
+                }catch(e){
+                    reject(e)
+                }
             }else {
-                this.query = this.getQueryBuilder().delete().where<undefined>(identifiant)
+                this.query = this.getQueryBuilder().delete().where<undefined>(credential)
 
-                this.getMysqlConnection().query(this.query.__toString(), (err, result)=>{
-                    if(err) reject(err)
-                    resolve(result)
-                })
+                try {
+                    const res = await this.getMysqlConnection().query<Entity[]>(this.query.__toString())
+                    resolve(res[0])
+                }catch(e){
+                    reject(e)
+                }
             }
         })
     }
