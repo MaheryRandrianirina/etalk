@@ -1,4 +1,4 @@
-import {createConnection} from "mysql"
+import {createConnection} from "mysql2/promise"
 
 const connection = createConnection({
     host: process.env.DB_HOST,
