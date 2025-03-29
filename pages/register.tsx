@@ -77,23 +77,20 @@ export default function Register(): JSX.Element {
         stRegisterStep: Function
     ] = useState(1)
 
-    const [identity, setIdentity]: [identity: UserIdentity, setIdentity: Function] = useState({
+    const [identity, setIdentity] = useState<UserIdentity>({
         name: "",
         firstname: "",
         username: "",
         sex: "man"
-    })
+    } as UserIdentity)
 
     const [formErrors, setFormErrors]= useFormErrors<RegistrationFormErrors>({})
 
-    const [userUniqueProperties, setUserUniqueProperties]: [
-        userUniqueProperties: UserUniqueProperties,
-        setUserUniqueProperties: Function
-    ] = useState({
+    const [userUniqueProperties, setUserUniqueProperties] = useState<UserUniqueProperties>({
         email: "",
         password: "",
         password_confirmation: ""
-    })
+    } as UserUniqueProperties)
 
     const [stepThreeProperties, setStepThreeProperties]: [
         stepThreeProperties: RegistrationStepThreeProperties, 
@@ -203,8 +200,8 @@ export default function Register(): JSX.Element {
                 return {...s, username: value}
             })
         }else if(event.target.className === "man_radio_button" || event.target.className === "woman_radio_button"){
-            setIdentity((s:UserIdentity)=>{
-                return {...s,sex: value}
+            setIdentity((s)=>{
+                return {...s,sex: value} as UserIdentity
             })
         }else if(targetName === "email"){
             setUserUniqueProperties((properties: UserUniqueProperties) => {
@@ -261,7 +258,7 @@ export default function Register(): JSX.Element {
                 firstname: identity.firstname,
                 username: identity.username,
                 sex: identity.sex
-            }} errors={formErrors} disableButton={disabledButton as boolean}/>}
+            } as UserIdentity} errors={formErrors} disableButton={disabledButton as boolean}/>}
             
             {registerStep === 2 && <RegisterStepTwo inputsEvents={{
                 onChange: handleChange
@@ -269,7 +266,7 @@ export default function Register(): JSX.Element {
                 email:userUniqueProperties.email,
                 password: userUniqueProperties.password,
                 password_confirmation: userUniqueProperties.password_confirmation
-            }} disableButton={disabledButton as boolean}/>}
+            } as UserUniqueProperties} disableButton={disabledButton as boolean}/>}
 
             {registerStep === 3 && <RegisterStepThree events={{
                 onClick: chooseProfilPic

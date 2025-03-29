@@ -54,6 +54,7 @@
     - Refaire une récupération via le websocket lors du retour après la création de conversation
     - Ajouter le statut en ligne de l'utilisateur dans le BDD lorsqu'il se connecte
     - Liste d'amis et leur statut en ligne
+    - Optimiser le code react
     - Envoi d'images
     - Envoi de fichiers
     - Vocal
@@ -63,3 +64,9 @@
 # FONCTIONNALITES A AJOUTER
     - Support d'emojis
     
+# PROCHAINES CHOSES A FAIRE URGEMMENT
+- Remplacer tous les RequestWithSession en NextApiRequest ou NextRequest [v]
+- Ajuster le style de l'oeil sur les champs mot de passe dans le formulaire d'inscription
+- Afficher des erreurs claires lorsque les conditions du formulaire d'inscription ne sont pas remplies
+- Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist)
+- Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes

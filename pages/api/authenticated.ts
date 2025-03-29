@@ -1,8 +1,10 @@
-import { withSessionSsr } from "../../backend/utilities/withSession"
+import { getSession } from "@/lib/index"
+import type { NextApiRequest, NextApiResponse } from "next"
 
-export const getServerSideProps = withSessionSsr(async function getServerSideProps({req, res}){
-    
-    if(req.session.user){
+
+export async function getServerSideProps({req, res}: {req: NextApiRequest, res: NextApiResponse}){
+    const session = await getSession(req, res)
+    if(session?.user){
         return {
             props: {},
             redirect: {
@@ -16,4 +18,4 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
     return {
         props: {}
     }
-})
+}
