@@ -5,11 +5,13 @@ import ValidationError from "../security/validationError"
 import UserTable from "../database/tables/UserTable"
 import PasswordGuard from "../security/password"
 import { User } from "../../types/user"
-import { File } from "buffer"
 import { LoginInputs } from "../../components/login"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import Str from "../Helpers/Str"
 import { MysqlError } from "mysql"
+import { RequestWithSession } from "../../types/session"
+import { ColumnsToFill } from "../../types/Database"
+import SessionError from "../../lib/errors/SessionErrror"
 
 export default class Auth {
 
@@ -26,17 +28,15 @@ export default class Auth {
         }
     }
 
-    constructor(private req: NextApiRequest, private res?: NextApiResponse) {
-
-    }
+    constructor(private req: RequestWithSession, private res?: NextApiResponse) {}
 
     async registerUser() {
-        const body: BeforeStepThreeData = this.req.body 
+        const body: RegistrationRequestBody = this.req.body 
         
         if (this.res) {
             const { registrationStep, data } = body
 
-            this.userValidator.setData(data)
+            this.userValidator.setData(data as ColumnsToFill<User>)
 
             switch (registrationStep) {
                 case 1:
@@ -66,16 +66,29 @@ export default class Auth {
                     .username("username")
                     .getErrors()
             
-                if(errors === null && "session" in this.req){
+                if(errors === null && this.req.session){
                     try {
                         const userId: number = await this.insertUserIdentity(data)
-                        this.req.session.userId = userId
-                        await this.req.session.save()
-            
-                        this.res.status(200).json({success: true}) 
+
+                        if(this.req.session){
+                            this.req.session.userId = userId
+                            await this.req.session.save()
+                
+                            this.res.status(200).json({success: true})
+                            
+                            return
+                        }
+
+                        throw new SessionError("'session' doesn't exist in the request. Please check the : this.req.session");
+                        
                     }catch(e){
                         const error = e as Error
-                        console.error(error);
+                        if(error instanceof SessionError){
+                            console.error(error.message);
+                            
+                            return;
+                        }
+
                         this.res.status(500).json({success: false, sqlError: error.message})
                     }
                 }else {
@@ -100,7 +113,7 @@ export default class Auth {
                 'firstname': userIdentity.firstname, 
                 'username': userIdentity.username, 
                 'sex': userIdentity.sex
-            }) as number
+            } as ColumnsToFill<User>) as number
             return userid
         }catch(err){
             throw err
@@ -108,14 +121,14 @@ export default class Auth {
     }
     
     private async handleRegistrationStepTwo(data:DataFromRegistration) {
-        if(this.res && "session" in this.req){
+        if(this.res && this.req.session){
             const errors = this.userValidator
             .email("email")
             .password("password")
             .equals("password", "password_confirmation")
-            .getErrors()
+            .getErrors();
     
-            const userId = this.req.session.userId
+            const userId = this.req.session.userId;
             
             if (errors === null && userId !== undefined && userId !== null) {
                 try {
@@ -144,13 +157,13 @@ export default class Auth {
             await this.userTable.update({
                 password: hash,
                 email: data.email
-            }, {id: userId})
+            } as ColumnsToFill<User>, {id: userId} as ColumnsToFill<User>)
         }catch(e){
             throw e
         }
     }
     
-    private async loginAfterRegistration(data: DataFromRegistration, userId: number, req: NextApiRequest): Promise<boolean> {
+    private async loginAfterRegistration(data: DataFromRegistration, userId: number, req: RequestWithSession): Promise<boolean> {
         try {
             const res = await this.userTable.find(userId) as [User]
             const user = res[0]
@@ -163,7 +176,7 @@ export default class Auth {
 
     private async authenticatedUser(password: string, user: User, remember_me?: boolean): Promise<boolean> {
         const verifiedPassword = await this.passwordGuard.verify(password, user.password)
-        if(verifiedPassword && "session" in this.req){
+        if(verifiedPassword && this.req.session){
             this.req.session.user = {
                 id: user.id,
                 name: user.name,
@@ -180,7 +193,7 @@ export default class Auth {
             if(remember_me === true){
                 try {
                     const rememberToken = this.generateRememberToken(user)
-                    this.userTable.update({remember_token: rememberToken}, {id: user.id})
+                    this.userTable.update({remember_token: rememberToken} as ColumnsToFill<User>, {id: user.id} as ColumnsToFill<User>)
                     
                     const response = NextResponse.next()
                     response.cookies.set("auth", rememberToken)
@@ -200,13 +213,13 @@ export default class Auth {
     }
 
     private async handleRegistrationStepThree(file: string) {
-        if(this.res && "session" in this.req){
+        if(this.res && this.req.session){
             const authUser = this.req.session.user
             if (authUser !== undefined && authUser.id !== null) {
                 try {
                     await this.userTable.update(
-                        { image: file }, 
-                        { id: this.req.session.userId as number }
+                        { image: file } as ColumnsToFill<User>, 
+                        { id: this.req.session.userId as number }  as ColumnsToFill<User>
                     )
 
                     this.res.status(200).json({ success: true })
@@ -223,15 +236,11 @@ export default class Auth {
             throw Error(this.errorMessage.responseNull)
         } 
     }
-    
-    private insertUserStepThreeData(imagePath: string, userid: number){
-        this.userTable.update({image: imagePath},{id: userid})
-    }
 
     async loginUser() {
         if(this.res){
             const loginData = this.req.body as LoginInputs
-            const errors = this.userValidator.setData(loginData)
+            const errors = this.userValidator.setData(loginData as ColumnsToFill<User>)
                 .required("username", "password")
                 .username("username")
                 .password("password")
@@ -285,7 +294,7 @@ export default class Auth {
 
     isAuthenticated(): boolean {
         if("session" in this.req){
-            const authUser = this.req.session.user
+            const authUser = this.req.session?.user
             return authUser !== undefined 
                 && authUser.is_online === true
         }else {
@@ -298,7 +307,7 @@ export default class Auth {
         user: User
     }> {
         const userId = parseInt(cookieValue.split('-----')[0])
-        const [user] = await this.userTable.find(userId) 
+        const [user] = await this.userTable.find(userId)
 
         return {
             ok: user.remember_token === cookieValue,
@@ -307,4 +316,4 @@ export default class Auth {
     }
 }
 
-type BeforeStepThreeData = {registrationStep: number, data:DataFromRegistration}
+type RegistrationRequestBody = {registrationStep: number, data:DataFromRegistration}

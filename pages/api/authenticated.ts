@@ -1,8 +1,9 @@
-import { withSessionSsr } from "../../backend/utilities/withSession"
+import type { NextResponse } from "next/server"
+import { RequestWithSession } from "../../types/session"
 
-export const getServerSideProps = withSessionSsr(async function getServerSideProps({req, res}){
-    
-    if(req.session.user){
+
+export async function getServerSideProps({req, res}: {req: RequestWithSession, res: NextResponse}){
+    if(req.session?.user){
         return {
             props: {},
             redirect: {
@@ -16,4 +17,4 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
     return {
         props: {}
     }
-})
+}

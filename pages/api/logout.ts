@@ -1,11 +1,9 @@
-import { withSessionRoute } from "../../backend/utilities/withSession";
-import { NextApiRequest, NextApiResponse } from "next"
+import { NextApiResponse } from "next"
+import { RequestWithSession } from "../../types/session";
 
-export default withSessionRoute(Logout)
-
-async function Logout(req: NextApiRequest, res: NextApiResponse) {
+export default async function Logout(req: RequestWithSession, res: NextApiResponse) {
     const session = req.session
-    if(session.user && req.method?.toLocaleLowerCase() === "post"){
+    if(session?.user && req.method?.toLocaleLowerCase() === "post"){
         session.destroy();
 
         res.status(200).json({success: true});

@@ -1,9 +1,8 @@
 import Query from "../Query"
 import connection from "../mysqlConnection"
 import { ColumnsToFill, Data, Entity, Join, JoinArray, Orders, Prefix, PrefixArray, QueryConditions, TableColumns, UnknownQueryConditions } from "../../../types/Database"
-import { User } from "../../../types/user"
 import Str from "../../Helpers/Str"
-import { Connection, FieldPacket, OkPacket, RowDataPacket } from "mysql2/promise"
+import { Connection } from "mysql2/promise"
 
 export default class Table<T extends Entity> {
 
@@ -111,7 +110,7 @@ export default class Table<T extends Entity> {
         return this.queryTypeInsertion<true>('update', columns, conditions)
     }
 
-    find(id: number): Promise<Entity[]> {
+    find(id: number): Promise<T[]> {
         return new Promise(async(resolve, reject)=>{
             let query: Query<T>
 
@@ -124,7 +123,7 @@ export default class Table<T extends Entity> {
             }
 
             try {
-                const res = await this.getMysqlConnection().query<Entity[]>(
+                const res = await this.getMysqlConnection().query<T[]>(
                     query.__toString(), 
                     [id]);
 

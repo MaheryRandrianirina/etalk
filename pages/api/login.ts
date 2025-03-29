@@ -1,10 +1,8 @@
-import { NextApiRequest, NextApiResponse} from "next"
-import { withSessionRoute } from "../../backend/utilities/withSession"
+import { NextApiResponse} from "next"
 import Auth from "../../backend/User/Auth"
+import { RequestWithSession } from "../../types/session"
 
-export default withSessionRoute(Login)
-
-async function Login(req: NextApiRequest, res: NextApiResponse) {
+export default async function Login(req: RequestWithSession, res: NextApiResponse) {
     if(req.method === "POST"){
         const auth = new Auth(req, res)
         await auth.loginUser()

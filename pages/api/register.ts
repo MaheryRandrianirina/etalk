@@ -1,11 +1,8 @@
-import { NextApiRequest, NextApiResponse} from "next"
-import { withSessionRoute } from "../../backend/utilities/withSession"
+import { NextApiResponse} from "next"
 import Auth from "../../backend/User/Auth"
-import { RouteHandler } from "next/dist/server/future/route-handlers/route-handler"
+import { RequestWithSession } from "../../types/session"
 
-export default withSessionRoute(Register) 
-
-async function Register(req: NextApiRequest, res: NextApiResponse) {
+export default async function Register(req: RequestWithSession, res: NextApiResponse) {
     if(req.method === "POST"){
         try {
             const auth = new Auth(req, res)

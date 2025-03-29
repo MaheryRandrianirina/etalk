@@ -1,19 +1,16 @@
 import {Server as IOServer} from "socket.io"
 import { Server as HTTPServer } from "http"
-import {NextApiRequest, NextApiResponse} from "next"
+import { NextApiResponse} from "next"
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from "../../types/socket/utils"
-import { withSessionRoute } from "../../backend/utilities/withSession"
 import { Socket as NetSocket } from "net"
-import axios from "axios"
 import ConversationTable from "../../backend/database/tables/ConversationTable"
-import { BlockedUsers, Conversation, ConversationUser, Message } from "../../types/Database"
+import { Conversation, ConversationUser, Message } from "../../types/Database"
 import { GetAway } from "../../types/utils"
 import { AuthUser, User } from "../../types/user"
 import MessageTable from "../../backend/database/tables/MessageTable"
 import UserTable from "../../backend/database/tables/UserTable"
 import { Conversation as UserConversation } from "../../backend/User/Conversation"
-import BlockedUsersTable from "../../backend/database/tables/BlockedUsers"
-import { join } from "path"
+import { RequestWithSession } from "../../types/session"
 
 interface SocketServer extends HTTPServer {
     io?: IOServer 
@@ -27,11 +24,8 @@ export interface ResponseWithSocket<T> extends NextApiResponse<T>{
     socket: SocketWithIO
 }
 
-export default withSessionRoute(socketHandler)
-
-function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
-    let {user} = req.session
-    
+export default function socketHandler (req: RequestWithSession, res: ResponseWithSocket<any>){
+    const user = req.session?.user
     if(!user){
         res.status(403).json({success: false, forbidden: true})
         return
