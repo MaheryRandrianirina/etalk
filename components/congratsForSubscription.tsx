@@ -1,8 +1,7 @@
-import { withIronSessionSsr } from "iron-session/next/dist";
 import { useEffect } from "react";
-import { withSessionSsr } from "../backend/utilities/withSession";
 import axios from "axios";
 import useClassnameAnimator from "../lib/hooks/useClassnameAnimator";
+import { NextApiRequest } from "next";
 
 export default function CongratsForSubscription({className}: {
   className?: string
@@ -199,7 +198,7 @@ export default function CongratsForSubscription({className}: {
   );
 }
 
-export const getServerSideProps = withSessionSsr(async function getServerSideProps({req}){
+export async function getServerSideProps({req}:{req: NextApiRequest}){
   
   const res = await axios.get('/api/user')
   if("user" in res.data && "id" in res.data.user){
@@ -211,4 +210,4 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
   return {
     props: {loggedIn: false}
   }
-})
+}

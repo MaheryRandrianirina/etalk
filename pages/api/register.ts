@@ -1,17 +1,11 @@
 import { NextApiRequest, NextApiResponse} from "next"
-import { withSessionRoute } from "../../backend/utilities/withSession"
 import Auth from "../../backend/User/Auth"
-import { RouteHandler } from "next/dist/server/future/route-handlers/route-handler"
+import { getSession } from "@/lib/index"
 
-export default withSessionRoute(Register) 
-
-async function Register(req: NextApiRequest, res: NextApiResponse) {
+export default async function Register(req: NextApiRequest, res: NextApiResponse) {
     if(req.method === "POST"){
-        try {
-            const auth = new Auth(req, res)
-            await auth.registerUser()
-        }catch(e){
-            console.error(e)
-        }
+        const session = await getSession(req, res);
+        const auth = new Auth(req, res, session);
+        await auth.registerUser();
     }
 }

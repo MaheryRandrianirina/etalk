@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse} from "next"
-import { withSessionRoute } from "../../backend/utilities/withSession"
 import Auth from "../../backend/User/Auth"
+import { getSession } from "@/lib/index";
 
-export default withSessionRoute(Login)
-
-async function Login(req: NextApiRequest, res: NextApiResponse) {
+export default async function Login(req: NextApiRequest, res: NextApiResponse) {
     if(req.method === "POST"){
-        const auth = new Auth(req, res)
+        const session = await getSession(req, res)
+        const auth = new Auth(req, res, session)
         await auth.loginUser()
     }else {
         res.status(401).send("Not Allowed Method")

@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import ReceptionBox from '../components/receptionbox'
-import { withSessionSsr } from '../backend/utilities/withSession'
 import { User } from '../types/user'
 import { NextResponse } from "next/server"
 import type { NextApiRequest, NextApiResponse } from "next"
@@ -21,6 +20,9 @@ import { useChannel, useConnectionStateListener } from "ably/react";
 import { Conversation } from '../types/Database'
 import { CustomMessage } from '../types/ably'
 import { useCallAblyApi } from '../components/hooks'
+import { getIronSession } from 'iron-session'
+import { SessionData } from '../types/session'
+import { getSession } from '../lib'
 
 
 type AnimationClassName = {receptionBox: string, conversation: string}
@@ -241,7 +243,7 @@ export default function Home({user}: {
   );
 }
 
-export const getServerSideProps = withSessionSsr(async function getServerSideProps({req,res}){
+export async function getServerSideProps({req,res}:{req: NextApiRequest,res: NextApiResponse}){
   const response = NextResponse.next()
   const authCookie = response.cookies.get('auth')
   
@@ -249,14 +251,16 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
   let loggedIn: boolean = false
 
   const urlForAuth = req.url === "/login" || req.url === "/register"
-  let user = req.session.user
+
+  const session = await getSession(req, res);
+  let user = session?.user
   
   if(!urlForAuth && !user){
       loggedIn = false
 
       if(authCookie){
         try {
-          const auth = new Auth(req as NextApiRequest, res as NextApiResponse)
+          const auth = new Auth(req, res, session);
           const remembered = await auth.remembered(authCookie.value)
           if(remembered.ok){
             loggedIn = true
@@ -280,11 +284,11 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
       }
     }
   }
-  console.log(user)
+  
   return {
     props: {
       user: user,
       errorMessage: errorMessage
     }
   }
-})
+}

@@ -1,19 +1,16 @@
 import {Server as IOServer} from "socket.io"
 import { Server as HTTPServer } from "http"
-import {NextApiRequest, NextApiResponse} from "next"
+import type { NextApiRequest, NextApiResponse} from "next"
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from "../../types/socket/utils"
-import { withSessionRoute } from "../../backend/utilities/withSession"
 import { Socket as NetSocket } from "net"
-import axios from "axios"
 import ConversationTable from "../../backend/database/tables/ConversationTable"
-import { BlockedUsers, Conversation, ConversationUser, Message } from "../../types/Database"
+import { Conversation, ConversationUser, Message } from "../../types/Database"
 import { GetAway } from "../../types/utils"
 import { AuthUser, User } from "../../types/user"
 import MessageTable from "../../backend/database/tables/MessageTable"
 import UserTable from "../../backend/database/tables/UserTable"
 import { Conversation as UserConversation } from "../../backend/User/Conversation"
-import BlockedUsersTable from "../../backend/database/tables/BlockedUsers"
-import { join } from "path"
+import { getSession } from "@/lib/index"
 
 interface SocketServer extends HTTPServer {
     io?: IOServer 
@@ -27,14 +24,12 @@ export interface ResponseWithSocket<T> extends NextApiResponse<T>{
     socket: SocketWithIO
 }
 
-export default withSessionRoute(socketHandler)
-
-function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
-    let {user} = req.session
-    
+export default async function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
+    const session = await getSession(req, res);
+    const user = session.user;
     if(!user){
-        res.status(403).json({success: false, forbidden: true})
-        return
+        res.status(403).json({success: false, forbidden: true});
+        return;
     }
     
     if(res.socket.server.io){
@@ -49,7 +44,7 @@ function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
 
         res.socket.server.io = io
 
-        const u = user as GetAway<User, ["created_at", "updated_at", "email", "remember_token", "password"]>
+        const u = user as Omit<User, "created_at" | "updated_at" | "email" | "remember_token" | "password">
 
         const userTable = new UserTable()
         const messageTable = new MessageTable()
@@ -118,7 +113,7 @@ function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
                     return
                 }
                 
-                const userConversation = new UserConversation(req, conversation_id)
+                const userConversation = new UserConversation(req, session, conversation_id)
                 const messages = await userConversation.messages()
 
                 socket.emit('conversation_messages', messages)
@@ -129,7 +124,7 @@ function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
                 try {
                     const conversationTable = new ConversationTable()
                     const conversation = await conversationTable.find(conversation_id)
-                    const userConversation = new UserConversation(req, conversation_id)
+                    const userConversation = new UserConversation(req, session, conversation_id)
                     
                     if(conversation.length === 0){
                         await userConversation.new(messageData.adressee_id, messageData.message)

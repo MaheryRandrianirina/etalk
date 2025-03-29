@@ -1,14 +1,16 @@
 
 import ConversationTable from "../database/tables/ConversationTable"
 import MessageTable from "../database/tables/MessageTable"
-import { NextApiRequest } from "next"
 import { AuthUser } from "../../types/user"
 import ConversationUserTable from "../database/tables/ConversationUserTable"
 import { ConversationMessage } from "../../types/conversation"
-import { BlockedUsers, ConversationUser, Message } from "../../types/Database"
+import { BlockedUsers, ColumnsToFill, ConversationUser, Message } from "../../types/Database"
 import { Conversation as ConversationType } from "../../types/Database"
 import UserFriends from "../database/tables/UserFriends"
 import BlockedUsersTable from "../database/tables/BlockedUsers"
+import { NextApiRequest } from "next"
+import { IronSession } from "iron-session"
+import { SessionData } from "../../types/session"
 
 export class Conversation {
 
@@ -18,16 +20,19 @@ export class Conversation {
     private messageTable = new MessageTable()
     private userFriends = new UserFriends()
 
-    constructor(req: NextApiRequest, private id?: number){
+    constructor(req: NextApiRequest, session: IronSession<SessionData>, private id?: number){
         if(this.authUser === null){
-            this.authUser = req.session.user !== undefined ? req.session.user : null
+            this.authUser = session?.user !== undefined ? session.user : null
         }
         
     }
 
     async new(receiver_id: number, message: ConversationMessage): Promise<void> {
         if(this.authUser){
-            const conversationId = await this.conversationTable.new({initializer_id:this.authUser?.id, adressee_id: receiver_id})
+            const conversationId = await this.conversationTable.new({
+                initializer_id:this.authUser?.id, 
+                adressee_id: receiver_id} as ColumnsToFill<ConversationType>
+            )
         
             const blockedUsersTable = new BlockedUsersTable();
             const [blockedReceiver] = await blockedUsersTable
@@ -50,8 +55,8 @@ export class Conversation {
 
     async conversationUser(conversationId: number, receiverId: number): Promise<void> {
         const conversationUserTable = new ConversationUserTable()
-        await conversationUserTable.new({"conversation_id": conversationId, "user_id": this.authUser?.id})
-        await conversationUserTable.new({"conversation_id": conversationId, "user_id": receiverId})
+        await conversationUserTable.new({"conversation_id": conversationId, "user_id": this.authUser?.id} as ColumnsToFill<ConversationType>)
+        await conversationUserTable.new({"conversation_id": conversationId, "user_id": receiverId} as ColumnsToFill<ConversationType>)
     }
 
     async messages(): Promise<Message[]>{
@@ -75,7 +80,7 @@ export class Conversation {
     async createNewFriend(receiver_id: number): Promise<number> {
         if(this.authUser){
             const createdUserFriend = await this.userFriends
-                .new({"user_id": this.authUser.id, "friend_id": receiver_id})
+                .new({"user_id": this.authUser.id, "friend_id": receiver_id} as ColumnsToFill<ConversationType>)
             return createdUserFriend
         }else {
             throw new Error("Vous n'êtes pas connecté!")

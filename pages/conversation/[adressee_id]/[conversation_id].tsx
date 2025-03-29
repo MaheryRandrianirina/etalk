@@ -11,18 +11,18 @@ import { Dispatch,
     TransitionEvent, 
     TransitionEventHandler, 
     useCallback, 
-    useContext, 
     useEffect, 
     useMemo, 
     useState } from "react"
 import { ChosenReceiver, ConversationMessage, SetMessage } from "../../../types/conversation"
 import Data from "../../../lib/data"
-import { withSessionSsr } from "../../../backend/utilities/withSession"
 import axios, { AxiosError } from "axios"
 import { Join } from "../../../types/Database"
 import { CustomMessage } from "../../../types/ably"
 import { useChannel } from "ably/react"
 import { useCallAblyApi } from "../../../components/hooks"
+import type { NextApiRequest, NextApiResponse } from "next"
+import { getSession } from "@/lib/index"
 
 
 export type BlockUser = {
@@ -278,9 +278,9 @@ export default function UserConversation({create, user, setCreateConversation, a
     </div>
 }
 
-export const getServerSideProps = withSessionSsr(async function getServerSideProps({req, res}){
-    const {user} = req.session
-
+export async function getseServerSideProps({req, res}:{req:NextApiRequest, res: NextApiResponse}){
+    const session = await getSession(req, res);
+    const user = session.user;
     if(!user){
         return {
             redirect: {
@@ -296,4 +296,4 @@ export const getServerSideProps = withSessionSsr(async function getServerSidePro
             user: user
         }
     }
-})
+}
