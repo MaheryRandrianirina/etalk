@@ -11,7 +11,7 @@ import Str from "../Helpers/Str"
 import { MysqlError } from "mysql"
 import { SessionData } from "../../types/session"
 import { ColumnsToFill } from "../../types/Database"
-import SessionError from "../../lib/errors/SessionErrror"
+import { SessionError } from "@/lib/index"
 import { IronSession } from "iron-session"
 
 export default class Auth {
@@ -120,7 +120,7 @@ export default class Auth {
         if (errors === null && userId) {
             try {
                 await this.insertUserStepTwoData(data, userId)
-                const authenticatedUser = await this.loginAfterRegistration(data, userId, this.req)
+                const authenticatedUser = await this.loginAfterRegistration(data, userId)
 
                 if (authenticatedUser) {
                     this.res.status(200).json({ success: true })
@@ -150,7 +150,7 @@ export default class Auth {
         }
     }
     
-    private async loginAfterRegistration(data: DataFromRegistration, userId: number, req: RequestWithSession): Promise<boolean> {
+    private async loginAfterRegistration(data: DataFromRegistration, userId: number): Promise<boolean> {
         try {
             const res = await this.userTable.find(userId) as [User]
             const user = res[0]

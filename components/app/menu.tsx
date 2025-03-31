@@ -4,7 +4,7 @@ import { ModalData } from "../../types/modal"
 import { createPortal } from "react-dom"
 import { ButtonContext } from "../contexts/ButtonContext"
 import ConfirmationModal from "../modals/confirmationModal"
-import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator"
+import useClassnameAnimator from "../../hooks/useClassnameAnimator"
 import Data from "../../lib/data"
 import CsrfClass from "../../backend/security/csrf"
 

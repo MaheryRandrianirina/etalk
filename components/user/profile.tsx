@@ -1,5 +1,5 @@
 import { FC, MouseEventHandler, TransitionEventHandler, memo, useEffect } from "react";
-import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator";
+import useClassnameAnimator from "../../hooks/useClassnameAnimator";
 import CloseIcon from "../icons/closeIcon";
 import { AuthUser } from "../../types/user";
 import { UserIcon } from "../icons/UserIcon";

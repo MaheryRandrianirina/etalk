@@ -1,7 +1,7 @@
 import { FC, MouseEventHandler, TransitionEventHandler, useEffect } from "react";
 import Modal from "./modal";
 import { PrimaryButton, SecondaryButton } from "../widgets/button";
-import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator";
+import useClassnameAnimator from "../../hooks/useClassnameAnimator";
 
 const ConfirmationModal: FC<{
     data: string,

@@ -18,11 +18,10 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import {DataFromRegistration} from "../types/registration/dataFromRegistration";
 import { PostDataReturnType } from "../types/registration/dataBaseCommunication"
 import { RegistrationStepThreeProperties } from "../types/registration/registration";
-import useFormErrors from "../lib/hooks/useFormErrors";
+import useFormErrors from "../hooks/useFormErrors";
 import { RegistrationFormErrors } from "../types/errors";
 import { getServerSideProps } from "./api/authenticated";
-import FileError from "../lib/errors/FileError";
-import UploadError from "../lib/errors/UploadError";
+import { FileError, UploadError } from "@/lib/index";
 
 
 const PostDataforRegistration: (

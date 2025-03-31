@@ -3,7 +3,7 @@ import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
 import { ConversationMessage } from "../../types/conversation";
 import { AuthUser } from "../../types/user";
 import Message from "./message";
-import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator";
+import useClassnameAnimator from "../../hooks/useClassnameAnimator";
 
 export default function Content({messages, showIntoBubble, user}: {
     messages: ConversationMessage[],

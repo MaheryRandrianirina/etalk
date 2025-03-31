@@ -15,7 +15,7 @@ import Opening from '../components/loaders/opening'
 import axios from 'axios'
 import { UserConversations } from '../types/conversation'
 import Menu from '../components/app/menu'
-import useClassnameAnimator from '../lib/hooks/useClassnameAnimator';
+import useClassnameAnimator from '../hooks/useClassnameAnimator';
 import { useChannel, useConnectionStateListener } from "ably/react";
 import { Conversation } from '../types/Database'
 import { CustomMessage } from '../types/ably'
