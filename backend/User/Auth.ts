@@ -11,7 +11,7 @@ import Str from "../Helpers/Str"
 import { MysqlError } from "mysql"
 import { SessionData } from "../../types/session"
 import { ColumnsToFill } from "../../types/Database"
-import SessionError from "../../lib/errors/SessionErrror"
+import { SessionError } from "@/lib/index"
 import { IronSession } from "iron-session"
 
 export default class Auth {

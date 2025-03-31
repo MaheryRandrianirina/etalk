@@ -3,7 +3,7 @@ import { InputCheckbox, InputPassword, InputText } from "./form/input";
 import { PrimaryButton } from "./widgets/button";
 import Link from "next/link";
 import axios, { AxiosError } from "axios";
-import useFormErrors from "../lib/hooks/useFormErrors";
+import useFormErrors from "../hooks/useFormErrors";
 import { LoginFormErrors } from "../types/errors";
 import Logo from "./decors/logo";
 

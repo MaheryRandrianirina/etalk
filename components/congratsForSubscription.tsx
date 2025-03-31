@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import axios from "axios";
-import useClassnameAnimator from "../lib/hooks/useClassnameAnimator";
+import useClassnameAnimator from "../hooks/useClassnameAnimator";
 import { NextApiRequest } from "next";
 
 export default function CongratsForSubscription({className}: {

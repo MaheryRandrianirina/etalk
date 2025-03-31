@@ -1,9 +1,9 @@
-import { Dispatch, Key, SetStateAction, useEffect, useState } from "react";
-import DateHelper from "../../lib/helpers/Date";
+import { useEffect } from "react";
+import { DateHelper } from "@/lib/index";
 import { ConversationMessage } from "../../types/conversation";
 import { MessageType } from "../../types/messageType";
 import Bubble from "./bubble";
-import useClassnameAnimator from "../../lib/hooks/useClassnameAnimator";
+import useClassnameAnimator from "../../hooks/useClassnameAnimator";
 
 export default function Message({type, last, className, content}: {
   type: MessageType, 

@@ -1,5 +1,4 @@
-import FileError from "../lib/errors/FileError"
-import UploadError from "../lib/errors/UploadError"
+import { FileError, UploadError} from "@/lib/index"
 
 describe("Custom Error test", () => {
     test("FileError message is string", () => {
