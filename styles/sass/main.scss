@@ -255,6 +255,19 @@ p {
 
         .form_group {
             @include form_group();
+            
+        }
+
+        .form_group.form_group_password_input,
+        .form_group.form_group_password_confirmation_input {
+            position: relative;
+            .eye-icon {
+                position: absolute;
+                height: 20px;
+                top: 12px;
+                right: 10px;
+                color: $primary;
+            }
         }
         
         .form_group_man_radio_button, .form_group_woman_radio_button {
