@@ -150,7 +150,7 @@ export default class Auth {
         }
     }
     
-    private async loginAfterRegistration(data: DataFromRegistration, userId: number, req: NextApiRequest): Promise<boolean> {
+    private async loginAfterRegistration(data: DataFromRegistration, userId: number, req: RequestWithSession): Promise<boolean> {
         try {
             const res = await this.userTable.find(userId) as [User]
             const user = res[0]

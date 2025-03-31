@@ -20,8 +20,6 @@ import { useChannel, useConnectionStateListener } from "ably/react";
 import { Conversation } from '../types/Database'
 import { CustomMessage } from '../types/ably'
 import { useCallAblyApi } from '../components/hooks'
-import { getIronSession } from 'iron-session'
-import { SessionData } from '../types/session'
 import { getSession } from '../lib'
 
 

@@ -278,9 +278,15 @@ export default function UserConversation({create, user, setCreateConversation, a
     </div>
 }
 
+<<<<<<< HEAD
 export async function getseServerSideProps({req, res}:{req:NextApiRequest, res: NextApiResponse}){
     const session = await getSession(req, res);
     const user = session.user;
+=======
+export async function getseServerSideProps({req, res}:{req:RequestWithSession, res: NextResponse}){
+    const user = req.session?.user
+
+>>>>>>> 929a86fddfdd0fe7cf92aaf12ba32d67f3fdb2d2
     if(!user){
         return {
             redirect: {
