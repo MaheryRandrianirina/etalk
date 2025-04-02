@@ -37,7 +37,7 @@ export default class Auth {
         const body: RegistrationRequestBody = this.req.body 
         
         const { registrationStep, data } = body
-
+        
         this.userValidator.setData(data as ColumnsToFill<User>)
 
         switch (registrationStep) {
@@ -65,9 +65,8 @@ export default class Auth {
                 
             if (errors === null) {
                 try {
-                    const userId: number = await this.insertUserIdentity(data);
-                    this.session.userId = userId;
-
+                    this.session.registrationStepOneData = data;
+                    
                     await this.session.save();
 
                     this.res.status(200).json({ success: true });
@@ -75,6 +74,7 @@ export default class Auth {
                     return;
                 } catch (e) {
                     const error = e as Error
+                    
                     if (error instanceof SessionError) {
                         console.error(error.message);
 
@@ -96,13 +96,17 @@ export default class Auth {
     
     private async insertUserIdentity(userIdentity: DataFromRegistration): Promise<number>{
         try {
-            const userid = await this.userTable.new({
-                'name': userIdentity.name, 
-                'firstname': userIdentity.firstname, 
-                'username': userIdentity.username, 
-                'sex': userIdentity.sex
-            } as ColumnsToFill<User>) as number;
+            const hash = await this.passwordGuard.hash(userIdentity.password);
 
+            const userid = await this.userTable.new({
+                name: userIdentity.name, 
+                firstname: userIdentity.firstname, 
+                username: userIdentity.username, 
+                sex: userIdentity.sex,
+                password: hash,
+                email: userIdentity.email
+            } as ColumnsToFill<User>) as number;
+            
             return userid;
         }catch(err){
             throw err
@@ -116,10 +120,12 @@ export default class Auth {
             .equals("password", "password_confirmation")
             .getErrors();
     
-        const userId = this.session.userId;
-        if (errors === null && userId) {
+        const registration_step_one_data = this.session.registrationStepOneData;
+        console.log("data", registration_step_one_data)
+        if (errors === null && registration_step_one_data) {
             try {
-                await this.insertUserStepTwoData(data, userId)
+                const userId: number = await this.insertUserIdentity({...registration_step_one_data, ...data});
+                
                 const authenticatedUser = await this.loginAfterRegistration(data, userId)
 
                 if (authenticatedUser) {
@@ -135,19 +141,6 @@ export default class Auth {
         } else {
             this.res.status(500).json({ ...errors, success: false })
         } 
-    }
-    
-    private async insertUserStepTwoData(data: DataFromRegistration, userId: number): Promise<void> {        
-        try {
-            const hash = await this.passwordGuard.hash(data.password);
-
-            await this.userTable.update({
-                password: hash,
-                email: data.email
-            } as ColumnsToFill<User>, {id: userId} as ColumnsToFill<User>);
-        }catch(e){
-            throw e
-        }
     }
     
     private async loginAfterRegistration(data: DataFromRegistration, userId: number): Promise<boolean> {

@@ -16,7 +16,8 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/lib/*": ["lib/*"]
+      "@/lib/*": ["lib/*"],
+      "@/styles/":["styles/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "backend/test/validatortest.mts", "jest.config.js", "server/index.js"],
