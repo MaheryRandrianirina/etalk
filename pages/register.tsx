@@ -7,11 +7,13 @@ import {
     MouseEventHandler,
     SetStateAction,
     SyntheticEvent,
+    useEffect,
     useState
 } from "react";
 import {RegisterStepOne, RegisterStepThree, RegisterStepTwo} from "../components/form/registerStepElements";
 import CongratsForSubscription from "../components/congratsForSubscription";
-import styles from "../styles/sass/modules/buttons.module.scss";
+import buttons_styles from "../styles/sass/modules/buttons.module.scss";
+import input_styles from "../styles/sass/modules/input.module.scss"
 import Link from "next/link";
 import {UserIdentity, UserUniqueProperties} from "../types/user";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -22,6 +24,7 @@ import useFormErrors from "../hooks/useFormErrors";
 import { RegistrationFormErrors } from "../types/errors";
 import { getServerSideProps } from "./api/authenticated";
 import { FileError, UploadError } from "@/lib/index";
+import { PASSWORDS_CONFIRMATION_ALERT } from "@/lib/constants";
 
 
 const PostDataforRegistration: (
@@ -98,6 +101,16 @@ export default function Register(): JSX.Element {
         activeButton: "ignore",
         chosenImage: null
     } as RegistrationStepThreeProperties)
+
+    const [passwordAlert, setpasswordAlert] = useState<JSX.Element|null>(null)
+
+    useEffect(()=>{
+        if(userUniqueProperties.password !== userUniqueProperties.password_confirmation){
+            setpasswordAlert(<small className={input_styles.error}>{PASSWORDS_CONFIRMATION_ALERT}</small>)
+        }else{
+            setpasswordAlert(null)
+        }
+    }, [userUniqueProperties.password_confirmation])
 
     const rulesForEachStep = {
         one: identity.name.length >= 3 
@@ -183,7 +196,7 @@ export default function Register(): JSX.Element {
 
     const handleChange: ChangeEventHandler = (event: ChangeEvent<HTMLInputElement>) => {
         const targetName = event.target.name as Exclude<keyof DataFromRegistration,"sex">
-
+        
         const value: string = event.target.value
 
         if(targetName === "name"){
@@ -245,7 +258,7 @@ export default function Register(): JSX.Element {
         : (registerStep === 2 ? rulesForEachStep.two === false : null)
 
     return <div className="registration_page">
-        {registerStep === 1 && <Link href="/login" className={styles.to_loginpage_button}>
+        {registerStep === 1 && <Link href="/login" className={buttons_styles.to_loginpage_button}>
             Se connecter
         </Link>}
         {registerStep < 4 ? <form method="post" onSubmit={handleSubmit} encType="multipart/form-data">
@@ -265,7 +278,7 @@ export default function Register(): JSX.Element {
                 email:userUniqueProperties.email,
                 password: userUniqueProperties.password,
                 password_confirmation: userUniqueProperties.password_confirmation
-            } as UserUniqueProperties} disableButton={disabledButton as boolean}/>}
+            } as UserUniqueProperties} disableButton={disabledButton as boolean} passConfirmationAlert={passwordAlert}/>}
 
             {registerStep === 3 && <RegisterStepThree events={{
                 onClick: chooseProfilPic

@@ -8,6 +8,7 @@ import styles from "../../styles/sass/modules/input.module.scss"
 import { UserUniqueProperties } from "../../types/user";
 import { ButtonContext } from "../contexts/ButtonContext";
 import { RegistrationFormErrors } from "../../types/errors";
+import { debounce } from "@/lib/utils";
 
 
 function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
@@ -77,10 +78,11 @@ function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
   );
 }
 
-function RegisterStepTwo({inputsEvents, values, disableButton}: {
+function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationAlert}: {
   inputsEvents: ElementEvents<HTMLInputElement>,
   values: UserUniqueProperties,
-  disableButton: boolean
+  disableButton: boolean,
+  passConfirmationAlert: JSX.Element|null
 }): JSX.Element {
   return (
     <div className="register_step_two">
@@ -117,7 +119,7 @@ function RegisterStepTwo({inputsEvents, values, disableButton}: {
           onChange: inputsEvents.onChange
         }}
       />
-
+      {passConfirmationAlert}
       <PrimaryButtonWithArrowRight disabled={disableButton}>Suivant </PrimaryButtonWithArrowRight>
       <RegistrationProgress activeBar={2} />
     </div>
