@@ -1,8 +1,8 @@
 import { useRouter } from "next/router"
-import ConversationHeader from "../../../components/conversations/header"
-import ConversationFooter from "../../../components/conversations/footer"
-import Content from "../../../components/conversations/content"
-import { AuthUser, User } from "../../../types/user"
+import ConversationHeader from "@/components/conversations/header"
+import ConversationFooter from "@/components/conversations/footer"
+import Content from "@/components/conversations/content"
+import { AuthUser, User } from "@/types/user"
 import { Dispatch, 
     FormEvent, 
     MouseEventHandler, 
@@ -14,13 +14,13 @@ import { Dispatch,
     useEffect, 
     useMemo, 
     useState } from "react"
-import { ChosenReceiver, ConversationMessage, SetMessage } from "../../../types/conversation"
-import Data from "../../../lib/data"
+import { ChosenReceiver, ConversationMessage, SetMessage } from "@/types/conversation"
+import Data from "@/lib/data"
 import axios, { AxiosError } from "axios"
-import { Join } from "../../../types/Database"
-import { CustomMessage } from "../../../types/ably"
+import { Join } from "@/types/Database"
+import { CustomMessage } from "@/types/ably"
 import { useChannel } from "ably/react"
-import { useCallAblyApi } from "../../../components/hooks"
+import { useCallAblyApi } from "@/hooks/useCallAbly"
 import type { NextApiRequest, NextApiResponse } from "next"
 import { getSession } from "@/lib/index"
 

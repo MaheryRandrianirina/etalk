@@ -1,5 +1,5 @@
 import { FC, MouseEventHandler, ReactNode, TransitionEventHandler } from "react";
-import CloseIcon from "../icons/closeIcon";
+import CloseIcon from "../../atoms/icons/closeIcon";
 
 const Modal: FC<{
     className?: string,

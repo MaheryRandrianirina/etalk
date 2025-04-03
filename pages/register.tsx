@@ -10,27 +10,29 @@ import {
     useEffect,
     useState
 } from "react";
-import {RegisterStepOne, RegisterStepThree, RegisterStepTwo} from "../components/form/registerStepElements";
-import CongratsForSubscription from "../components/congratsForSubscription";
-import buttons_styles from "../styles/sass/modules/buttons.module.scss";
-import input_styles from "../styles/sass/modules/input.module.scss"
+import {RegisterStepOne, RegisterStepThree, RegisterStepTwo} from "@/components/organisms/registerStepElements";
+import CongratsForSubscription from "@/components/molecules/congratsForSubscription";
+import buttons_styles from "@/styles/sass/modules/buttons.module.scss";
 import Link from "next/link";
-import {UserIdentity, UserUniqueProperties} from "../types/user";
+import {UserIdentity, UserUniqueProperties} from "@/types/user";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import {DataFromRegistration} from "../types/registration/dataFromRegistration";
-import { PostDataReturnType } from "../types/registration/dataBaseCommunication"
-import { RegistrationStepThreeProperties } from "../types/registration/registration";
-import useFormErrors from "../hooks/useFormErrors";
-import { RegistrationFormErrors } from "../types/errors";
-import { getServerSideProps } from "./api/authenticated";
+import {DataFromRegistration} from "@/types/registration/dataFromRegistration";
+import { PostDataReturnType } from "@/types/registration/dataBaseCommunication"
+import { RegistrationStepThreeProperties } from "@/types/registration/registration";
+import useFormErrors from "@/hooks/useFormErrors";
+import { RegistrationFormErrors } from "@/types/errors";
+import { getServerSideProps } from "@/pages/api/authenticated";
 import { FileError, UploadError } from "@/lib/index";
-import { PASSWORDS_CONFIRMATION_ALERT } from "@/lib/constants";
+import { password_alerts } from "@/lib/constants";
+import { debounce } from "@/lib/utils";
+import { ProgressContext } from "@/components/contexts/Progress";
 
 
 const PostDataforRegistration: (
     step: number, 
-    data: UserIdentity | UserUniqueProperties | {image:File}
-) => Promise<PostDataReturnType> = async (step, data): Promise<any> => {
+    data: UserIdentity | UserUniqueProperties | {image:File},
+    setProgress: (progress: number) => void
+) => Promise<PostDataReturnType> = async (step, data, setProgress): Promise<any> => {
     try {
         let res: AxiosResponse<{success: boolean}, unknown> | undefined
 
@@ -62,7 +64,13 @@ const PostDataforRegistration: (
                 throw new FileError("Le fichier est trop volumineux")
             }
         }else {
-            res = await axios.post("/api/register", {registrationStep: step, data: data})
+            res = await axios.post("/api/register", {registrationStep: step, data: data}, {
+                onUploadProgress: (progressEvent) => {
+                    const {loaded, total} = progressEvent
+                    const percentCompleted = total ? Math.round((loaded * 100) / total) : Math.round((loaded * 1024)) // estimate by bytes
+                    setProgress(percentCompleted)
+                }
+            })
         }
         
         if(res?.statusText === "OK"){
@@ -71,6 +79,15 @@ const PostDataforRegistration: (
     }catch(error){
         throw error
     }
+}
+
+/**
+ * verifie la validite du mot de passe
+ * @param password string
+ * @returns boolean
+ */
+const isValid: (password: string) => boolean = (password:string) => {
+    return password.length >= 8 && password.match(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^\w\s]).+$/) !== null
 }
 
 export default function Register(): JSX.Element {
@@ -102,15 +119,24 @@ export default function Register(): JSX.Element {
         chosenImage: null
     } as RegistrationStepThreeProperties)
 
-    const [passwordAlert, setpasswordAlert] = useState<JSX.Element|null>(null)
+    const [passConfirmationError, setpassConfirmationError] = useState<string|null>(null)
+    const [passwordInvalidError, setPasswordInvalidError] = useState<string|null>(null)
+    const [progress, setProgress] = useState<number>(0)
 
     useEffect(()=>{
-        if(userUniqueProperties.password !== userUniqueProperties.password_confirmation){
-            setpasswordAlert(<small className={input_styles.error}>{PASSWORDS_CONFIRMATION_ALERT}</small>)
-        }else{
-            setpasswordAlert(null)
+
+        if(userUniqueProperties.password !== "" && !isValid(userUniqueProperties.password)){
+            debounce(() => setPasswordInvalidError(password_alerts.PASSWORD_INVALID))()
+        }else {
+            debounce(() => setPasswordInvalidError(e => e !== null ? null : e))()
         }
-    }, [userUniqueProperties.password_confirmation])
+
+        if(userUniqueProperties.password_confirmation !== "" && userUniqueProperties.password !== userUniqueProperties.password_confirmation){
+            debounce(() => setpassConfirmationError(password_alerts.PASSWORD_CONFIRMATION))()
+        }else{
+            debounce(() => setpassConfirmationError(null))()
+        }
+    }, [userUniqueProperties.password, userUniqueProperties.password_confirmation])
 
     const rulesForEachStep = {
         one: identity.name.length >= 3 
@@ -131,15 +157,16 @@ export default function Register(): JSX.Element {
             let res: PostDataReturnType | undefined
 
             if(registerStep === 1){
-                res = await PostDataforRegistration(registerStep, identity)
+                res = await PostDataforRegistration(registerStep, identity, setProgress)
             }else if(registerStep === 2){
-                res = await PostDataforRegistration(registerStep, userUniqueProperties)
+                res = await PostDataforRegistration(registerStep, userUniqueProperties, setProgress)
             }else if(registerStep === 3){
                 const activeButton = stepThreeProperties.activeButton
                 if(activeButton === "finish" && stepThreeProperties.chosenImage !== null){
                     res = await PostDataforRegistration(
                         registerStep, 
-                        {image: stepThreeProperties.chosenImage}
+                        {image: stepThreeProperties.chosenImage},
+                        setProgress
                     )
                 }else if(activeButton === "ignore") {
                     setRegisterStep((s: number) => s + 1)
@@ -153,6 +180,8 @@ export default function Register(): JSX.Element {
                     console.error(res.sqlError)
                 }
             }
+            // reset progress a 0
+            setProgress(0)
         }catch(error){
             if(error instanceof AxiosError && error.response !== undefined){
                 const errorData = error.response.data
@@ -199,45 +228,16 @@ export default function Register(): JSX.Element {
         
         const value: string = event.target.value
 
-        if(targetName === "name"){
-            setIdentity((s:UserIdentity) => {
-                return {...s, name: value}
-            })
-        }else if(targetName === "firstname"){
-            setIdentity((s:UserIdentity) => {
-                return {...s, firstname: value} 
-            })
-        }else if(targetName === "username") {
-            setIdentity((s:UserIdentity)=>{
-                return {...s, username: value}
-            })
+        if(targetName === "name" || targetName === "firstname" || targetName === "username"){
+            setIdentity((s:UserIdentity) => ({...s, [targetName]: value}))
         }else if(event.target.className === "man_radio_button" || event.target.className === "woman_radio_button"){
-            setIdentity((s)=>{
-                return {...s,sex: value} as UserIdentity
-            })
-        }else if(targetName === "email"){
-            setUserUniqueProperties((properties: UserUniqueProperties) => {
-                return {
-                    ...properties, email: value
-                }
-            })
-        }else if(targetName === "password"){
-            setUserUniqueProperties((properties: UserUniqueProperties) => {
-                return {
-                    ...properties, password: value
-                }
-            })
-        }else if(targetName === "password_confirmation"){
-            setUserUniqueProperties((properties: UserUniqueProperties) => {
-                return {
-                    ...properties, password_confirmation: value
-                }
-            })
+            setIdentity((s)=>({...s,sex: value} as UserIdentity))
+        }else if(targetName === "email" || targetName === "password" || targetName === "password_confirmation"){
+            setUserUniqueProperties((properties: UserUniqueProperties) => ({...properties, [targetName]: value}))
         }
     }
 
     const chooseProfilPic: MouseEventHandler = (event: SyntheticEvent) => {
-
         const fileInput = document.querySelector('.hidden_file_input') as HTMLInputElement
         if(fileInput && fileInput.type === "file"){
             fileInput.click()
@@ -261,31 +261,40 @@ export default function Register(): JSX.Element {
         {registerStep === 1 && <Link href="/login" className={buttons_styles.to_loginpage_button}>
             Se connecter
         </Link>}
-        {registerStep < 4 ? <form method="post" onSubmit={handleSubmit} encType="multipart/form-data">
-            
-            {registerStep === 1 && <RegisterStepOne inputsEvents={{
-                onChange: handleChange
-            }} values={{
-                name: identity.name,
-                firstname: identity.firstname,
-                username: identity.username,
-                sex: identity.sex
-            } as UserIdentity} errors={formErrors} disableButton={disabledButton as boolean}/>}
-            
-            {registerStep === 2 && <RegisterStepTwo inputsEvents={{
-                onChange: handleChange
-            }} values={{
-                email:userUniqueProperties.email,
-                password: userUniqueProperties.password,
-                password_confirmation: userUniqueProperties.password_confirmation
-            } as UserUniqueProperties} disableButton={disabledButton as boolean} passConfirmationAlert={passwordAlert}/>}
+        {registerStep < 4 ? 
+        <form method="post" onSubmit={handleSubmit} encType="multipart/form-data">
+            <ProgressContext.Provider value={progress}>
+                {registerStep === 1 && <RegisterStepOne inputsEvents={{
+                    onChange: handleChange
+                }} values={{
+                    name: identity.name,
+                    firstname: identity.firstname,
+                    username: identity.username,
+                    sex: identity.sex
+                } as UserIdentity} errors={formErrors} disableButton={disabledButton as boolean}/>}
+                
+                {registerStep === 2 && 
+                    <RegisterStepTwo inputsEvents={{
+                    onChange: handleChange
+                    }} values={{
+                        email:userUniqueProperties.email,
+                        password: userUniqueProperties.password,
+                        password_confirmation: userUniqueProperties.password_confirmation
+                    } as UserUniqueProperties} disableButton={disabledButton as boolean} 
+                    passConfirmationError={passConfirmationError}
+                    invalidPassError={passwordInvalidError}/>
+                }
 
-            {registerStep === 3 && <RegisterStepThree events={{
-                onClick: chooseProfilPic
-            }} activeButton={stepThreeProperties.activeButton}
-                chosenProfilePhoto={stepThreeProperties.chosenImage}
-            />}
-        </form> : <CongratsForSubscription/>}
+                {registerStep === 3 && <RegisterStepThree events={{
+                    onClick: chooseProfilPic
+                }} activeButton={stepThreeProperties.activeButton}
+                    chosenProfilePhoto={stepThreeProperties.chosenImage}
+                />}
+            </ProgressContext.Provider>
+        </form> 
+            : 
+        <CongratsForSubscription/>
+        }
     </div>
 }
 

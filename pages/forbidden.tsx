@@ -1,4 +1,4 @@
-import Logo from "../components/decors/logo";
+import Logo from "../components/atoms/decors/logo";
 
 export default function Forbidden(): JSX.Element {
     return <div className="forbidden">

@@ -1,10 +1,10 @@
 import { FC, MouseEventHandler, TransitionEventHandler, memo, useEffect } from "react";
 import useClassnameAnimator from "../../hooks/useClassnameAnimator";
-import CloseIcon from "../icons/closeIcon";
+import CloseIcon from "../atoms/icons/closeIcon";
 import { AuthUser } from "../../types/user";
-import { UserIcon } from "../icons/UserIcon";
-import ProfilePic from "../profilePic";
-import { SecondaryButton } from "../widgets/button";
+import { UserIcon } from "../atoms/icons/UserIcon";
+import ProfilePic from "../atoms/profilePic";
+import { SecondaryButton } from "../atoms/button";
 import { Join } from "../../types/Database";
 
 const Profile: FC<{

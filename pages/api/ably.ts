@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse} from "next"
-import { withSessionRoute } from "../../backend/utilities/withSession"
 import ably from "ably";
 import ConversationTable from "../../backend/database/tables/ConversationTable";
 import { Conversation, ConversationUser, Message } from "../../types/Database";
@@ -11,9 +10,7 @@ import { Conversation as UserConversation } from "../../backend/User/Conversatio
 import { CustomMessage } from "../../types/ably";
 import { ConversationMessage } from "../../types/conversation";
 
-export default withSessionRoute(Ably) 
-
-async function Ably(req: NextApiRequest, res: NextApiResponse) {
+export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
     if(req.method === "GET"){
         let {user} = req.session;
         if(!user){

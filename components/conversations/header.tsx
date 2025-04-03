@@ -1,6 +1,6 @@
-import ProfilePic from "../profilePic";
+import ProfilePic from "../atoms/profilePic";
 import profilePic from "../../public/20200823_120127_0.jpg";
-import { AddReceiverInput } from "../form/input";
+import { AddReceiverInput } from "../atoms/input";
 import {
   ChangeEvent,
   ChangeEventHandler,
@@ -18,7 +18,7 @@ import {
 } from "react";
 import axios from "axios";
 import { AuthUser, User } from "../../types/user";
-import SearchResults from "../app/searchResults";
+import SearchResults from "../molecules/searchResults";
 import { GetAway, MultipleClassnameForAnimation } from "../../types/utils";
 import { ChosenReceivers } from "./chosenReceivers";
 import {
@@ -26,14 +26,14 @@ import {
   Receiver,
   SearchResultStyle,
 } from "../../types/conversation";
-import { UserIcon } from "../icons/UserIcon";
-import Profile from "../user/profile";
+import { UserIcon } from "../atoms/icons/UserIcon";
+import Profile from "../organisms/profile";
 import { createPortal } from "react-dom";
 import { ButtonContext } from "../contexts/ButtonContext";
-import ConfirmationModal from "../modals/confirmationModal";
+import ConfirmationModal from "../molecules/modals/confirmationModal";
 import { BlockUser } from "../../pages/conversation/[adressee_id]/[conversation_id]";
 import { Join } from "../../types/Database";
-import BackIcon from "../icons/backIcon";
+import BackIcon from "../atoms/icons/backIcon";
 import { ModalData } from "../../types/modal";
 
 const ConversationHeader = ({

@@ -3,7 +3,7 @@ import { GetAway } from "../../types/utils"
 import { User } from "../../types/user"
 import { MouseEvent, MouseEventHandler, SyntheticEvent } from "react"
 import { SearchResultHandler } from "../../types/input"
-import { UserIcon } from "../icons/UserIcon"
+import { UserIcon } from "../atoms/icons/UserIcon"
 
 export default function SearchResult({user, clickResultHandler, choseReceiver}: {
     user: GetAway<User, ["password"]>,

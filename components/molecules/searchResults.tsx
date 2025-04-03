@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, SyntheticEvent, useCallback, useEffect, useState } from "react";
 import { User } from "../../types/user";
 import { GetAway } from "../../types/utils";
-import SearchResult from "./searchResult";
+import SearchResult from "../atoms/searchResult";
 import { SearchResultHandler } from "../../types/input";
 
 type SearchResultsType = GetAway<User, ["password"]>[]

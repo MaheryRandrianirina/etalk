@@ -1,20 +1,20 @@
 import Head from 'next/head'
-import ReceptionBox from '../components/receptionbox'
+import ReceptionBox from '../components/organisms/receptionbox'
 import { User } from '../types/user'
 import { NextResponse } from "next/server"
 import type { NextApiRequest, NextApiResponse } from "next"
 import Auth from '../backend/User/Auth'
 import { ChangeEvent, ChangeEventHandler, Context, Dispatch, EventHandler, Fragment, MouseEvent, MouseEventHandler, SetStateAction, SyntheticEvent, createContext, useCallback, useEffect, useState } from 'react'
 import UserConversation from './conversation/[adressee_id]/[conversation_id]'
-import Header from '../components/app/header'
-import SearchBar from '../components/app/searchBar'
-import ListActiveFriends from '../components/friends/listActiveFriends'
-import SearchResults from '../components/app/searchResults'
-import Footer from '../components/app/footer'
-import Opening from '../components/loaders/opening'
+import Header from '../components/atoms/header'
+import SearchBar from '../components/atoms/searchBar'
+import ListActiveFriends from '../components/molecules/listActiveFriends'
+import SearchResults from '../components/molecules/searchResults'
+import Footer from '../components/atoms/footer'
+import Opening from '../components/atoms/loaders/opening'
 import axios from 'axios'
 import { UserConversations } from '../types/conversation'
-import Menu from '../components/app/menu'
+import Menu from '../components/molecules/menu'
 import useClassnameAnimator from '../hooks/useClassnameAnimator';
 import { useChannel, useConnectionStateListener } from "ably/react";
 import { Conversation } from '../types/Database'

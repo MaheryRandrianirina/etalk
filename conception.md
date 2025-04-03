@@ -67,6 +67,7 @@
 # PROCHAINES CHOSES A FAIRE URGEMMENT
 - Remplacer tous les RequestWithSession en NextApiRequest ou NextRequest [v]
 - Ajuster le style de l'oeil sur les champs mot de passe dans le formulaire d'inscription [v]
-- Afficher des erreurs claires lorsque les conditions du formulaire d'inscription ne sont pas remplies
+- Afficher des erreurs claires lorsque les conditions du formulaire d'inscription ne sont pas remplies [v]
+- Afficher le titre de chaque page dans le document.title
 - Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist)
 - Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes
