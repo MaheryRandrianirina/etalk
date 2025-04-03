@@ -24,7 +24,8 @@ import useFormErrors from "../hooks/useFormErrors";
 import { RegistrationFormErrors } from "../types/errors";
 import { getServerSideProps } from "./api/authenticated";
 import { FileError, UploadError } from "@/lib/index";
-import { PASSWORDS_CONFIRMATION_ALERT } from "@/lib/constants";
+import { password_alerts } from "@/lib/constants";
+import { debounce } from "@/lib/utils";
 
 
 const PostDataforRegistration: (
@@ -73,6 +74,15 @@ const PostDataforRegistration: (
     }
 }
 
+/**
+ * verifie la validite du mot de passe
+ * @param password string
+ * @returns boolean
+ */
+const isValid: (password: string) => boolean = (password:string) => {
+    return password.length >= 8 && password.match(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^\w\s]).+$/) !== null
+}
+
 export default function Register(): JSX.Element {
     const [registerStep, setRegisterStep]: [
         registerStep: number,
@@ -102,15 +112,23 @@ export default function Register(): JSX.Element {
         chosenImage: null
     } as RegistrationStepThreeProperties)
 
-    const [passwordAlert, setpasswordAlert] = useState<JSX.Element|null>(null)
+    const [passConfirmationError, setpassConfirmationError] = useState<string|null>(null)
+    const [passwordInvalidError, setPasswordInvalidError] = useState<string|null>(null)
 
     useEffect(()=>{
-        if(userUniqueProperties.password !== userUniqueProperties.password_confirmation){
-            setpasswordAlert(<small className={input_styles.error}>{PASSWORDS_CONFIRMATION_ALERT}</small>)
-        }else{
-            setpasswordAlert(null)
+
+        if(userUniqueProperties.password !== "" && !isValid(userUniqueProperties.password)){
+            debounce(() => setPasswordInvalidError(password_alerts.PASSWORD_INVALID))()
+        }else {
+            debounce(() => setPasswordInvalidError(e => e !== null ? null : e))()
         }
-    }, [userUniqueProperties.password_confirmation])
+
+        if(userUniqueProperties.password_confirmation !== "" && userUniqueProperties.password !== userUniqueProperties.password_confirmation){
+            debounce(() => setpassConfirmationError(password_alerts.PASSWORD_CONFIRMATION))()
+        }else{
+            debounce(() => setpassConfirmationError(null))()
+        }
+    }, [userUniqueProperties.password, userUniqueProperties.password_confirmation])
 
     const rulesForEachStep = {
         one: identity.name.length >= 3 
@@ -199,45 +217,16 @@ export default function Register(): JSX.Element {
         
         const value: string = event.target.value
 
-        if(targetName === "name"){
-            setIdentity((s:UserIdentity) => {
-                return {...s, name: value}
-            })
-        }else if(targetName === "firstname"){
-            setIdentity((s:UserIdentity) => {
-                return {...s, firstname: value} 
-            })
-        }else if(targetName === "username") {
-            setIdentity((s:UserIdentity)=>{
-                return {...s, username: value}
-            })
+        if(targetName === "name" || targetName === "firstname" || targetName === "username"){
+            setIdentity((s:UserIdentity) => ({...s, [targetName]: value}))
         }else if(event.target.className === "man_radio_button" || event.target.className === "woman_radio_button"){
-            setIdentity((s)=>{
-                return {...s,sex: value} as UserIdentity
-            })
-        }else if(targetName === "email"){
-            setUserUniqueProperties((properties: UserUniqueProperties) => {
-                return {
-                    ...properties, email: value
-                }
-            })
-        }else if(targetName === "password"){
-            setUserUniqueProperties((properties: UserUniqueProperties) => {
-                return {
-                    ...properties, password: value
-                }
-            })
-        }else if(targetName === "password_confirmation"){
-            setUserUniqueProperties((properties: UserUniqueProperties) => {
-                return {
-                    ...properties, password_confirmation: value
-                }
-            })
+            setIdentity((s)=>({...s,sex: value} as UserIdentity))
+        }else if(targetName === "email" || targetName === "password" || targetName === "password_confirmation"){
+            setUserUniqueProperties((properties: UserUniqueProperties) => ({...properties, [targetName]: value}))
         }
     }
 
     const chooseProfilPic: MouseEventHandler = (event: SyntheticEvent) => {
-
         const fileInput = document.querySelector('.hidden_file_input') as HTMLInputElement
         if(fileInput && fileInput.type === "file"){
             fileInput.click()
@@ -272,13 +261,17 @@ export default function Register(): JSX.Element {
                 sex: identity.sex
             } as UserIdentity} errors={formErrors} disableButton={disabledButton as boolean}/>}
             
-            {registerStep === 2 && <RegisterStepTwo inputsEvents={{
+            {registerStep === 2 && 
+                <RegisterStepTwo inputsEvents={{
                 onChange: handleChange
-            }} values={{
-                email:userUniqueProperties.email,
-                password: userUniqueProperties.password,
-                password_confirmation: userUniqueProperties.password_confirmation
-            } as UserUniqueProperties} disableButton={disabledButton as boolean} passConfirmationAlert={passwordAlert}/>}
+                }} values={{
+                    email:userUniqueProperties.email,
+                    password: userUniqueProperties.password,
+                    password_confirmation: userUniqueProperties.password_confirmation
+                } as UserUniqueProperties} disableButton={disabledButton as boolean} 
+                passConfirmationError={passConfirmationError}
+                invalidPassError={passwordInvalidError}/>
+            }
 
             {registerStep === 3 && <RegisterStepThree events={{
                 onClick: chooseProfilPic
