@@ -18,10 +18,8 @@ import Menu from '../components/molecules/menu'
 import useClassnameAnimator from '../hooks/useClassnameAnimator';
 import { useChannel, useConnectionStateListener } from "ably/react";
 import { Conversation } from '../types/Database'
-import { CustomMessage } from '../types/ably'
-import { useCallAblyApi } from '../components/hooks'
-import { getIronSession } from 'iron-session'
-import { SessionData } from '../types/session'
+import { CustomMessage } from '@/types/ably'
+import { useCallAblyApi } from '@/hooks/useCallAbly'
 import { getSession } from '../lib'
 
 
