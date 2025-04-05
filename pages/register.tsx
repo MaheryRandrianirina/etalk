@@ -26,6 +26,7 @@ import { FileError, UploadError } from "@/lib/index";
 import { password_alerts } from "@/lib/constants";
 import { debounce } from "@/lib/utils";
 import { ProgressContext } from "@/components/contexts/Progress";
+import { onUploadProgress } from "@/lib/utils/events";
 
 
 const PostDataforRegistration: (
@@ -65,11 +66,7 @@ const PostDataforRegistration: (
             }
         }else {
             res = await axios.post("/api/register", {registrationStep: step, data: data}, {
-                onUploadProgress: (progressEvent) => {
-                    const {loaded, total} = progressEvent
-                    const percentCompleted = total ? Math.round((loaded * 100) / total) : Math.round((loaded * 1024)) // estimate by bytes
-                    setProgress(percentCompleted)
-                }
+                onUploadProgress: onUploadProgress(setProgress)
             })
         }
         

@@ -1,11 +1,14 @@
 import { ChangeEvent, ChangeEventHandler, Dispatch, FormEventHandler, SetStateAction, useState } from "react";
-import { InputCheckbox, InputPassword, InputText } from "../atoms/input";
-import { PrimaryButton } from "../atoms/button";
+import { InputCheckbox, InputPassword, InputText } from "@/components/atoms/input";
+import { PrimaryButton } from "@/components/atoms/button";
 import Link from "next/link";
 import axios, { AxiosError } from "axios";
-import useFormErrors from "../../hooks/useFormErrors";
-import { LoginFormErrors } from "../../types/errors";
-import Logo from "../atoms/decors/logo";
+import useFormErrors from "@/hooks/useFormErrors";
+import { LoginFormErrors } from "@/types/errors";
+import Logo from "@/components/atoms/decors/logo";
+import { Portal } from "@/components/templates/Portal";
+import { ProgressBar } from "@/components/atoms/loaders/Progressbar";
+import { onUploadProgress } from "@/lib/utils/events";
 
 export type LoginInputs = {
     username: string,
@@ -13,9 +16,11 @@ export type LoginInputs = {
     remember_me: boolean
 }
 
-const PostLoginData = async (data: LoginInputs) => {
+const PostLoginData = async (data: LoginInputs, setProgress: (progress: number)=>void) => {
     try {
-        const res = await axios.post("/api/login", data)
+        const res = await axios.post("/api/login", data, {
+            onUploadProgress: onUploadProgress(setProgress)
+        })
         if(res.statusText === "OK"){
             return res.data
         }else {
@@ -37,6 +42,7 @@ export default function Login(): JSX.Element {
         password: "",
         remember_me: false
     } as LoginInputs)
+    const [progress, setProgress] = useState<number>(0)
 
     const [formErrors, setFormErrors]= useFormErrors<LoginFormErrors>({})
 
@@ -65,7 +71,7 @@ export default function Login(): JSX.Element {
         e.preventDefault();
 
         try {
-            const data = await PostLoginData(inputsValues) as {
+            const data = await PostLoginData(inputsValues, setProgress) as {
                 success: true, message?: string, 
                 redirection?: {redirected: boolean, url: string}
             }
@@ -141,5 +147,8 @@ export default function Login(): JSX.Element {
                 Pas de compte ? <Link href="/register" className="registration_link_from_login">S&lsquo;inscrire</Link>
             </div>
         </form>
+        <Portal>
+            <ProgressBar progress={progress}/>
+        </Portal>
     </div>
 }
