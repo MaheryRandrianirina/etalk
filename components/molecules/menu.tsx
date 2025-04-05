@@ -3,11 +3,7 @@ import BackIcon from "../atoms/icons/backIcon"
 import { ModalData } from "../../types/modal"
 import { createPortal } from "react-dom"
 import { ButtonContext } from "../contexts/ButtonContext"
-<<<<<<< HEAD:components/app/menu.tsx
-import ConfirmationModal from "../modals/confirmationModal"
-=======
 import ConfirmationModal from "./modals/confirmationModal"
->>>>>>> feat/progressBarOnForms:components/molecules/menu.tsx
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
 import Data from "../../lib/data"
 import CsrfClass from "../../backend/security/csrf"

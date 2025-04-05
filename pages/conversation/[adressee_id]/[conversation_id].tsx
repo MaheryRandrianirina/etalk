@@ -14,22 +14,13 @@ import { Dispatch,
     useEffect, 
     useMemo, 
     useState } from "react"
-<<<<<<< HEAD
-import { ChosenReceiver, ConversationMessage, SetMessage } from "../../../types/conversation"
-import Data from "../../../lib/data"
-=======
 import { ChosenReceiver, ConversationMessage, SetMessage } from "@/types/conversation"
 import Data from "@/lib/data"
->>>>>>> feat/progressBarOnForms
 import axios, { AxiosError } from "axios"
 import { Join } from "@/types/Database"
 import { CustomMessage } from "@/types/ably"
 import { useChannel } from "ably/react"
-<<<<<<< HEAD
-import { useCallAblyApi } from "../../../components/hooks"
-=======
 import { useCallAblyApi } from "@/hooks/useCallAbly"
->>>>>>> feat/progressBarOnForms
 import type { NextApiRequest, NextApiResponse } from "next"
 import { getSession } from "@/lib/index"
 
