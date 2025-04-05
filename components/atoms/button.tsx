@@ -1,8 +1,8 @@
 
 import { PropsWithChildren, ReactNode, useContext } from "react";
 import { ButtonHTMLAttributes } from "react";
-import styles from "../../styles/sass/modules/decorations.module.scss";
-import { ButtonContext } from "../form/registerStepElements";
+import styles from "@/styles/sass/modules/decorations.module.scss";
+import { ButtonContext } from "../organisms/registerStepElements";
 
 function Button({type, children, className, disabled}: ButtonHTMLAttributes<string | boolean | undefined>): JSX.Element {
     const clickEventHandler = useContext(ButtonContext)

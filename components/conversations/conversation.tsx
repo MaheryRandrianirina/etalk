@@ -4,13 +4,17 @@ import { AuthUser, ConversationOwners, User } from "../../types/user"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { Conversation as UserConversation, Join } from "../../types/Database"
 import { ConversationMessage, SetMessage } from "../../types/conversation"
+<<<<<<< HEAD
 import { UserIcon } from "../icons/UserIcon"
+=======
+import { UserIcon } from "../atoms/icons/UserIcon"
+>>>>>>> feat/progressBarOnForms
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
 import { profilePhotoPath } from "@/lib/index"
 import { useChannel } from "ably/react"
 import axios from "axios"
 import { CustomMessage } from "../../types/ably"
-import { useCallAblyApi } from "../hooks"
+import { useCallAblyApi } from "@/hooks/useCallAbly"
 import { formatDistanceToNow } from "date-fns"; 
 import { fr } from "date-fns/locale"
 

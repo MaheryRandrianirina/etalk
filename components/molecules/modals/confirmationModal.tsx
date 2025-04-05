@@ -1,7 +1,12 @@
 import { FC, MouseEventHandler, TransitionEventHandler, useEffect } from "react";
 import Modal from "./modal";
+<<<<<<< HEAD:components/modals/confirmationModal.tsx
 import { PrimaryButton, SecondaryButton } from "../widgets/button";
 import useClassnameAnimator from "../../hooks/useClassnameAnimator";
+=======
+import { PrimaryButton, SecondaryButton } from "../../atoms/button";
+import useClassnameAnimator from "../../../hooks/useClassnameAnimator";
+>>>>>>> feat/progressBarOnForms:components/molecules/modals/confirmationModal.tsx
 
 const ConfirmationModal: FC<{
     data: string,

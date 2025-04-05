@@ -1,6 +1,6 @@
 
 import { getServerSideProps} from "./api/authenticated"
-import Login from "../components/login";
+import Login from "../components/organisms/login";
 
 export default Login;
 

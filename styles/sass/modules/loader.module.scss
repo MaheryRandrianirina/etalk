@@ -1,4 +1,5 @@
 @import "../mixins/globalmixins.scss";
+@import "@/styles/sass/colors.scss";
 
 .opening_app_loader {
     position: relative;
@@ -24,4 +25,14 @@
     .copyright_owner {
         margin-bottom: 10px;
     }
+}
+
+.progress_bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 5px;
+    width: 0;
+    background-color: $success;
+    transition: witdh .3s ease;
 }

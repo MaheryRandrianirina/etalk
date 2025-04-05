@@ -1,5 +1,5 @@
 import { ChangeEventHandler } from "react";
-import { InputSearch } from "../form/input";
+import { InputSearch } from "./input";
 
 export default function SearchBar({onSearchBarChange, value}: {
   onSearchBarChange: ChangeEventHandler<HTMLInputElement>,

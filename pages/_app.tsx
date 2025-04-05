@@ -1,4 +1,4 @@
-import '../styles/sass/main.scss'
+import '@/styles/sass/main.scss'
 import type { AppProps } from 'next/app'
 import localFont from "next/font/local"
 import * as Ably from "ably";

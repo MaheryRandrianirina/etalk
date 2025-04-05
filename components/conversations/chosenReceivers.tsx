@@ -1,5 +1,5 @@
 import React, { Dispatch, MouseEventHandler, ReactNode, SetStateAction, useEffect, useState } from "react";
-import styles from "../../styles/sass/modules/conversations.module.scss"
+import styles from "@/styles/sass/modules/conversations.module.scss"
 
 type Receivers = {id:number, username:string}[]
 

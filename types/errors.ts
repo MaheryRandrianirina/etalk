@@ -1,4 +1,4 @@
-import { LoginInputs } from "../components/login"
+import { LoginInputs } from "../components/organisms/login"
 import { DataFromRegistration } from "./registration/dataFromRegistration" 
 
 

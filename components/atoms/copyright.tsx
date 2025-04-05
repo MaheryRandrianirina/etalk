@@ -1,4 +1,4 @@
-import styles from "../styles/sass/modules/loader.module.scss"
+import styles from "@/styles/sass/modules/loader.module.scss"
 
 export default function Copyright(): JSX.Element {
     return <div className={styles.copyright}>

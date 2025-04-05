@@ -1,14 +1,17 @@
-import { PrimaryButton, PrimaryButtonWithArrowRight, SecondaryButton } from "../widgets/button";
-import ProfilePhotoChoiceInput from "../widgets/profilePhotoChoiceInput";
-import RegistrationProgress from "../widgets/registrationProgress";
-import { InputEmail, InputPassword, InputRadio, InputText } from "./input";
-import { ElementEvents } from "../../types/events";
-import { UserIdentity } from "../../types/user";
-import styles from "../../styles/sass/modules/input.module.scss"
-import { UserUniqueProperties } from "../../types/user";
-import { ButtonContext } from "../contexts/ButtonContext";
-import { RegistrationFormErrors } from "../../types/errors";
-import { debounce } from "@/lib/utils";
+import { PrimaryButton, PrimaryButtonWithArrowRight, SecondaryButton } from "@/components/atoms/button";
+import ProfilePhotoChoiceInput from "@/components/atoms/profilePhotoChoiceInput";
+import RegistrationProgress from "@/components/atoms/registrationProgress";
+import { InputEmail, InputPassword, InputRadio, InputText } from "@/components/atoms/input";
+import { ElementEvents } from "@/types/events";
+import { UserIdentity } from "@/types/user";
+import styles from "@/styles/sass/modules/input.module.scss"
+import { UserUniqueProperties } from "@/types/user";
+import { ButtonContext } from "@/components/contexts/ButtonContext";
+import { RegistrationFormErrors } from "@/types/errors";
+import { Portal } from "@/components/templates/Portal";
+import { ProgressBar } from "@/components/atoms/loaders/Progressbar";
+import { useContext } from "react";
+import { ProgressContext } from "@/components//contexts/Progress";
 
 
 function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
@@ -17,6 +20,8 @@ function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
   errors: RegistrationFormErrors,
   disableButton: boolean
 }):JSX.Element {
+  
+  const progress = useContext(ProgressContext)
   
   return (
     <div className="register_step_one">
@@ -74,6 +79,10 @@ function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
       
       <PrimaryButtonWithArrowRight disabled={disableButton}>Suivant </PrimaryButtonWithArrowRight>
       <RegistrationProgress />
+        
+      <Portal>
+            <ProgressBar progress={progress}/>
+        </Portal>
     </div>
   );
 }
@@ -85,6 +94,9 @@ function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationE
   passConfirmationError: string|null,
   invalidPassError: string|null
 }): JSX.Element {
+
+  const progress = useContext(ProgressContext)
+
   return (
     <div className="register_step_two">
       <InputEmail
@@ -124,6 +136,10 @@ function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationE
       />
       <PrimaryButtonWithArrowRight disabled={disableButton}>Suivant </PrimaryButtonWithArrowRight>
       <RegistrationProgress activeBar={2} />
+
+      <Portal>
+            <ProgressBar progress={progress}/>
+        </Portal>
     </div>
   );
 }
@@ -137,6 +153,9 @@ function RegisterStepThree({
   activeButton: 'ignore' | 'finish',
   chosenProfilePhoto: File | null
 }): JSX.Element {
+  
+  const progress = useContext(ProgressContext)
+
   return (
     <div className="register_step_three">
       <ProfilePhotoChoiceInput image={chosenProfilePhoto} onClickImagePicker={events.onClick !== undefined ? events.onClick : null}/>
@@ -145,6 +164,10 @@ function RegisterStepThree({
         <PrimaryButton>Terminer</PrimaryButton>
       }
       <RegistrationProgress activeBar={3} />
+
+      <Portal>
+            <ProgressBar progress={progress}/>
+        </Portal>
     </div>
   );
 }

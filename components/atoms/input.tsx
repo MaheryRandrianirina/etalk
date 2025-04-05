@@ -1,8 +1,8 @@
-import { InputAttributes, InputEvents, InputOptions, InputTypes } from "../../types/input";
-import styles from "../../styles/sass/modules/input.module.scss"
-import conversationStyles from "../../styles/sass/modules/conversations.module.scss"
+import { InputAttributes, InputEvents, InputOptions, InputTypes } from "@/types/input";
+import styles from "@/styles/sass/modules/input.module.scss"
+import conversationStyles from "@/styles/sass/modules/conversations.module.scss"
 import { ChangeEventHandler, Dispatch, MouseEvent, MouseEventHandler, SetStateAction, useState } from "react";
-import EyeIcon from "../icons/eyeIcon";
+import EyeIcon from "@/components/atoms/icons/eyeIcon";
 
 function Input({type, attributes, events}: InputOptions<InputTypes[number]>): JSX.Element {
     return (
