@@ -1,4 +1,4 @@
-import { ChangeEvent, ChangeEventHandler, Dispatch, FormEventHandler, SetStateAction, useState } from "react";
+import { ChangeEvent, ChangeEventHandler, Dispatch, FormEventHandler, SetStateAction, useEffect, useState } from "react";
 import { InputCheckbox, InputPassword, InputText } from "@/components/atoms/input";
 import { PrimaryButton } from "@/components/atoms/button";
 import Link from "next/link";
@@ -9,6 +9,8 @@ import Logo from "@/components/atoms/decors/logo";
 import { Portal } from "@/components/templates/Portal";
 import { ProgressBar } from "@/components/atoms/loaders/Progressbar";
 import { onUploadProgress } from "@/lib/utils/events";
+import { setPageTitle } from "@/lib/utils/page";
+import { page_title } from "@/lib/constants";
 
 export type LoginInputs = {
     username: string,
@@ -45,6 +47,10 @@ export default function Login(): JSX.Element {
     const [progress, setProgress] = useState<number>(0)
 
     const [formErrors, setFormErrors]= useFormErrors<LoginFormErrors>({})
+
+    useEffect(()=>{
+        setPageTitle(page_title.LOGIN)
+    }, [])
 
     const handleChangeInputs: ChangeEventHandler = (event: ChangeEvent<HTMLInputElement>)=>{
         const target = event.currentTarget

@@ -1,10 +1,6 @@
 import { useEffect } from "react";
 import axios from "axios";
-<<<<<<< HEAD:components/congratsForSubscription.tsx
-import useClassnameAnimator from "../hooks/useClassnameAnimator";
-=======
 import useClassnameAnimator from "../../hooks/useClassnameAnimator";
->>>>>>> feat/progressBarOnForms:components/molecules/congratsForSubscription.tsx
 import { NextApiRequest } from "next";
 
 export default function CongratsForSubscription({className}: {

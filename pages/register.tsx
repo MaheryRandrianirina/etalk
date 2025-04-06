@@ -27,6 +27,8 @@ import { password_alerts } from "@/lib/constants";
 import { debounce } from "@/lib/utils";
 import { ProgressContext } from "@/components/contexts/Progress";
 import { onUploadProgress } from "@/lib/utils/events";
+import { setPageTitle } from "@/lib/utils/page";
+import { page_title} from "@/lib/constants";
 
 
 const PostDataforRegistration: (
@@ -122,6 +124,8 @@ export default function Register(): JSX.Element {
 
     useEffect(()=>{
 
+        setPageTitle(page_title.REGISTER)
+        
         if(userUniqueProperties.password !== "" && !isValid(userUniqueProperties.password)){
             debounce(() => setPasswordInvalidError(password_alerts.PASSWORD_INVALID))()
         }else {
