@@ -65,9 +65,9 @@ export default class Auth {
                 
             if (errors === null) {
                 try {
-                    const userAlreadyInDB = await this.checkIfUserAlreadyExistsInDB(data.username)
-                    if (userAlreadyInDB) {
-                        this.res.status(409).json({ success: false, errors: { username: "Ce pseudo existe déjà" } })
+                    const pseudoAlreadyUsed = await this.checkIfUserAlreadyExistsInDB("username", data.username)
+                    if (pseudoAlreadyUsed) {
+                        this.res.status(409).json({ success: false, errors: { username: "Ce pseudo est deja utilise" } })
                         return
                     }
 
@@ -100,8 +100,8 @@ export default class Auth {
         
     }
 
-    private async checkIfUserAlreadyExistsInDB(username: string) {
-        const foundUsers = await this.userTable.search(["username"], ["username"], { values: [`%${username}%`]})
+    private async checkIfUserAlreadyExistsInDB(key: string, value: string) {
+        const foundUsers = await this.userTable.search([key], [key], { values: [`%${value}%`]})
         return foundUsers.length > 0
     }
     
@@ -132,9 +132,15 @@ export default class Auth {
             .getErrors();
     
         const registration_step_one_data = this.session.registrationStepOneData;
-        console.log("data", registration_step_one_data)
+        
         if (errors === null && registration_step_one_data) {
             try {
+                const emailAlreadyUsed = await this.checkIfUserAlreadyExistsInDB("email", data.email)
+                if (emailAlreadyUsed) {
+                    this.res.status(409).json({ success: false, errors: { email: "Cet adresse email est deja utilise"}})
+                    return
+                }
+
                 const userId: number = await this.insertUserIdentity({...registration_step_one_data, ...data});
                 
                 const authenticatedUser = await this.loginAfterRegistration(data, userId)

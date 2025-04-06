@@ -284,7 +284,9 @@ export default function Register(): JSX.Element {
                         password_confirmation: userUniqueProperties.password_confirmation
                     } as UserUniqueProperties} disableButton={disabledButton as boolean} 
                     passConfirmationError={passConfirmationError}
-                    invalidPassError={passwordInvalidError}/>
+                    invalidPassError={passwordInvalidError}
+                    errors={formErrors}
+                    />
                 }
 
                 {registerStep === 3 && <RegisterStepThree events={{

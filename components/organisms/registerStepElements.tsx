@@ -44,8 +44,8 @@ function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
           }}
           events={inputsEvents}
         />
-        {errors.name !== undefined ? <small className={styles.error + " " + styles.nameError}>{errors.name[0]}</small> : null}
-        {errors.firstname !== undefined ? <small className={styles.error + " " + styles.firstnameError}>{errors.firstname[0]}</small> : null}
+        {errors.name !== undefined ? <small className={styles.error + " " + styles.nameError}>{errors.name}</small> : null}
+        {errors.firstname !== undefined ? <small className={styles.error + " " + styles.firstnameError}>{errors.firstname}</small> : null}
       </div>
       <InputText
         attributes={{
@@ -87,12 +87,13 @@ function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
   );
 }
 
-function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationError, invalidPassError}: {
+function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationError, invalidPassError, errors}: {
   inputsEvents: ElementEvents<HTMLInputElement>,
   values: UserUniqueProperties,
   disableButton: boolean,
   passConfirmationError: string|null,
-  invalidPassError: string|null
+  invalidPassError: string|null,
+  errors: RegistrationFormErrors,
 }): JSX.Element {
 
   const progress = useContext(ProgressContext)
@@ -110,6 +111,7 @@ function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationE
           onChange: inputsEvents.onChange
         }}
       />
+      {errors.email !== undefined ? <small className={styles.error + " " + styles.nameError}>{errors.email}</small> : null}
       <InputPassword
         attributes={{
           className: "password_input",
