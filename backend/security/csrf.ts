@@ -3,9 +3,7 @@ import { randomBytes } from "crypto";
 export default class CsrfClass {
     private tokens: string[] = []
 
-    constructor(private key: string = "csrf", private sessionKey: string = "_csrf"){
-
-    }
+    constructor(private key: string = "csrf", private sessionKey: string = "_csrf"){}
     
     generate(): Promise<Buffer> {
         return new Promise((resolve, reject)=>{

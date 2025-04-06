@@ -69,7 +69,7 @@ const PostDataforRegistration: (
         }else {
             res = await axios.post("/api/register", {registrationStep: step, data: data}, {
                 onUploadProgress: onUploadProgress(setProgress)
-            })
+            })            
         }
         
         if(res?.statusText === "OK"){
@@ -125,7 +125,7 @@ export default function Register(): JSX.Element {
     useEffect(()=>{
 
         setPageTitle(page_title.REGISTER)
-        
+
         if(userUniqueProperties.password !== "" && !isValid(userUniqueProperties.password)){
             debounce(() => setPasswordInvalidError(password_alerts.PASSWORD_INVALID))()
         }else {
@@ -181,8 +181,7 @@ export default function Register(): JSX.Element {
                     console.error(res.sqlError)
                 }
             }
-            // reset progress a 0
-            setProgress(0)
+            
         }catch(error){
             if(error instanceof AxiosError && error.response !== undefined){
                 const errorData = error.response.data
@@ -221,7 +220,9 @@ export default function Register(): JSX.Element {
             }
             
         }
-        
+
+        // reset progress a 0
+        setProgress(0)
     }
 
     const handleChange: ChangeEventHandler = (event: ChangeEvent<HTMLInputElement>) => {

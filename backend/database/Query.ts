@@ -64,12 +64,12 @@ export default class Query<T extends Entity> {
         let collections: string[] = []
 
         if(conditions instanceof Array){
-            conditions.forEach(column => {
+            collections = conditions.map(column => {
                 const c = column as string
                 if(!like){
-                    collections.push(`${c.includes('!=') ? c + " ?" : c + " = ?"}`)
+                    return `${c.includes('!=') ? c + " ?" : c + " = ?"}`
                 }else {
-                    collections.push(`${c} LIKE ?`)
+                    return `${c} LIKE ?`
                 }
             })
         }else {

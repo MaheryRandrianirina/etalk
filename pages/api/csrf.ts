@@ -5,9 +5,7 @@ export default async function Csrf(req: NextApiRequest, res: NextApiResponse){
     const csrf = new CsrfClass()
 
     if(req.method === "GET"){
-        console.log("method get")
-        try
-        {
+        try{
             const token = await csrf.generate()
             res.setHeader("Content-Type", "plain/text").status(200).send(token)
         }catch(error){

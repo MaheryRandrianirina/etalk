@@ -65,6 +65,12 @@ export default class Auth {
                 
             if (errors === null) {
                 try {
+                    const userAlreadyInDB = await this.checkIfUserAlreadyExistsInDB(data.username)
+                    if (userAlreadyInDB) {
+                        this.res.status(409).json({ success: false, errors: { username: "Ce pseudo existe déjà" } })
+                        return
+                    }
+
                     this.session.registrationStepOneData = data;
                     
                     await this.session.save();
@@ -92,6 +98,11 @@ export default class Auth {
         }
             
         
+    }
+
+    private async checkIfUserAlreadyExistsInDB(username: string) {
+        const foundUsers = await this.userTable.search(["username"], ["username"], { values: [`%${username}%`]})
+        return foundUsers.length > 0
     }
     
     private async insertUserIdentity(userIdentity: DataFromRegistration): Promise<number>{

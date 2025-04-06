@@ -272,7 +272,7 @@ export default class Table<T extends Entity> {
         (keyof ColumnsToFill<T>)[], 
         conditions: ColumnsToFill<T> | (keyof ColumnsToFill<T>)[],
         dataForArrayConditions?: {values: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[], operator?: "OR" | "AND"}
-    ): Promise<ColumnsToFill<Entity>[]>{
+    ): Promise<T[]>{
         return new Promise(async(resolve, reject)=>{
             let query: Query<T>
 
@@ -287,21 +287,21 @@ export default class Table<T extends Entity> {
             }
 
             if(dataForArrayConditions && conditions instanceof Array){
-                query.where<undefined>(conditions, dataForArrayConditions.operator , true)
+                query.where(conditions, dataForArrayConditions.operator , true)
                 
                 try {
                     const res = await this.getMysqlConnection().query<Entity[]>(query.__toString(), dataForArrayConditions.values)
-                    resolve(res[0])
+                    resolve(res[0] as T[])
                 }catch(e){
                     reject(e)
                 }
                 
             }else  {
                 query.where<undefined>(conditions, undefined , true)
-
+                
                 try {
                     const res = await this.getMysqlConnection().query<Entity[]>(query.__toString())
-                    resolve(res[0])
+                    resolve(res[0] as T[])
                 }catch(e){
                     reject(e)
                 }

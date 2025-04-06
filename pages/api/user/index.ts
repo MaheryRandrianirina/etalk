@@ -1,17 +1,17 @@
 import UserTable from "../../../backend/database/tables/UserTable";
-import { withSessionRoute } from "../../../backend/utilities/withSession";
 import { NextApiRequest, NextApiResponse } from "next/types";
 import { User as UserType } from "../../../types/user";
 import { ConversationUser } from "../../../types/Database";
 import ConversationUserTable from "../../../backend/database/tables/ConversationUserTable";
+import { getSession } from "@/lib";
 
-export default withSessionRoute(User)
 
-async function User(req: NextApiRequest, res: NextApiResponse){
+export default async function User(req: NextApiRequest, res: NextApiResponse){
     const userTable = new UserTable<UserType>()
     const conversationUserTable = new ConversationUserTable<ConversationUser>()
 
-    const {user} = req.session
+    const session = await getSession(req, res)
+    const user = session.user
     if(user && req.method === "GET"){
         const {name, sender_id, id } = req.query
         if(name !== undefined 
