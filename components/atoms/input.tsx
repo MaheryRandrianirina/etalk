@@ -50,7 +50,7 @@ function InputPassword({
     events,errors
 }: {
     label?: string, attributes: InputAttributes<"password">,
-    events?: InputEvents<"password">, errors?: string | null
+    events?: InputEvents<"password">, errors?: string
 }): JSX.Element {
     const [showEye, setShowEye]: [
         showEye: boolean,
@@ -67,7 +67,7 @@ function InputPassword({
         {label && <label htmlFor={attributes.id}>{label}</label>}
         <Input type={showEye ? "text" : "password"} attributes={attributes} events={events}/>
         <EyeIcon onClick={handleEyeClick}/>
-        {errors !== null && errors !== undefined && <small className={styles.error}>{errors}</small>}
+        {errors !== "" && errors !== undefined && <small className={styles.error}>{errors}</small>}
     </div>
 }
 

@@ -117,9 +117,6 @@ export default function Register(): JSX.Element {
         activeButton: "ignore",
         chosenImage: null
     } as RegistrationStepThreeProperties)
-
-    const [passConfirmationError, setpassConfirmationError] = useState<string|null>(null)
-    const [passwordInvalidError, setPasswordInvalidError] = useState<string|null>(null)
     const [progress, setProgress] = useState<number>(0)
 
     useEffect(()=>{
@@ -127,15 +124,15 @@ export default function Register(): JSX.Element {
         setPageTitle(page_title.REGISTER)
 
         if(userUniqueProperties.password !== "" && !isValid(userUniqueProperties.password)){
-            debounce(() => setPasswordInvalidError(password_alerts.PASSWORD_INVALID))()
+            debounce(() => setFormErrors(e => ({...e, password:password_alerts.PASSWORD_INVALID})))()
         }else {
-            debounce(() => setPasswordInvalidError(e => e !== null ? null : e))()
+            debounce(() => setFormErrors(e => ({...e, password: ""})))()
         }
 
         if(userUniqueProperties.password_confirmation !== "" && userUniqueProperties.password !== userUniqueProperties.password_confirmation){
-            debounce(() => setpassConfirmationError(password_alerts.PASSWORD_CONFIRMATION))()
+            debounce(() => setFormErrors(e => ({...e, password_confirmation:password_alerts.PASSWORD_CONFIRMATION})))()
         }else{
-            debounce(() => setpassConfirmationError(null))()
+            debounce(() => setFormErrors(e => ({...e, password_confirmation: ""})))()
         }
     }, [userUniqueProperties.password, userUniqueProperties.password_confirmation])
 
@@ -283,8 +280,6 @@ export default function Register(): JSX.Element {
                         password: userUniqueProperties.password,
                         password_confirmation: userUniqueProperties.password_confirmation
                     } as UserUniqueProperties} disableButton={disabledButton as boolean} 
-                    passConfirmationError={passConfirmationError}
-                    invalidPassError={passwordInvalidError}
                     errors={formErrors}
                     />
                 }

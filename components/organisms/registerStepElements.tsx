@@ -87,12 +87,10 @@ function RegisterStepOne({inputsEvents, values, errors, disableButton}: {
   );
 }
 
-function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationError, invalidPassError, errors}: {
+function RegisterStepTwo({inputsEvents, values, disableButton, errors}: {
   inputsEvents: ElementEvents<HTMLInputElement>,
   values: UserUniqueProperties,
   disableButton: boolean,
-  passConfirmationError: string|null,
-  invalidPassError: string|null,
   errors: RegistrationFormErrors,
 }): JSX.Element {
 
@@ -122,7 +120,7 @@ function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationE
         events={{
           onChange: inputsEvents.onChange
         }}
-        errors={invalidPassError}
+        errors={errors.password}
       />
       <InputPassword
         attributes={{
@@ -134,7 +132,7 @@ function RegisterStepTwo({inputsEvents, values, disableButton, passConfirmationE
         events={{
           onChange: inputsEvents.onChange
         }}
-        errors={passConfirmationError}
+        errors={errors.password_confirmation}
       />
       <PrimaryButtonWithArrowRight disabled={disableButton}>Suivant </PrimaryButtonWithArrowRight>
       <RegistrationProgress activeBar={2} />

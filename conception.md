@@ -41,7 +41,7 @@
     - Diminuer la hauteur du modal confirmation du logout [v]
     - Ajouter l'oeil sur les inputs de mot de passe avec la possibilié de voir les MDP [v]
     - Ajouter l'animation au congratsForSubscription [v]
-    - Ajouter un progress-bar lors des soumissions de formulaire (inscription, connexion)
+    - Ajouter un progress-bar lors des soumissions de formulaire (inscription, connexion) [v]
     - Régler la récupération des messages
     - Déconnecter l'utilisateur après un certains moment s'il a coché le 'se souvenir de moi'
     - Installer react-test-renderer, @testing-library/react
@@ -69,7 +69,8 @@
 - Ajuster le style de l'oeil sur les champs mot de passe dans le formulaire d'inscription [v]
 - Afficher des erreurs claires lorsque les conditions du formulaire d'inscription ne sont pas remplies [v]
 - Afficher le titre de chaque page dans le document.title [v]
-- Afficher une erreur lorsque l'utilisateur tente de creer un pseudo et adresse email deja existant (il suffit juste de mettre les colonnes en unique) [v]
+- Afficher une erreur lorsque l'utilisateur tente de creer un pseudo et adresse email deja existant [v]
+- Modifier le composant registerStepTwo en ajoutant le prop "errors" comme pour le registerStepOne [v]
 - Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist)
 - Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes
 - Implementer le token csrd sur toutes les requetes de type POST
