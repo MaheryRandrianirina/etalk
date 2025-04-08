@@ -2,6 +2,7 @@
   "name": "chatapp",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "concurrently \"next dev\" \"nodemon server/index.js\"",
     "build": "next build",

@@ -1,14 +1,15 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import axios from "axios";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-type AblyApiState = [
-    calledAblyApi: Boolean,
-    setCalledAblyApi: Dispatch<SetStateAction<boolean>>
-];
 
-const useCallAblyApi = (): AblyApiState =>{
-    const [calledAblyApi, setCalledAblyApi]: AblyApiState = useState(false);
+const useCallAblyApi = (): boolean =>{
+    const [calledAblyApi, setCalledAblyApi] = useState(false);
 
-    return [calledAblyApi, setCalledAblyApi];
+    useEffect(()=> {
+        axios.get("/api/ably").then(res => setCalledAblyApi(true)).catch(err => console.error(err));
+    },[])
+
+    return calledAblyApi;
 }
 
 export {

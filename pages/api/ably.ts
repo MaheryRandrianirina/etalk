@@ -9,10 +9,12 @@ import MessageTable from "../../backend/database/tables/MessageTable";
 import { Conversation as UserConversation } from "../../backend/User/Conversation"
 import { CustomMessage } from "../../types/ably";
 import { ConversationMessage } from "../../types/conversation";
+import { getSession } from "@/lib";
 
 export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
     if(req.method === "GET"){
-        let {user} = req.session;
+        const session = await getSession(req, res)
+        const user = session.user
         if(!user){
             res.status(403).json({success: false, forbidden: true})
             return
@@ -22,8 +24,9 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
         
         const userTable = new UserTable()
         const messageTable = new MessageTable()
+
         try {
-            const realtime = new ably.Realtime.Promise({key: process.env.ABLY_API_KEY});
+            const realtime = new ably.Realtime({key: process.env.ABLY_API_KEY});
             await realtime.connection.once("connected");
             console.log("connected to Ably");
 
@@ -34,7 +37,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
                     const conversationTable = new ConversationTable<Conversation>()
                     const conversations = await conversationTable
                         .columns<ConversationUser, undefined>(['c.*'])
-                        .join({'conversation_user': {alias: "cu", on: "c.id = cu.conversation_id"}})
+                        .join({'conversations_users': {alias: "cu", on: "c.id = cu.conversation_id"}})
                         .where<ConversationUser>({'cu.user_id': u.id})
                         .get() as Conversation[]
                     
@@ -99,7 +102,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
                     return
                 }
                 
-                const userConversation = new UserConversation(req, conversation_id)
+                const userConversation = new UserConversation(req, session, conversation_id)
                 const messages = await userConversation.messages()
 
                 chatroom_channel.publish('conversation_messages', messages)
@@ -113,7 +116,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
                 try {
                     const conversationTable = new ConversationTable()
                     const conversation = await conversationTable.find(conversation_id)
-                    const userConversation = new UserConversation(req, conversation_id)
+                    const userConversation = new UserConversation(req, session, conversation_id)
                     
                     if(conversation.length === 0){
                         await userConversation.new(messageData.adressee_id, messageData.message)

@@ -19,11 +19,13 @@ import useClassnameAnimator from '@/hooks/useClassnameAnimator';
 import { useChannel, useConnectionStateListener } from "ably/react";
 import { Conversation } from '@/types/Database'
 import { CustomMessage } from '@/types/ably'
-import { useCallAblyApi } from '@/hooks/useCallAbly'
 import { getSession } from '@/lib'
 
 
 type AnimationClassName = {receptionBox: string, conversation: string}
+
+
+axios.get(`http://localhost:3000/api/ably`).catch(console.error)
 
 export default function Home({user}: {
   user: User
@@ -69,8 +71,6 @@ export default function Home({user}: {
     setShowMenu: Dispatch<SetStateAction<boolean>>
   ] = useState(false);
 
-  const [calledAblyApi, setCalledAblyApi] = useCallAblyApi();
-
   /**
    * POUR L'ANIMATION DU MENU DEROULANT
    */
@@ -80,39 +80,29 @@ export default function Home({user}: {
       console.log('Connected to Ably!');
   });
 
-  const {channel} = useChannel('chat_list', "conversations", (message: CustomMessage<Conversation[]>)=>{
+  const {channel, connectionError, channelError} = useChannel('chat_list', "conversations", (message: CustomMessage<Conversation[]>)=>{
     setConversations(message.data);
   });
 
   
-  useEffect(()=>{
-      if(!calledAblyApi){
-        axios.get("/api/ably").then(res => setCalledAblyApi(true)).catch(err => console.error(err));
+  useEffect(()=>{    
+      if (connectionError) {
+        console.error("Unable to connect to ably", connectionError)
+        return
       }
-
-      try {   
-        channel.publish("get_conversations", "message").then(res => {
-        }).catch(err => console.error(err));
-        
-        // if(backwarded){
-        //   channel.publish("get_conversations")
-        // }
-      }catch(e){
-        console.error(e)
-      }
+      
+      channel.publish("get_conversations", "message").then(res => console.log(res)).catch(err => console.error(err));
       
       if(showMenu){
         setClassnameForAnimation("active")
       }else {
         setClassnameForAnimation("")
       }
+
+      return () => channel.unsubscribe()
   }, [
-    showMenu, 
-    backwarded, 
-    setClassnameForAnimation,
-    channel,
-    calledAblyApi,
-    setCalledAblyApi
+    showMenu,
+    connectionError
   ])
 
   const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
@@ -157,9 +147,11 @@ export default function Home({user}: {
   const handleClickMenu: MouseEventHandler<HTMLDivElement> = (e:MouseEvent) =>  {
     e.preventDefault();
     
-    setShowMenu(show => !show)    
+    setShowMenu(show => !show);
   }
   
+  const isLoading = connectionError === null && conversations === null;
+
   return (
       <div className="app_container" style={{ height: "100%" }}>
         <Head>
@@ -168,7 +160,9 @@ export default function Home({user}: {
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
-          {conversations === null && <Opening />}
+          {isLoading && <Opening />}
+
+          {connectionError && <div>Une erreur est survenue. Veuilez recharger l'application.</div>}
 
           {createConversation === false &&
             activeSection === 1 &&
@@ -236,7 +230,7 @@ export default function Home({user}: {
               />
           )}
 
-          {<Menu className={classnameForAnimation} setShowMenu={setShowMenu} />}
+          {connectionError === null && <Menu className={classnameForAnimation} setShowMenu={setShowMenu} />}
       </div>
   );
 }

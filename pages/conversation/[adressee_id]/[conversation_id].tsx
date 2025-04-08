@@ -91,7 +91,7 @@ export default function UserConversation({create, user, setCreateConversation, a
         setBlockUser: Dispatch<SetStateAction<BlockUser>>
     ] = useState({success: false, error: null} as BlockUser);
 
-    const [calledAblyApi, setCalledAblyApi] = useCallAblyApi();
+    const calledAblyApi = useCallAblyApi();
 
     const {channel} = useChannel('chat_room', ()=>{
         console.log('use chat_room channel')
@@ -107,7 +107,6 @@ export default function UserConversation({create, user, setCreateConversation, a
             if(!calledAblyApi){
                 try {
                     await axios.get("/api/ably");
-                    setCalledAblyApi(true);
                 }catch(e){
                     console.error(e);
                 }
@@ -195,8 +194,7 @@ export default function UserConversation({create, user, setCreateConversation, a
         message, 
         blockUser,
         channel,
-        calledAblyApi,
-        setCalledAblyApi
+        calledAblyApi
     ]);
 
 
