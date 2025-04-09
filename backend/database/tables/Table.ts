@@ -286,11 +286,12 @@ export default class Table<T extends Entity> {
                 this.query = query.join(this.tableToJoin)
             }
 
-            if(dataForArrayConditions && conditions instanceof Array){
-                query.where(conditions, dataForArrayConditions.operator , true)
-                
+            if(dataForArrayConditions && conditions instanceof Array){                
                 try {
+                    query.where(conditions, dataForArrayConditions.operator , true)
+
                     const res = await this.getMysqlConnection().query<Entity[]>(query.__toString(), dataForArrayConditions.values)
+                    
                     resolve(res[0] as T[])
                 }catch(e){
                     reject(e)

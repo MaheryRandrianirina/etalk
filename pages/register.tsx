@@ -7,6 +7,7 @@ import {
     MouseEventHandler,
     SetStateAction,
     SyntheticEvent,
+    useCallback,
     useEffect,
     useState
 } from "react";
@@ -119,20 +120,21 @@ export default function Register(): JSX.Element {
     } as RegistrationStepThreeProperties)
     const [progress, setProgress] = useState<number>(0)
 
-    useEffect(()=>{
+    const debouncedSetFormErrors = useCallback(debounce((error: string) => setFormErrors(e => ({...e, password: error}))), [])
 
+    useEffect(()=>{
         setPageTitle(page_title.REGISTER)
 
         if(userUniqueProperties.password !== "" && !isValid(userUniqueProperties.password)){
-            debounce(() => setFormErrors(e => ({...e, password:password_alerts.PASSWORD_INVALID})))()
+            debouncedSetFormErrors(password_alerts.PASSWORD_INVALID)
         }else {
-            debounce(() => setFormErrors(e => ({...e, password: ""})))()
+            debouncedSetFormErrors("")
         }
 
         if(userUniqueProperties.password_confirmation !== "" && userUniqueProperties.password !== userUniqueProperties.password_confirmation){
-            debounce(() => setFormErrors(e => ({...e, password_confirmation:password_alerts.PASSWORD_CONFIRMATION})))()
+            debouncedSetFormErrors(password_alerts.PASSWORD_CONFIRMATION)
         }else{
-            debounce(() => setFormErrors(e => ({...e, password_confirmation: ""})))()
+            debouncedSetFormErrors("")
         }
     }, [userUniqueProperties.password, userUniqueProperties.password_confirmation])
 

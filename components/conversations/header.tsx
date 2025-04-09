@@ -35,6 +35,7 @@ import { BlockUser } from "../../pages/conversation/[adressee_id]/[conversation_
 import { Join } from "../../types/Database";
 import BackIcon from "../atoms/icons/backIcon";
 import { ModalData } from "../../types/modal";
+import { debounce } from "@/lib/utils";
 
 const ConversationHeader = ({
   addReceiver,
@@ -82,24 +83,6 @@ const ConversationHeader = ({
     setModal: Dispatch<SetStateAction<ModalData<"confirmation">>>
   ] = useState({show: false, type: "confirmation", data: ""} as ModalData<"confirmation">)
 
-  const handleChangeReceiverInput: ChangeEventHandler<HTMLInputElement> = (
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    setReceiver(e.target.value);
-  };
-
-  const handleCloseChosenReceiver: MouseEventHandler<SVGElement> = (
-    e: SyntheticEvent
-  ) => {
-    const target = e.currentTarget as SVGElement;
-
-    setChosenReceivers((r) => {
-      return r.filter((value, index) => {
-        return value.username !== target.previousElementSibling?.textContent;
-      });
-    });
-  };
-
   const [chosenReceiversStyle, setChosenReceiversStyle]: [
     chosenReceiversStyle: { left: string },
     setChosenReceiversStyle: Dispatch<SetStateAction<{ left: string }>>
@@ -127,12 +110,46 @@ const ConversationHeader = ({
         resetProfileClassnameForAnimation()
       }
     })
-  }, [classnameForAnimation, resetProfileClassnameForAnimation])
+  }, [classnameForAnimation])
 
+  const userId = user.id
+  const debouncedSearch = useCallback(debounce((receiver: string) => { searchReceiver(receiver, userId) }), [userId])
+
+  const handleChangeReceiverInput: ChangeEventHandler<HTMLInputElement> = (
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    const receiver_value = e.target.value
+    setReceiver(receiver_value);
+
+    // if the value of the searchbar is just an extension of the previous value
+    // then we don't need to search again
+    if(foundReceivers.length > 0 && receiver_value.includes(receiver_value.substring(0, receiver_value.length-1))){
+      setFoundReceivers(foundReceivers)
+      return
+    }
+
+    if (e.target.value.length > 2) {
+      debouncedSearch(e.target.value)
+    } 
+  };
+
+  const handleCloseChosenReceiver: MouseEventHandler<SVGElement> = (
+    e: SyntheticEvent
+  ) => {
+    const target = e.currentTarget as SVGElement;
+
+    setChosenReceivers((r) => {
+      return r.filter((value, index) => {
+        return value.username !== target.previousElementSibling?.textContent;
+      });
+    });
+  };
+
+  const {username, name } = user
   const searchReceiver: (
     receiver: string, 
     sender_id: number
-  ) => Promise<GetAway<User, ["password"]>[]> = useCallback(async (receiver, sender_id) => {
+  ) => Promise<void> = async (receiver, sender_id) => {
     try {
       const res = await axios.get(`/api/user?name=${receiver}&sender_id=${sender_id}`);
       if (res.statusText === "OK") {
@@ -146,51 +163,34 @@ const ConversationHeader = ({
           });
           
           return (
-            userValue.username !== user.username || userValue.name !== user.name
+            userValue.username !== username || userValue.name !== name
           );
         });
 
-        return searchedUsers;
+        setFoundReceivers(searchedUsers);
       } else {
         throw Error("Il y a eu une erreur");
       }
     } catch (e) {
-      throw e;
+      console.error(e);
     }
-  }, [chosenReceivers, user]);
+  };
+  
 
   useEffect(() => {
-    const searchInput = document.querySelector(
-      ".search_input"
-    ) as HTMLInputElement;
-    
     if (addReceiver) {
+      const searchInput = document.querySelector(
+        ".search_input"
+      ) as HTMLInputElement;
+
       setSearchResultStyle({
         left: `${searchInput.offsetLeft}px`,
         width: `${searchInput.offsetWidth}px`,
-      });
-
-      if (receiver.length > 2) {
-        searchReceiver(receiver, user.id)
-          .then((users) => {
-            setFoundReceivers(users);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
+      }); 
     }
 
     handleBodyClick()    
-  }, [
-    receiver, 
-    showAdresseeProfile, 
-    classnameForAnimation,
-    addReceiver,
-    searchReceiver,
-    user,
-    handleBodyClick
-  ]);
+  }, [addReceiver]);
 
   const handleChooseReceiver = (
     e: SyntheticEvent,

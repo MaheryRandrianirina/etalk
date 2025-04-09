@@ -71,9 +71,7 @@ export default function Home({user}: {
     setShowMenu: Dispatch<SetStateAction<boolean>>
   ] = useState(false);
 
-  /**
-   * POUR L'ANIMATION DU MENU DEROULANT
-   */
+  // POUR L'ANIMATION DU MENU DEROULANT
   const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("");
 
   useConnectionStateListener('connected', ()=>{
@@ -100,10 +98,7 @@ export default function Home({user}: {
       }
 
       return () => channel.unsubscribe()
-  }, [
-    showMenu,
-    connectionError
-  ])
+  }, [showMenu, connectionError])
 
   const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
       event.preventDefault()

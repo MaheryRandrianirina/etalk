@@ -63,7 +63,7 @@ export class Conversation {
         if(this.id && this.authUser){
             const messages = await this.messageTable.columns<ConversationUser, undefined>(['m.*'])
                 .join({
-                'conversation_user': {alias: "cu", on: "cu.conversation_id = m.conversation_id"},
+                'conversations_users': {alias: "cu", on: "cu.conversation_id = m.conversation_id"},
                 'user': {alias: 'u', on: "u.id = cu.user_id"}
             })
                 .where<ConversationUser>({

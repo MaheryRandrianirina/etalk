@@ -30,7 +30,7 @@ async function getLastMessage(id: number, userId: number, res: NextApiResponse):
         const messageTable = new MessageTable()
         const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
             .join({
-                "conversation_user": {alias: "cu", on: "cu.user_id = m.sender_id"},
+                "conversations_users": {alias: "cu", on: "cu.user_id = m.sender_id"},
                 "user": {alias: "u", on: "u.id = cu.user_id"}
             })
             .where<ConversationUser>({"m.conversation_id": id, "m.sender_id": userId})
@@ -58,7 +58,7 @@ async function getConversationAdressee(
 
         if(nb_adressee_id === user_id){
             [foundUser] = await userTable.columns<ConversationUser, undefined>(["u.*"])
-                .join({"conversation_user": {
+                .join({"conversations_users": {
                     alias: "cu",
                     on: "u.id = cu.user_id"
                 }, 

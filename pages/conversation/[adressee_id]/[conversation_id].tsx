@@ -20,7 +20,6 @@ import axios, { AxiosError } from "axios"
 import { Join } from "@/types/Database"
 import { CustomMessage } from "@/types/ably"
 import { useChannel } from "ably/react"
-import { useCallAblyApi } from "@/hooks/useCallAbly"
 import type { NextApiRequest, NextApiResponse } from "next"
 import { getSession } from "@/lib/index"
 
@@ -39,12 +38,8 @@ export default function UserConversation({create, user, setCreateConversation, a
 }): JSX.Element {
     const router = useRouter()
 
-    const ids = useMemo(()=>{
-        return {
-            adressee_id: parseInt(router.query.adressee_id as string),
-            conversation_id: parseInt(router.query.conversation_id as string)
-        }
-    }, [router]);
+    const adressee_id = parseInt(router.query.adressee_id as string)
+    const conversation_id = parseInt(router.query.conversation_id as string)
 
     const [chosenReceivers, setChosenReceivers]: [
         chosenReceivers: ChosenReceiver[], 
@@ -76,11 +71,6 @@ export default function UserConversation({create, user, setCreateConversation, a
         setAnimate: Dispatch<SetStateAction<boolean>>
     ] = useState(false)
 
-    const [userFromRouter, setUserFromRouter]: [
-        userFromRouter: AuthUser | null,
-        setUserFromRouter: Dispatch<SetStateAction<AuthUser | null>>
-    ] = useState(null as AuthUser | null)
-
     const [adressee, setAdressee]: [
         adressee: Join<AuthUser, {blocked: boolean}> | null,
         setAdresse: Dispatch<SetStateAction<Join<AuthUser, {blocked: boolean}> | null>>
@@ -90,8 +80,6 @@ export default function UserConversation({create, user, setCreateConversation, a
         blockUser: BlockUser, 
         setBlockUser: Dispatch<SetStateAction<BlockUser>>
     ] = useState({success: false, error: null} as BlockUser);
-
-    const calledAblyApi = useCallAblyApi();
 
     const {channel} = useChannel('chat_room', ()=>{
         console.log('use chat_room channel')
@@ -104,21 +92,9 @@ export default function UserConversation({create, user, setCreateConversation, a
         userConversation.offsetWidth
         
         const handleAblyConnection = async()=>{
-            if(!calledAblyApi){
-                try {
-                    await axios.get("/api/ably");
-                }catch(e){
-                    console.error(e);
-                }
-            }
-            
-            if(channel === null){
-                return;
-            }
-
             if(adressee && adressee.id){
                 channel.publish("get_conversation_messages", JSON.stringify({
-                    conversation_id: ids.conversation_id, 
+                    conversation_id: conversation_id, 
                     adressee_id: adressee.id
                 }));
     
@@ -155,7 +131,7 @@ export default function UserConversation({create, user, setCreateConversation, a
                 setDisableButton(true)
             }
         }else { 
-            axios.get(`/api/user/conversation/${ids.conversation_id}?adressee_id=${ids.adressee_id}`).then(res => {
+            axios.get(`/api/user/conversation/${conversation_id}?adressee_id=${adressee_id}`).then(res => {
                 if(res.statusText === "OK"){
                     setAdressee(res.data.adressee)
                 }
@@ -186,15 +162,12 @@ export default function UserConversation({create, user, setCreateConversation, a
         }
            
     }, [
-        create, 
         disableButton, 
         adressee, 
-        ids,
+        adressee_id,
+        conversation_id,
         chosenReceivers, 
-        message, 
-        blockUser,
-        channel,
-        calledAblyApi
+        message
     ]);
 
 
@@ -214,9 +187,9 @@ export default function UserConversation({create, user, setCreateConversation, a
             
         }else if(!create && message){
             channel?.publish("message", JSON.stringify({
-                conversation_id: ids.conversation_id,
+                conversation_id: conversation_id,
                 message: message, 
-                adressee_id: ids.adressee_id
+                adressee_id: adressee_id
             }))
 
             channel?.subscribe('conversation_messages', (message)=>{

@@ -2,7 +2,7 @@ import express from "express";
 import next from "next";
 import multer from "multer";
 
-const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8080;
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();

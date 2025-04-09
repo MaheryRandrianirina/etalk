@@ -52,7 +52,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
                 try {
                     const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
                     .join({
-                        "conversation_user": {alias: "cu", on: "cu.user_id = m.sender_id"},
+                        "conversations_users": {alias: "cu", on: "cu.user_id = m.sender_id"},
                         "user": {alias: "u", on: "u.id = cu.user_id"}
                     })
                     .where<ConversationUser>({

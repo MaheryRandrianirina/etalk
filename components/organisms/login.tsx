@@ -142,7 +142,7 @@ export default function Login(): JSX.Element {
             
             <InputPassword events={{
                 onChange: handleChangeInputs
-            }} errors={formErrors.password !== undefined ? formErrors.password : null} attributes={{className: "password_input", name: "password", value: inputsValues.password, placeholder: "Mot de passe"}}/>
+            }} errors={formErrors.password} attributes={{className: "password_input", name: "password", value: inputsValues.password, placeholder: "Mot de passe"}}/>
             
             <InputCheckbox events={{
                 onChange: handleChangeInputs

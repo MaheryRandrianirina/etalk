@@ -55,7 +55,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                     const conversationTable = new ConversationTable<Conversation>()
                     const conversations = await conversationTable
                         .columns<ConversationUser, undefined>(['c.*'])
-                        .join({'conversation_user': {alias: "cu", on: "c.id = cu.conversation_id"}})
+                        .join({'conversations_users': {alias: "cu", on: "c.id = cu.conversation_id"}})
                         .where<ConversationUser>({'cu.user_id': u.id})
                         .get() as Conversation[]
                     
@@ -69,7 +69,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                 try {
                     const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
                     .join({
-                        "conversation_user": {alias: "cu", on: "cu.user_id = m.sender_id"},
+                        "conversations_users": {alias: "cu", on: "cu.user_id = m.sender_id"},
                         "user": {alias: "u", on: "u.id = cu.user_id"}
                     })
                     .where<ConversationUser>({

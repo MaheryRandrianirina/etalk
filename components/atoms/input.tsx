@@ -23,7 +23,7 @@ function InputRadio({label, attributes, events}: {
     label?: string, attributes:InputAttributes<"radio">,
     events?: InputEvents<"radio">
 }): JSX.Element {
-    console.log(events)
+    
     return <div className={"form_group form_group_" + attributes.className}>
         <Input type="radio" attributes={attributes} events={events}/>
         {label && <label htmlFor={attributes.id}>{label}</label>}
