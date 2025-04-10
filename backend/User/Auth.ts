@@ -101,7 +101,7 @@ export default class Auth {
     }
 
     private async checkIfUserAlreadyExistsInDB(key: string, value: string) {
-        const foundUsers = await this.userTable.search([key], [key], { values: [`%${value}%`]})
+        const foundUsers = await this.userTable.search([key], [key], { values: [`${value}`]})
         return foundUsers.length > 0
     }
     
@@ -215,7 +215,7 @@ export default class Auth {
             try {
                 await this.userTable.update(
                     { image: file } as ColumnsToFill<User>,
-                    { id: this.session.userId as number } as ColumnsToFill<User>
+                    { id: this.session.user?.id as number } as ColumnsToFill<User>
                 )
 
                 this.res.status(200).json({ success: true })

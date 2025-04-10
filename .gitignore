@@ -40,3 +40,6 @@ next-env.d.ts
 
 # MD files
 conception.md
+
+# images
+/public/images/

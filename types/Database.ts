@@ -110,7 +110,8 @@ type Orders<T extends Entity> = {
     type: "DESC" | "ASC"
 }
 
-export type { Entity, 
+export type { 
+    Entity, 
     Data, ColumnsToFill, 
     Conversation, Message,
     ConversationUser, UserCalls,
