@@ -1,11 +1,12 @@
-import { ChangeEvent, ChangeEventHandler, MouseEventHandler, useEffect } from "react";
+import { ChangeEvent, ChangeEventHandler, Dispatch, MouseEventHandler, SetStateAction, useEffect } from "react";
 import MessageTextarea from "./messageTextarea";
 import { SetMessage,ConversationMessage } from "../../types/conversation";
+import { formatDate } from "date-fns";
 
 export default function ConversationFooter({submitForm, message, setMessage, disableButton, sender_id, blockedAdressee}: {
     submitForm: MouseEventHandler<HTMLButtonElement>,
     message: ConversationMessage | null,
-    setMessage: SetMessage<undefined>,
+    setMessage: Dispatch<SetStateAction<ConversationMessage | null>>
     disableButton: boolean,
     sender_id: number,
     blockedAdressee: boolean
@@ -15,9 +16,9 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
         
         setMessage(m => {
             if(m === null){
-                return {texto: event.target.value, created_at: new Date(), sender_id: sender_id}
+                return {texto: event.target.value, created_at: formatDate(new Date(), 'Y-m-d H:i:s'), sender_id: sender_id} as ConversationMessage
             }else {
-                return {...m, texto: event.target.value, created_at: new Date(), sender_id: sender_id}
+                return {...m, texto: event.target.value, created_at: formatDate(new Date(), 'Y-m-d H:i:s'), sender_id: sender_id}
             }
         })
     }

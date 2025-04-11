@@ -78,15 +78,15 @@ export default function Home({user}: {
       console.log('Connected to Ably!');
   });
 
-  const {channel, connectionError, channelError} = useChannel('chat_list', "conversations", (message: CustomMessage<Conversation[]>)=>{
+  const {channel, connectionError, channelError, ably} = useChannel('chat_list', "conversations", (message: CustomMessage<Conversation[]>)=>{
     setConversations(message.data);
   });
 
   
   useEffect(()=>{    
       if (connectionError) {
-        console.error("Unable to connect to ably", connectionError)
-        return
+        console.log("reconnect to ably")
+        ably.connect()
       }
       
       channel.publish("get_conversations", "message").then(res => console.log(res)).catch(err => console.error(err));
@@ -98,7 +98,7 @@ export default function Home({user}: {
       }
 
       return () => channel.unsubscribe()
-  }, [showMenu, connectionError])
+  }, [showMenu, connectionError, backwarded])
 
   const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
       event.preventDefault()

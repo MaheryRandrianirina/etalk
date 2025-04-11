@@ -13,7 +13,7 @@ type GetAway<T extends {[key: string]: string | Date | number | boolean}, U exte
 type AppSocketState = Socket<ServerToClientEvents, ClientToServerEvents> | null
 type SocketStateDispatcher = Dispatch<SetStateAction<AppSocketState>>
 
-type Undefine<T extends {[key: symbol]: any}> = {
+type Undefine<T extends {[key: PropertyKey]: any}> = {
     [key in keyof T]?: T[key]
 }
 

@@ -64,9 +64,7 @@ export default class Table<T extends Entity> {
             }
 
             if(conditions !== undefined){
-                if(conditions instanceof Array){
-                    
-                }else {
+                if(conditions instanceof Array === false){
                     for (const i in conditions) {
                         if(typeof i === "string"){
                             const index = i as keyof ColumnsToFill<T>

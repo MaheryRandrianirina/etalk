@@ -1,16 +1,15 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { withSessionRoute } from "../../../../backend/utilities/withSession";
-import MessageTable from "../../../../backend/database/tables/MessageTable";
-import { BlockedUsers, ConversationUser, Message } from "../../../../types/Database";
-import BlockedUsersTable from "../../../../backend/database/tables/BlockedUsers";
-import UserTable from "../../../../backend/database/tables/UserTable";
-import { User } from "../../../../types/user";
+import MessageTable from "@/backend/database/tables/MessageTable";
+import { BlockedUsers, ConversationUser, Message } from "@/types/Database";
+import BlockedUsersTable from "@/backend/database/tables/BlockedUsers";
+import UserTable from "@/backend/database/tables/UserTable";
+import { User } from "@/types/user";
+import { getSession } from "@/lib";
 
-export default withSessionRoute(Conversation)
 
-async function Conversation(req: NextApiRequest, res: NextApiResponse){
-    const {user} = req.session
-
+export default async function Conversation(req: NextApiRequest, res: NextApiResponse){
+    const session = await getSession(req, res)
+    const user = session.user
     if(req.method === "GET" && user){
         const {id, adressee_id} = req.query
         
@@ -31,7 +30,7 @@ async function getLastMessage(id: number, userId: number, res: NextApiResponse):
         const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
             .join({
                 "conversations_users": {alias: "cu", on: "cu.user_id = m.sender_id"},
-                "user": {alias: "u", on: "u.id = cu.user_id"}
+                "users": {alias: "u", on: "u.id = cu.user_id"}
             })
             .where<ConversationUser>({"m.conversation_id": id, "m.sender_id": userId})
             .orderBy("m.created_at", "DESC")
@@ -79,7 +78,7 @@ async function getConversationAdressee(
         const [blocked_adressee] = await blockedUsersTable
             .columns<BlockedUsers, undefined>(['bu.*'])
             .join({
-                "user": {
+                "users": {
                     alias: "u",
                     on: "u.id = bu.blocked_user_id AND u.id = bu.user_id",
                     type: 'LEFT'
@@ -92,6 +91,6 @@ async function getConversationAdressee(
             blocked_adressee ? nb_adressee_id === blocked_adressee.blocked_user_id : false
         )}})
     }catch(e){
-        console.error(e)
+        throw e
     }
 }

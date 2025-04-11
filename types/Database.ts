@@ -15,7 +15,7 @@ interface Message extends RowDataPacket {
     file: string,
     image: string,
     vocal: string,
-    created_at: Date,
+    created_at: string,
     conversation_id: number,
     sender_id: number,
     receiver_id: number,

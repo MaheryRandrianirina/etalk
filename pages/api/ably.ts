@@ -32,7 +32,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
 
             const chatlist_channel = realtime.channels.get("chat_list");
             chatlist_channel.subscribe('get_conversations', async(message: CustomMessage<null>) => {
-                console.log("get conversations")
+                console.log("get conversationssss")
                 try {
                     const conversationTable = new ConversationTable<Conversation>()
                     const conversations = await conversationTable
@@ -53,7 +53,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
                     const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
                     .join({
                         "conversations_users": {alias: "cu", on: "cu.user_id = m.sender_id"},
-                        "user": {alias: "u", on: "u.id = cu.user_id"}
+                        "users": {alias: "u", on: "u.id = cu.user_id"}
                     })
                     .where<ConversationUser>({
                         "m.conversation_id": msg.data, 
@@ -104,7 +104,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
                 
                 const userConversation = new UserConversation(req, session, conversation_id)
                 const messages = await userConversation.messages()
-
+                
                 chatroom_channel.publish('conversation_messages', messages)
             })
 

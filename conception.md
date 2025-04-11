@@ -71,7 +71,8 @@
 - Afficher le titre de chaque page dans le document.title [v]
 - Afficher une erreur lorsque l'utilisateur tente de creer un pseudo et adresse email deja existant [v]
 - Modifier le composant registerStepTwo en ajoutant le prop "errors" comme pour le registerStepOne [v]
-- Faire marche l'upload d'image dans l'inscription
+- Faire marche l'upload d'image dans l'inscription [v]
+- Envoyer un message en cliquant sur le bouton d'envoi
 - Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist)
 - Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes
-- Implementer le token csrd sur toutes les requetes de type POST
+- Implementer le token csrf sur toutes les requetes de type POST

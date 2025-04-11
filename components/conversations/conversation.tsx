@@ -8,9 +8,7 @@ import { UserIcon } from "../atoms/icons/UserIcon"
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
 import { profilePhotoPath } from "@/lib/index"
 import { useChannel } from "ably/react"
-import axios from "axios"
 import { CustomMessage } from "../../types/ably"
-import { useCallAblyApi } from "@/hooks/useCallAbly"
 import { formatDistanceToNow } from "date-fns"; 
 import { fr } from "date-fns/locale"
 
@@ -29,8 +27,6 @@ export default function Conversation({currentUser, conversation}: {
         setConversationOwners: Dispatch<SetStateAction<ConversationOwners | null>>
     ] = useState(null as ConversationOwners | null);
 
-    const [calledAblyApi, setCalledAblyApi] = useCallAblyApi();
-
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
 
     const {channel} = useChannel('chat_messages', "conversation_last_message", message => {
@@ -38,16 +34,7 @@ export default function Conversation({currentUser, conversation}: {
     });
 
     useEffect(()=>{
-        const handleAblyConnexion = async()=>{
-            if(!calledAblyApi){
-                try {
-                    await axios.get("/api/ably");
-                    setCalledAblyApi(true);
-                }catch(e){
-                    console.error(e)
-                }
-                
-            }
+        const handleAblyConnexion = ()=>{
 
             if(message === null){
                 channel.publish("get_conversation_last_message", `${conversation.id}`)
@@ -69,6 +56,7 @@ export default function Conversation({currentUser, conversation}: {
                 
             }
         }
+
         handleAblyConnexion();
 
         if(classnameForAnimation.length === 0){
@@ -76,15 +64,11 @@ export default function Conversation({currentUser, conversation}: {
         }
         
     }, [
-        setClassnameForAnimation, 
-        setConversationOwners, 
         message,
         classnameForAnimation,
         conversation,
         conversationOwners,
-        channel,
-        calledAblyApi,
-        setCalledAblyApi
+        channel
     ])
 
     const profilPic = conversationOwners?.adressee?.id !== currentUser.id ? 

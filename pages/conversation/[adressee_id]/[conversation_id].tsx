@@ -12,14 +12,12 @@ import { Dispatch,
     TransitionEventHandler, 
     useCallback, 
     useEffect, 
-    useMemo, 
     useState } from "react"
-import { ChosenReceiver, ConversationMessage, SetMessage } from "@/types/conversation"
-import Data from "@/lib/data"
+import { ChosenReceiver, ConversationMessage } from "@/types/conversation"
 import axios, { AxiosError } from "axios"
 import { Join } from "@/types/Database"
 import { CustomMessage } from "@/types/ably"
-import { useChannel } from "ably/react"
+import { useChannel, useConnectionStateListener } from "ably/react"
 import type { NextApiRequest, NextApiResponse } from "next"
 import { getSession } from "@/lib/index"
 
@@ -29,7 +27,7 @@ export type BlockUser = {
     error: Error | null
 }
 
-export default function UserConversation({create, user, setCreateConversation, animation, setBackwarded}: {
+export default function UserConversation({user, create, setCreateConversation, animation, setBackwarded}: {
     create?: true,
     user: User,
     setCreateConversation?: Dispatch<SetStateAction<boolean>>,
@@ -46,44 +44,20 @@ export default function UserConversation({create, user, setCreateConversation, a
         setChosenReceivers: Dispatch<SetStateAction<ChosenReceiver[]>>
     ] = useState([] as ChosenReceiver[])
 
-    const [message, setMessage]: [
-        message: ConversationMessage | null,
-        setMessage: SetMessage<undefined>
-    ] = useState(null as ConversationMessage | null)
+    const [message, setMessage] = useState<ConversationMessage | null>(null as ConversationMessage | null)
+    const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>([] as ConversationMessage[])
+    const [showMessageIntoBubble, setShowMessageIntoBubble] = useState<boolean>(false)
+    const [disableButton, setDisableButton] = useState<boolean>(true)
+    const [animate, setAnimate] = useState<boolean>(false)
+    const [adressee, setAdressee] = useState<Join<AuthUser, {blocked: boolean}> | null>(null as Join<AuthUser, {blocked: boolean}> | null)    
+    const [blockUser, setBlockUser] = useState<BlockUser>({success: false, error: null} as BlockUser);
+    const [connectedToAbly, setConnectedToAbly] = useState(create) // following value of create prop because it doen't load when user click on the create conversation button
 
-    const [conversationMessages, setConversationMessages]:[
-        conversationMessages: ConversationMessage[], 
-        setConversationMessages: Dispatch<SetStateAction<ConversationMessage[]>>
-    ] = useState([] as ConversationMessage[])
+    useConnectionStateListener('connected', () => console.log('Connected to Ably!'));
+    const {channel} = useChannel('chat_room');
 
-    const [showMessageIntoBubble, setShowMessageIntoBubble]:[
-        showMessageIntoBubble: boolean,
-        setShowMessageIntoBubble: Dispatch<SetStateAction<boolean>>
-    ] = useState(false)
-
-    const [disableButton, setDisableButton]: [
-        disableButton: boolean,
-        setDisableButton: Dispatch<SetStateAction<boolean>>
-    ] = useState(true)
-
-    const [animate, setAnimate]: [
-        animate: boolean,
-        setAnimate: Dispatch<SetStateAction<boolean>>
-    ] = useState(false)
-
-    const [adressee, setAdressee]: [
-        adressee: Join<AuthUser, {blocked: boolean}> | null,
-        setAdresse: Dispatch<SetStateAction<Join<AuthUser, {blocked: boolean}> | null>>
-    ] = useState(null as Join<AuthUser, {blocked: boolean}> | null)
-    
-    const [blockUser, setBlockUser]: [
-        blockUser: BlockUser, 
-        setBlockUser: Dispatch<SetStateAction<BlockUser>>
-    ] = useState({success: false, error: null} as BlockUser);
-
-    const {channel} = useChannel('chat_room', ()=>{
-        console.log('use chat_room channel')
-    });
+    const chosenReceiversLength = chosenReceivers.length
+    const texto = message?.texto
 
     useEffect(()=>{
         document.title = "Conversation"
@@ -91,7 +65,15 @@ export default function UserConversation({create, user, setCreateConversation, a
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
         
-        const handleAblyConnection = async()=>{
+        const handleAblyConnection = ()=>{
+            if (!connectedToAbly) {
+                axios.get(`/api/ably`).catch(console.error)
+
+                setConnectedToAbly(true)
+
+                return
+            }
+
             if(adressee && adressee.id){
                 channel.publish("get_conversation_messages", JSON.stringify({
                     conversation_id: conversation_id, 
@@ -109,8 +91,8 @@ export default function UserConversation({create, user, setCreateConversation, a
             });
         }
 
-        handleAblyConnection();
-        
+        handleAblyConnection()
+
         if(create){
             setAnimate(true)
 
@@ -118,15 +100,15 @@ export default function UserConversation({create, user, setCreateConversation, a
                 return
             }
 
-            if((message.texto !== undefined 
-                && message.texto.length > 0 )
-                && chosenReceivers.length > 0
+            if((texto
+                && texto.length > 0 )
+                && chosenReceiversLength > 0
                 && disableButton
             ){
                 setDisableButton(false)
-            }else if((message.texto !== undefined 
-                && message.texto.length === 0
-                && !disableButton) || chosenReceivers.length === 0
+            }else if((texto
+                && texto.length === 0
+                && !disableButton) || chosenReceiversLength === 0
             ){
                 setDisableButton(true)
             }
@@ -148,13 +130,13 @@ export default function UserConversation({create, user, setCreateConversation, a
                 return
             }
 
-            if(message.texto && 
-                message.texto.length > 0 && 
+            if(texto && 
+                texto.length > 0 && 
                 disableButton
             ){
                 setDisableButton(false)
-            }else if(message.texto &&
-                message.texto.length === 0 &&
+            }else if(texto &&
+                texto.length === 0 &&
                 !disableButton
             ){
                 setDisableButton(true)
@@ -162,23 +144,22 @@ export default function UserConversation({create, user, setCreateConversation, a
         }
            
     }, [
-        disableButton, 
-        adressee, 
+        disableButton,
         adressee_id,
         conversation_id,
-        chosenReceivers, 
-        message
+        chosenReceiversLength, 
+        texto,
+        connectedToAbly,
+        showMessageIntoBubble
     ]);
 
 
     const handleSubmitForm: MouseEventHandler<HTMLButtonElement> = (e:FormEvent<HTMLButtonElement>)=>{
         e.preventDefault()
 
-        const data = new Data()
-
         if(create && chosenReceivers.length > 0 && message){
             chosenReceivers.forEach(chosenReceiver => {
-                data.post(`/api/user/conversation/message/${chosenReceiver.id}`, message).then(res => {
+                axios.post(`/api/user/conversation/message/${chosenReceiver.id}`, message).then(res => {
                     setShowMessageIntoBubble(true)
                 }).catch(e => {
                     console.error(e)
@@ -249,7 +230,7 @@ export default function UserConversation({create, user, setCreateConversation, a
     </div>
 }
 
-export async function getseServerSideProps({req, res}:{req:NextApiRequest, res: NextApiResponse}){
+export async function getServerSideProps({req, res}:{req:NextApiRequest, res: NextApiResponse}){
     const session = await getSession(req, res);
     const user = session.user;
     if(!user){
@@ -264,7 +245,7 @@ export async function getseServerSideProps({req, res}:{req:NextApiRequest, res: 
 
     return {
         props: {
-            user: user
+            user
         }
     }
 }
