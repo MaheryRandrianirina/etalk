@@ -29,7 +29,7 @@ export default function Conversation({currentUser, conversation}: {
 
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
 
-    const {channel} = useChannel('chat_messages', "conversation_last_message", message => {
+    const {channel, ably} = useChannel('chat_messages', "conversation_last_message", message => {
         setMessage(message.data)
     });
 
@@ -63,6 +63,7 @@ export default function Conversation({currentUser, conversation}: {
             setClassnameForAnimation("active")
         }
         
+        return () => channel.unsubscribe()
     }, [
         message,
         classnameForAnimation,

@@ -1,6 +1,6 @@
 import { ChangeEvent, ChangeEventHandler, Dispatch, MouseEventHandler, SetStateAction, useEffect } from "react";
 import MessageTextarea from "./messageTextarea";
-import { SetMessage,ConversationMessage } from "../../types/conversation";
+import { ConversationMessage } from "../../types/conversation";
 import { formatDate } from "date-fns";
 
 export default function ConversationFooter({submitForm, message, setMessage, disableButton, sender_id, blockedAdressee}: {
@@ -13,12 +13,11 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
 }): JSX.Element {
 
     const handleTextoChange: ChangeEventHandler = (event: ChangeEvent<HTMLTextAreaElement>) => {
-        
         setMessage(m => {
             if(m === null){
-                return {texto: event.target.value, created_at: formatDate(new Date(), 'Y-m-d H:i:s'), sender_id: sender_id} as ConversationMessage
+                return {texto: event.target.value, created_at: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'), sender_id: sender_id} as ConversationMessage
             }else {
-                return {...m, texto: event.target.value, created_at: formatDate(new Date(), 'Y-m-d H:i:s'), sender_id: sender_id}
+                return {...m, texto: event.target.value, created_at: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'), sender_id: sender_id}
             }
         })
     }

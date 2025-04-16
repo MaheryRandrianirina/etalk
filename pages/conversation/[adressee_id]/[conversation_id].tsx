@@ -54,13 +54,15 @@ export default function UserConversation({user, create, setCreateConversation, a
     const [connectedToAbly, setConnectedToAbly] = useState(create) // following value of create prop because it doen't load when user click on the create conversation button
 
     useConnectionStateListener('connected', () => console.log('Connected to Ably!'));
-    const {channel} = useChannel('chat_room');
+    const {channel, ably} = useChannel('chat_room');
 
     const chosenReceiversLength = chosenReceivers.length
     const texto = message?.texto
+    const connectionState = ably.connection.state;
 
     useEffect(()=>{
         document.title = "Conversation"
+        
         
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
@@ -74,12 +76,12 @@ export default function UserConversation({user, create, setCreateConversation, a
                 return
             }
 
-            if(adressee && adressee.id){
+            if(adressee_id){
                 channel.publish("get_conversation_messages", JSON.stringify({
                     conversation_id: conversation_id, 
-                    adressee_id: adressee.id
+                    adressee_id: adressee_id
                 }));
-    
+                console.log("mess")
                 channel.subscribe('conversation_messages', (message: CustomMessage<ConversationMessage[]>) => {
                     setShowMessageIntoBubble(true)
                     setConversationMessages(message.data)
@@ -113,18 +115,20 @@ export default function UserConversation({user, create, setCreateConversation, a
                 setDisableButton(true)
             }
         }else { 
-            axios.get(`/api/user/conversation/${conversation_id}?adressee_id=${adressee_id}`).then(res => {
-                if(res.statusText === "OK"){
-                    setAdressee(res.data.adressee)
-                }
-            }).catch(e => {
-                const error = e as AxiosError<{success: boolean, message?: string}>
-                const errorData = error.response && error.response.data
-
-                if(errorData && !errorData.success && errorData.message){
-                    document.location.href = "/404"
-                }
-            })
+            if(!adressee) {
+                axios.get(`/api/user/conversation/${conversation_id}?adressee_id=${adressee_id}`).then(res => {
+                    if(res.statusText === "OK"){
+                        setAdressee(res.data.adressee)
+                    }
+                }).catch(e => {
+                    const error = e as AxiosError<{success: boolean, message?: string}>
+                    const errorData = error.response && error.response.data
+    
+                    if(errorData && !errorData.success && errorData.message){
+                        document.location.href = "/404"
+                    }
+                })
+            }
 
             if(!message){
                 return
@@ -142,11 +146,11 @@ export default function UserConversation({user, create, setCreateConversation, a
                 setDisableButton(true)
             }
         }
-           
+         
+        return () => channel.unsubscribe()
     }, [
         disableButton,
         adressee_id,
-        conversation_id,
         chosenReceiversLength, 
         texto,
         connectedToAbly,
@@ -156,7 +160,7 @@ export default function UserConversation({user, create, setCreateConversation, a
 
     const handleSubmitForm: MouseEventHandler<HTMLButtonElement> = (e:FormEvent<HTMLButtonElement>)=>{
         e.preventDefault()
-
+        
         if(create && chosenReceivers.length > 0 && message){
             chosenReceivers.forEach(chosenReceiver => {
                 axios.post(`/api/user/conversation/message/${chosenReceiver.id}`, message).then(res => {
@@ -167,20 +171,14 @@ export default function UserConversation({user, create, setCreateConversation, a
             })
             
         }else if(!create && message){
-            channel?.publish("message", JSON.stringify({
+            channel?.publish("message", {
                 conversation_id: conversation_id,
                 message: message, 
                 adressee_id: adressee_id
-            }))
+            })
 
-            channel?.subscribe('conversation_messages', (message)=>{
-                setShowMessageIntoBubble(true)
-
-                setConversationMessages(message.data)
-
-                setMessage(m => {
-                    return {...m, texto: ""}
-                })
+            setMessage(m => {
+                return {...m, texto: ""}
             })
         }
     }
@@ -191,7 +189,6 @@ export default function UserConversation({user, create, setCreateConversation, a
         if(create && setCreateConversation){
             setAnimate(false)
             setBackwarded(true)
-            //setCreateConversation(false)
         }else {
             document.location.href = "/"
         }

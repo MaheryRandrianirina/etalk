@@ -28,6 +28,7 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
         try {
             const realtime = new ably.Realtime({key: process.env.ABLY_API_KEY});
             await realtime.connection.once("connected");
+            
             console.log("connected to Ably");
 
             const chatlist_channel = realtime.channels.get("chat_list");
@@ -108,20 +109,23 @@ export default async function Ably(req: NextApiRequest, res: NextApiResponse) {
                 chatroom_channel.publish('conversation_messages', messages)
             })
 
-            chatroom_channel.subscribe('message', async(msg: CustomMessage<string>)=>{
-                const {conversation_id, messageData} = JSON.parse(msg.data) as {
-                    conversation_id: number,
-                    messageData: {message: ConversationMessage, adressee_id: number}
-                }
+            chatroom_channel.subscribe('message', async(msg: CustomMessage<{
+                conversation_id: number,
+                message: ConversationMessage,
+                adressee_id: number
+            }>)=>{
+                const {conversation_id, message, adressee_id} = msg.data
+                console.log("ty id", adressee_id)
+
                 try {
                     const conversationTable = new ConversationTable()
                     const conversation = await conversationTable.find(conversation_id)
                     const userConversation = new UserConversation(req, session, conversation_id)
                     
                     if(conversation.length === 0){
-                        await userConversation.new(messageData.adressee_id, messageData.message)
+                        await userConversation.new(adressee_id, message)
                     }else {
-                        await userConversation.message(messageData.message, conversation_id, messageData.adressee_id)
+                        await userConversation.message(message, conversation_id, adressee_id)
                     }
                     
                     const messages = await userConversation.messages()

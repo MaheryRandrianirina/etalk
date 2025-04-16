@@ -72,7 +72,7 @@
 - Afficher une erreur lorsque l'utilisateur tente de creer un pseudo et adresse email deja existant [v]
 - Modifier le composant registerStepTwo en ajoutant le prop "errors" comme pour le registerStepOne [v]
 - Faire marche l'upload d'image dans l'inscription [v]
-- Envoyer un message en cliquant sur le bouton d'envoi
+- Envoyer un message en cliquant sur le bouton d'envoi (bug: la date qui s'affiche sur chaque conversation dans la boite de reception devrait etre la date du dernier message)
 - Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist)
 - Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes
 - Implementer le token csrf sur toutes les requetes de type POST

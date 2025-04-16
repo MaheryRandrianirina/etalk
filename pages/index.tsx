@@ -71,6 +71,8 @@ export default function Home({user}: {
     setShowMenu: Dispatch<SetStateAction<boolean>>
   ] = useState(false);
 
+  const [getConversationPublished, setPublishGetConversation] = useState<boolean>(false)
+
   // POUR L'ANIMATION DU MENU DEROULANT
   const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("");
 
@@ -78,18 +80,21 @@ export default function Home({user}: {
       console.log('Connected to Ably!');
   });
 
-  const {channel, connectionError, channelError, ably} = useChannel('chat_list', "conversations", (message: CustomMessage<Conversation[]>)=>{
+  const {channel, connectionError, ably} = useChannel('chat_list', "conversations", (message: CustomMessage<Conversation[]>)=>{
     setConversations(message.data);
   });
 
   
   useEffect(()=>{    
-      if (connectionError) {
+      if (connectionError || ably.connection.state ===  "closed") {
         console.log("reconnect to ably")
         ably.connect()
       }
       
-      channel.publish("get_conversations", "message").then(res => console.log(res)).catch(err => console.error(err));
+      if(!getConversationPublished) {
+        channel.publish("get_conversations", "message").then(res => setPublishGetConversation(true)).catch(err => console.error(err));
+      }
+      
       
       if(showMenu){
         setClassnameForAnimation("active")
@@ -98,7 +103,7 @@ export default function Home({user}: {
       }
 
       return () => channel.unsubscribe()
-  }, [showMenu, connectionError, backwarded])
+  }, [showMenu, connectionError, backwarded, getConversationPublished])
 
   const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
       event.preventDefault()
