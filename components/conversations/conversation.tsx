@@ -1,22 +1,21 @@
 import Image from "next/image"
 import Link from "next/link"
 import { AuthUser, ConversationOwners, User } from "../../types/user"
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react"
 import { Conversation as UserConversation, Join } from "../../types/Database"
 import { ConversationMessage, SetMessage } from "../../types/conversation"
 import { UserIcon } from "../atoms/icons/UserIcon"
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
 import { profilePhotoPath } from "@/lib/index"
-import { useChannel } from "ably/react"
 import { CustomMessage } from "../../types/ably"
 import { formatDistanceToNow } from "date-fns"; 
 import { fr } from "date-fns/locale"
+import { SocketContext } from "../contexts/SocketContext"
 
 export default function Conversation({currentUser, conversation}: {
     currentUser: User,
     conversation: UserConversation
 }): JSX.Element {
-
     const [message, setMessage]: [
         message: Join<ConversationMessage, {sender: AuthUser}> | null,
         setMessage: SetMessage<{sender: AuthUser}>
@@ -29,47 +28,43 @@ export default function Conversation({currentUser, conversation}: {
 
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
 
-    const {channel, ably} = useChannel('chat_messages', "conversation_last_message", message => {
-        setMessage(message.data)
-    });
+    const socketValue= useContext(SocketContext);
 
     useEffect(()=>{
-        const handleAblyConnexion = ()=>{
+        socketValue?.socket.on("conversation_last_message", (message: Join<ConversationMessage, {sender: AuthUser}>) => {
+            console.log("yoh")
+            setMessage(message)
+        })
 
-            if(message === null){
-                channel.publish("get_conversation_last_message", `${conversation.id}`)
+        if(message === null){
+            socketValue?.socket.emit("get_conversation_last_message", `${conversation.id}`)
+        }
+        
+        if(conversationOwners === null){
+            try {
+                socketValue?.socket.emit('get_conversation_owners', JSON.stringify({
+                    initializer_id : conversation.initializer_id, 
+                    adressee_id :conversation.adressee_id
+                }))
+    
+                socketValue?.socket.on('conversation_owners', (message: CustomMessage<ConversationOwners|null>) =>{
+                    setConversationOwners(message.data)
+                })
+            }catch(e){
+                console.error(e)
             }
             
-            if(conversationOwners === null){
-                try {
-                    channel.publish('get_conversation_owners', JSON.stringify({
-                        initializer_id : conversation.initializer_id, 
-                        adressee_id :conversation.adressee_id
-                    }))
-        
-                    channel.subscribe('conversation_owners', (message: CustomMessage<ConversationOwners|null>) =>{
-                        setConversationOwners(message.data)
-                    })
-                }catch(e){
-                    console.error(e)
-                }
-                
-            }
         }
-
-        handleAblyConnexion();
 
         if(classnameForAnimation.length === 0){
             setClassnameForAnimation("active")
         }
         
-        return () => channel.unsubscribe()
     }, [
         message,
         classnameForAnimation,
         conversation,
-        conversationOwners,
-        channel
+        conversationOwners
     ])
 
     const profilPic = conversationOwners?.adressee?.id !== currentUser.id ? 

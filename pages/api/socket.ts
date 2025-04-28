@@ -44,23 +44,27 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
 
         res.socket.server.io = io
 
-        const u = user as Omit<User, "created_at" | "updated_at" | "email" | "remember_token" | "password">
+        const u = user as Omit<User, "created_at" | "updated_at" | "email" | "remember_token" | "password">;
 
-        const userTable = new UserTable()
-        const messageTable = new MessageTable()
+        const userTable = new UserTable();
+        const messageTable = new MessageTable();
 
         io.on('connection', (socket)=>{
+            socket.join("chat_list");
+
             socket.on('get_conversations', async()=>{
+                console.log("get conversationssss")
                 try {
                     const conversationTable = new ConversationTable<Conversation>()
                     const conversations = await conversationTable
                         .columns<ConversationUser, undefined>(['c.*'])
-                        .join({'conversations_users': {alias: "cu", on: "c.id = cu.conversation_id"}})
-                        .where<ConversationUser>({'cu.user_id': u.id})
-                        .get() as Conversation[]
-                    
-                    socket.emit('conversations', conversations)
-                }catch(e){
+                        .join({ 'conversations_users': { alias: "cu", on: "c.id = cu.conversation_id" } })
+                        .where<ConversationUser>({ 'cu.user_id': u.id })
+                        .get() as Conversation[];
+
+                    socket.emit('conversations', conversations);
+                    // continue here
+                } catch (e) {
                     console.error(e)
                 }
             })
@@ -70,7 +74,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                     const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
                     .join({
                         "conversations_users": {alias: "cu", on: "cu.user_id = m.sender_id"},
-                        "user": {alias: "u", on: "u.id = cu.user_id"}
+                        "users": {alias: "u", on: "u.id = cu.user_id"}
                     })
                     .where<ConversationUser>({
                         "m.conversation_id": conversation_id, 

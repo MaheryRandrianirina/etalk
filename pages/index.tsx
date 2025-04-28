@@ -4,7 +4,7 @@ import { User } from '@/types/user'
 import { NextResponse } from "next/server"
 import type { NextApiRequest, NextApiResponse } from "next"
 import Auth from '@/backend/User/Auth'
-import { ChangeEvent, ChangeEventHandler, Dispatch, EventHandler, Fragment, MouseEvent, MouseEventHandler, SetStateAction, SyntheticEvent, useEffect, useState } from 'react'
+import { ChangeEvent, ChangeEventHandler, Dispatch, EventHandler, Fragment, MouseEvent, MouseEventHandler, SetStateAction, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import UserConversation from './conversation/[adressee_id]/[conversation_id]'
 import Header from '@/components/atoms/header'
 import SearchBar from '@/components/atoms/searchBar'
@@ -16,16 +16,17 @@ import axios from 'axios'
 import { UserConversations } from '@/types/conversation'
 import Menu from '@/components/molecules/menu'
 import useClassnameAnimator from '@/hooks/useClassnameAnimator';
-import { useChannel, useConnectionStateListener } from "ably/react";
+import { useEvent, useConnectionStateListener } from "@/lib/socket";
 import { Conversation } from '@/types/Database'
 import { CustomMessage } from '@/types/ably'
 import { getSession } from '@/lib'
+import { SocketProvider } from '@/components/contexts/providers/SocketProvider'
 
 
 type AnimationClassName = {receptionBox: string, conversation: string}
 
 
-axios.get(`http://localhost:3000/api/ably`).catch(console.error)
+axios.get(`http://localhost:3000/api/socket`).catch(console.error)
 
 export default function Home({user}: {
   user: User
@@ -71,39 +72,28 @@ export default function Home({user}: {
     setShowMenu: Dispatch<SetStateAction<boolean>>
   ] = useState(false);
 
-  const [getConversationPublished, setPublishGetConversation] = useState<boolean>(false)
 
   // POUR L'ANIMATION DU MENU DEROULANT
   const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("");
 
-  useConnectionStateListener('connected', ()=>{
-      console.log('Connected to Ably!');
-  });
+  const { socket, connected, connectionError} = useConnectionStateListener('connect');
 
-  const {channel, connectionError, ably} = useChannel('chat_list', "conversations", (message: CustomMessage<Conversation[]>)=>{
-    setConversations(message.data);
-  });
-
+  if(socket){
+    socket.on("conversations", (message: Conversation[])=>{
+      console.log("conv", message)
+      setConversations(message satisfies UserConversations);
+    });
+  }
   
-  useEffect(()=>{    
-      if (connectionError || ably.connection.state ===  "closed") {
-        console.log("reconnect to ably")
-        ably.connect()
-      }
-      
-      if(!getConversationPublished) {
-        channel.publish("get_conversations", "message").then(res => setPublishGetConversation(true)).catch(err => console.error(err));
-      }
-      
-      
+  useEffect(()=>{       
+      socket.emit("get_conversations", "message");
+
       if(showMenu){
         setClassnameForAnimation("active")
       }else {
         setClassnameForAnimation("")
       }
-
-      return () => channel.unsubscribe()
-  }, [showMenu, connectionError, backwarded, getConversationPublished])
+  }, [showMenu, backwarded])
 
   const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
       event.preventDefault()
@@ -150,7 +140,7 @@ export default function Home({user}: {
     setShowMenu(show => !show);
   }
   
-  const isLoading = connectionError === null && conversations === null;
+  const isLoading = conversations === null;
 
   return (
       <div className="app_container" style={{ height: "100%" }}>
@@ -164,73 +154,74 @@ export default function Home({user}: {
 
           {connectionError && <div>Une erreur est survenue. Veuilez recharger l'application.</div>}
 
-          {createConversation === false &&
-            activeSection === 1 &&
-            conversations && (
-              <ReceptionBox
-                onClickMenu={handleClickMenu}
-                  backwarded={backwarded}
-                  setBackwarded={setBackwared}
-                  conversations={conversations}
-                  searchResults={{
-                    appear: isSearchResultsAppear,
-                    handleClickSearchResult: handleClickSearchResult,
+          <SocketProvider socketValue={{socket, connected, connectionError}}>
+            {(createConversation === false &&
+              activeSection === 1 &&
+              conversations) && (
+                <ReceptionBox
+                  onClickMenu={handleClickMenu}
+                    backwarded={backwarded}
+                    setBackwarded={setBackwared}
+                    conversations={conversations}
+                    searchResults={{
+                      appear: isSearchResultsAppear,
+                      handleClickSearchResult: handleClickSearchResult,
+                    }}
+                    user={user}
+                    searchBar={{
+                      value: searchBarValue,
+                      handleChange: handleSearchBarChange,
+                    }}
+                    createConversations={{
+                      setter: setCreateConversation,
+                      handler: handleCreateConversation,
+                    }}
+                    animationClassname={animationClassName.receptionBox}
+                    footer={{
+                      onClickUserFriends: handleClickUserFriends,
+                      handleClickMessageCircle: handleClickMessageCircle,
+                      activeSection: activeSection,
                   }}
-                  user={user}
-                  searchBar={{
-                    value: searchBarValue,
-                    handleChange: handleSearchBarChange,
-                  }}
-                  createConversations={{
-                    setter: setCreateConversation,
-                    handler: handleCreateConversation,
-                  }}
-                  animationClassname={animationClassName.receptionBox}
-                  footer={{
-                    onClickUserFriends: handleClickUserFriends,
-                    handleClickMessageCircle: handleClickMessageCircle,
-                    activeSection: activeSection,
-                }}
-              />
-            )}
-
-          {conversations && activeSection === 2 ? (
-            <Fragment>
-              <Header onClickMenu={handleClickMenu} />
-              <SearchBar
-                value={searchBarValue}
-                onSearchBarChange={handleSearchBarChange}
-              />
-              {isSearchResultsAppear === true && (
-                <SearchResults
-                  clickResultHandler={handleClickSearchResult}
-                  results={[]}
                 />
               )}
-              <ListActiveFriends />
-              <Footer
-                onClickUserFriends={handleClickUserFriends}
-                onClickMessageCircle={handleClickMessageCircle}
-                active={activeSection}
-              />
-            </Fragment>
-          ) : (
-            ""
-          )}
-          {createConversation && (
-              <UserConversation
-                animation={{
-                  className: animationClassName.conversation,
-                  set: setAnimationClassName,
-                }}
-                setCreateConversation={setCreateConversation}
-                create={true}
-                user={user}
-                setBackwarded={setBackwared}
-              />
-          )}
 
-          {connectionError === null && <Menu className={classnameForAnimation} setShowMenu={setShowMenu} />}
+            {conversations && activeSection === 2 ? (
+              <Fragment>
+                <Header onClickMenu={handleClickMenu} />
+                <SearchBar
+                  value={searchBarValue}
+                  onSearchBarChange={handleSearchBarChange}
+                />
+                {isSearchResultsAppear === true && (
+                  <SearchResults
+                    clickResultHandler={handleClickSearchResult}
+                    results={[]}
+                  />
+                )}
+                <ListActiveFriends />
+                <Footer
+                  onClickUserFriends={handleClickUserFriends}
+                  onClickMessageCircle={handleClickMessageCircle}
+                  active={activeSection}
+                />
+              </Fragment>
+            ) : (
+              ""
+            )}
+            {createConversation && (
+                <UserConversation
+                  animation={{
+                    className: animationClassName.conversation,
+                    set: setAnimationClassName,
+                  }}
+                  setCreateConversation={setCreateConversation}
+                  create={true}
+                  user={user}
+                  setBackwarded={setBackwared}
+                />
+            )}
+        </SocketProvider>
+          {!connectionError && <Menu className={classnameForAnimation} setShowMenu={setShowMenu} />}
       </div>
   );
 }

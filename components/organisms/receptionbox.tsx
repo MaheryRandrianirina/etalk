@@ -49,7 +49,7 @@ export default function ReceptionBox({
   setBackwarded: Dispatch<SetStateAction<boolean>>;
   onClickMenu: MouseEventHandler<HTMLDivElement>
 }): JSX.Element {
-
+  
   useEffect(() => {
     const receptionBox = document.querySelector(
       ".reception_box"

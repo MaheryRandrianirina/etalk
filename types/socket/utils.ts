@@ -1,6 +1,8 @@
+import { DefaultEventsMap } from "socket.io";
 import { Conversation, Join, Message } from "../Database";
 import { ConversationMessage } from "../conversation";
 import { AuthUser, User } from "../user";
+import { Socket } from "socket.io-client";
 
 interface ServerToClientEvents {
     conversations: (a: Conversation[])=>void;
@@ -27,9 +29,14 @@ interface SocketData {
     age: number;
 }
 
+type ResponseHandler = (message: unknown) => void
+
+type SocketValue = { socket: Socket<DefaultEventsMap, DefaultEventsMap>, connected: boolean, connectionError: boolean }
 export type {
     ServerToClientEvents,
     ClientToServerEvents,
     InterServerEvents,
-    SocketData
+    SocketData,
+    ResponseHandler,
+    SocketValue
 }
