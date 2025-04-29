@@ -7,7 +7,6 @@ import { ConversationMessage, SetMessage } from "../../types/conversation"
 import { UserIcon } from "../atoms/icons/UserIcon"
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
 import { profilePhotoPath } from "@/lib/index"
-import { CustomMessage } from "../../types/ably"
 import { formatDistanceToNow } from "date-fns"; 
 import { fr } from "date-fns/locale"
 import { SocketContext } from "../contexts/SocketContext"

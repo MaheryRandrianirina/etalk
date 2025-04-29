@@ -112,12 +112,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                 })
             })
 
-            socket.on('get_conversation_messages', async (conversation_id, adressee_id)=>{
-                if(adressee_id === u.id){
-                    socket.emit('conversation_messages_error', {status: 404, message: "Cette conversation n'existe pas"})
-                    return
-                }
-                
+            socket.on('get_conversation_messages', async (conversation_id, adressee_id)=>{                
                 const userConversation = new UserConversation(req, session, conversation_id)
                 const messages = await userConversation.messages()
 

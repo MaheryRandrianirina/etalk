@@ -17,15 +17,17 @@ import { ChosenReceiver, ConversationMessage } from "@/types/conversation"
 import axios, { AxiosError } from "axios"
 import { Join } from "@/types/Database"
 import { CustomMessage } from "@/types/ably"
-import { useChannel, useConnectionStateListener } from "ably/react"
 import type { NextApiRequest, NextApiResponse } from "next"
 import { getSession } from "@/lib/index"
+import { useConnectionStateListener } from "@/lib/socket"
 
 
 export type BlockUser = {
     success: boolean,
     error: Error | null
 }
+
+axios.get(`http://localhost:3000/api/socket`).catch(console.error)
 
 export default function UserConversation({user, create, setCreateConversation, animation, setBackwarded}: {
     create?: true,
@@ -51,49 +53,33 @@ export default function UserConversation({user, create, setCreateConversation, a
     const [animate, setAnimate] = useState<boolean>(false)
     const [adressee, setAdressee] = useState<Join<AuthUser, {blocked: boolean}> | null>(null as Join<AuthUser, {blocked: boolean}> | null)    
     const [blockUser, setBlockUser] = useState<BlockUser>({success: false, error: null} as BlockUser);
-    const [connectedToAbly, setConnectedToAbly] = useState(create) // following value of create prop because it doen't load when user click on the create conversation button
+    
+    const { socket, connected, connectionError} = useConnectionStateListener('connect');
+    
+    if (socket) {
+        socket.emit("get_conversation_messages", conversation_id, adressee_id);
 
-    useConnectionStateListener('connected', () => console.log('Connected to Ably!'));
-    const {channel, ably} = useChannel('chat_room');
+        socket.on('conversation_messages', (message: ConversationMessage[]) => {
+            setShowMessageIntoBubble(true)
+            setConversationMessages(message)
+        });
+    }
+    
 
-    const chosenReceiversLength = chosenReceivers.length
-    const texto = message?.texto
-    const connectionState = ably.connection.state;
+    const chosenReceiversLength = chosenReceivers.length;
+    const texto = message?.texto;
 
     useEffect(()=>{
         document.title = "Conversation"
         
-        
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
-        
-        const handleAblyConnection = ()=>{
-            if (!connectedToAbly) {
-                axios.get(`/api/ably`).catch(console.error)
 
-                setConnectedToAbly(true)
-
-                return
-            }
-
-            if(adressee_id){
-                channel.publish("get_conversation_messages", JSON.stringify({
-                    conversation_id: conversation_id, 
-                    adressee_id: adressee_id
-                }));
-                console.log("mess")
-                channel.subscribe('conversation_messages', (message: CustomMessage<ConversationMessage[]>) => {
-                    setShowMessageIntoBubble(true)
-                    setConversationMessages(message.data)
-                });
-            }
-    
-            channel.subscribe('conversation_messages_error', (error)=>{
+        socket.on('conversation_messages_error', (error)=>{
+            if (error.status === 404) {
                 document.location.href = "/404"
-            });
-        }
-
-        handleAblyConnection()
+            }
+        });
 
         if(create){
             setAnimate(true)
@@ -147,13 +133,10 @@ export default function UserConversation({user, create, setCreateConversation, a
             }
         }
          
-        return () => channel.unsubscribe()
     }, [
         disableButton,
-        adressee_id,
         chosenReceiversLength, 
         texto,
-        connectedToAbly,
         showMessageIntoBubble
     ]);
 
@@ -171,8 +154,7 @@ export default function UserConversation({user, create, setCreateConversation, a
             })
             
         }else if(!create && message){
-            channel?.publish("message", {
-                conversation_id: conversation_id,
+            socket.emit("message", conversation_id, {
                 message: message, 
                 adressee_id: adressee_id
             })

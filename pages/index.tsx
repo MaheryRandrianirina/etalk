@@ -4,7 +4,7 @@ import { User } from '@/types/user'
 import { NextResponse } from "next/server"
 import type { NextApiRequest, NextApiResponse } from "next"
 import Auth from '@/backend/User/Auth'
-import { ChangeEvent, ChangeEventHandler, Dispatch, EventHandler, Fragment, MouseEvent, MouseEventHandler, SetStateAction, SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, ChangeEventHandler, Dispatch, EventHandler, Fragment, MouseEvent, MouseEventHandler, SetStateAction, SyntheticEvent, useEffect, useState } from 'react'
 import UserConversation from './conversation/[adressee_id]/[conversation_id]'
 import Header from '@/components/atoms/header'
 import SearchBar from '@/components/atoms/searchBar'
@@ -16,9 +16,8 @@ import axios from 'axios'
 import { UserConversations } from '@/types/conversation'
 import Menu from '@/components/molecules/menu'
 import useClassnameAnimator from '@/hooks/useClassnameAnimator';
-import { useEvent, useConnectionStateListener } from "@/lib/socket";
+import { useConnectionStateListener } from "@/lib/socket";
 import { Conversation } from '@/types/Database'
-import { CustomMessage } from '@/types/ably'
 import { getSession } from '@/lib'
 import { SocketProvider } from '@/components/contexts/providers/SocketProvider'
 
