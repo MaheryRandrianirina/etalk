@@ -97,11 +97,12 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
             })
 
             socket.on('get_conversation_owners', async(initializer_id, adressee_id)=>{
+                console.log('get_conversation_owners')
                 const [initializer] = await userTable.columns([
-                        "id", "name", "username", 
-                        "firstname", "email", "sex", 
-                        "image", "is_online"
-                    ]).find(initializer_id) as AuthUser[]
+                    "id", "name", "username", 
+                    "firstname", "email", "sex", 
+                    "image", "is_online"
+                ]).find(initializer_id) as AuthUser[]
 
                 const [adressee] = await userTable.find(adressee_id) as AuthUser[]
 

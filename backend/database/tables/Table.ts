@@ -119,7 +119,7 @@ export default class Table<T extends Entity> {
             }else {
                 query = this.getQueryBuilder().select("*").where(['id'] as (keyof ColumnsToFill<T>)[])
             }
-
+            
             try {
                 const res = await this.getMysqlConnection().query<T[]>(
                     query.__toString(), 

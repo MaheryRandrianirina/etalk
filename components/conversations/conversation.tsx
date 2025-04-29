@@ -36,20 +36,17 @@ export default function Conversation({currentUser, conversation}: {
             setMessage(message)
         })
 
+        socketValue?.socket.on('conversation_owners', (message: ConversationOwners) =>{
+            setConversationOwners(message)
+        })
+
         if(message === null){
             socketValue?.socket.emit("get_conversation_last_message", `${conversation.id}`)
         }
         
         if(conversationOwners === null){
             try {
-                socketValue?.socket.emit('get_conversation_owners', JSON.stringify({
-                    initializer_id : conversation.initializer_id, 
-                    adressee_id :conversation.adressee_id
-                }))
-    
-                socketValue?.socket.on('conversation_owners', (message: CustomMessage<ConversationOwners|null>) =>{
-                    setConversationOwners(message.data)
-                })
+                socketValue?.socket.emit('get_conversation_owners', conversation.initializer_id, conversation.adressee_id)
             }catch(e){
                 console.error(e)
             }
