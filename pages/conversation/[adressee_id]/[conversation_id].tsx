@@ -16,7 +16,6 @@ import { Dispatch,
 import { ChosenReceiver, ConversationMessage } from "@/types/conversation"
 import axios, { AxiosError } from "axios"
 import { Join } from "@/types/Database"
-import { CustomMessage } from "@/types/ably"
 import type { NextApiRequest, NextApiResponse } from "next"
 import { getSession } from "@/lib/index"
 import { useConnectionStateListener } from "@/lib/socket"
@@ -57,12 +56,14 @@ export default function UserConversation({user, create, setCreateConversation, a
     const { socket, connected, connectionError} = useConnectionStateListener('connect');
     
     if (socket) {
-        socket.emit("get_conversation_messages", conversation_id, adressee_id);
+        if(!create) {
+            socket.emit("get_conversation_messages", conversation_id, adressee_id);
 
-        socket.on('conversation_messages', (message: ConversationMessage[]) => {
-            setShowMessageIntoBubble(true)
-            setConversationMessages(message)
-        });
+            socket.on('conversation_messages', (message: ConversationMessage[]) => {
+                setShowMessageIntoBubble(true)
+                setConversationMessages(message)
+            });
+        }
     }
     
 
@@ -74,12 +75,6 @@ export default function UserConversation({user, create, setCreateConversation, a
         
         const userConversation = document.querySelector('.user_conversation') as HTMLDivElement
         userConversation.offsetWidth
-
-        socket.on('conversation_messages_error', (error)=>{
-            if (error.status === 404) {
-                document.location.href = "/404"
-            }
-        });
 
         if(create){
             setAnimate(true)
@@ -101,6 +96,12 @@ export default function UserConversation({user, create, setCreateConversation, a
                 setDisableButton(true)
             }
         }else { 
+            socket.on('conversation_messages_error', (error)=>{
+                if (error.status === 404) {
+                    document.location.href = "/404"
+                }
+            });
+
             if(!adressee) {
                 axios.get(`/api/user/conversation/${conversation_id}?adressee_id=${adressee_id}`).then(res => {
                     if(res.statusText === "OK"){
@@ -134,6 +135,7 @@ export default function UserConversation({user, create, setCreateConversation, a
         }
          
     }, [
+        create,
         disableButton,
         chosenReceiversLength, 
         texto,

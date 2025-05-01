@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { AuthUser, ConversationOwners, User } from "../../types/user"
-import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react"
+import { Dispatch, memo, SetStateAction, useContext, useEffect, useState } from "react"
 import { Conversation as UserConversation, Join } from "../../types/Database"
 import { ConversationMessage, SetMessage } from "../../types/conversation"
 import { UserIcon } from "../atoms/icons/UserIcon"
@@ -10,11 +10,15 @@ import { profilePhotoPath } from "@/lib/index"
 import { formatDistanceToNow } from "date-fns"; 
 import { fr } from "date-fns/locale"
 import { SocketContext } from "../contexts/SocketContext"
+import axios from "axios"
 
-export default function Conversation({currentUser, conversation}: {
+export default (Conversation)
+
+function Conversation({currentUser, conversation}: {
     currentUser: User,
     conversation: UserConversation
 }): JSX.Element {
+    
     const [message, setMessage]: [
         message: Join<ConversationMessage, {sender: AuthUser}> | null,
         setMessage: SetMessage<{sender: AuthUser}>
@@ -26,46 +30,41 @@ export default function Conversation({currentUser, conversation}: {
     ] = useState(null as ConversationOwners | null);
 
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
-
+    
     const socketValue= useContext(SocketContext);
 
-    useEffect(()=>{
-        socketValue?.socket.on("conversation_last_message", (message: Join<ConversationMessage, {sender: AuthUser}>) => {
-            console.log("yoh")
+    if(message === null && socketValue){
+        console.log("message = null", `${conversation.id}.conversation_last_message`)
+        socketValue.socket.emit("get_conversation_last_message", `${conversation.id}`)
+
+        socketValue?.socket.on(`${conversation.id}.conversation_last_message`, (message: Join<ConversationMessage, {sender: AuthUser}>) => {
             setMessage(message)
         })
+    }
 
-        socketValue?.socket.on('conversation_owners', (message: ConversationOwners) =>{
-            setConversationOwners(message)
-        })
+    const conversationOwnersDefined = conversationOwners != null
 
-        if(message === null){
-            socketValue?.socket.emit("get_conversation_last_message", `${conversation.id}`)
-        }
+    useEffect(()=>{
         
-        if(conversationOwners === null){
-            try {
-                socketValue?.socket.emit('get_conversation_owners', conversation.initializer_id, conversation.adressee_id)
-            }catch(e){
-                console.error(e)
-            }
-            
+        if(!conversationOwnersDefined){
+            axios.get(`/api/user?initializer_id=${conversation.initializer_id}&adressee_id=${conversation.adressee_id}`)
+                .then(res => {
+                    setConversationOwners(res.data.owners)
+                })
+                .catch(err => {
+                    // gerer erreur
+                })
         }
 
         if(classnameForAnimation.length === 0){
             setClassnameForAnimation("active")
         }
-        
-    }, [
-        message,
-        classnameForAnimation,
-        conversation,
-        conversationOwners
-    ])
+
+    }, [classnameForAnimation, conversationOwnersDefined])
 
     const profilPic = conversationOwners?.adressee?.id !== currentUser.id ? 
         conversationOwners?.adressee.image : conversationOwners.initializer.image
-    
+    console.log("conversation", conversation.id, message)
     return <Link href={{
         pathname: "/conversation/[adressee_id]/[conversation_id]",
         query: { adressee_id: conversationOwners?.adressee.id, conversation_id: conversation.id}

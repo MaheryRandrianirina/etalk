@@ -177,7 +177,7 @@ export default class Table<T extends Entity> {
         return this
     }
 
-    orderBy(column: keyof Prefix<T, T>, type: "DESC" | "ASC"): this {
+    orderBy(column: keyof Prefix<T, T>, type: "DESC" | "ASC" = "ASC"): this {
         this.orders = {
             column: column,
             type: type
@@ -340,6 +340,23 @@ export default class Table<T extends Entity> {
                     reject(e)
                 }
             }
+        })
+    }
+
+    /**
+     * allows writting raw sql query
+     * @param query raw sql
+     */
+    raw(query: string, values: (string|number)[]|null = null): Promise<T[]> {
+        return new Promise(async(resolve, reject)=>{
+
+            try {
+                const res = await this.getMysqlConnection().query<Entity[]>(query, values)
+                resolve(res[0] as T[])
+            } catch (e) {
+                reject(e)
+            }
+            
         })
     }
 }

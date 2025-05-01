@@ -6,21 +6,21 @@ type ConnectionState = "connect";
 export const useConnectionStateListener = (state: ConnectionState)=>{
     const socket = io();
 
-    const [ connected, setConnected] = useState<boolean>(false);
-    const [connectionError, setConnectionError] = useState<boolean>(false);
+    const [ connectionState, setConnectionState] = useState<{connected: boolean, connectionError: boolean}>({connected:false, connectionError: false});
 
-    if (state === "connect" && connected === false) {
+    if (state === "connect" && connectionState.connected === false) {
         socket.on(state, () => {
-            setConnected(true);
+            setConnectionState(state => ({...state, connected: true}));
         });
 
         socket.on("connect_error", (error) => {
             if (!socket.active) {
-                setConnected(false);
-                setConnectionError(true);
+                setConnectionState(state => ({...state, connectionError: true}));
             } 
         });
     }
+
+    const {connected, connectionError} = connectionState;
 
     return {socket, connected, connectionError}
 }

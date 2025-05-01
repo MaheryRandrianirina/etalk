@@ -1,6 +1,6 @@
 import UserTable from "../../../backend/database/tables/UserTable";
 import { NextApiRequest, NextApiResponse } from "next/types";
-import { User as UserType } from "../../../types/user";
+import { AuthUser, User as UserType } from "../../../types/user";
 import { Conversation, ConversationUser } from "../../../types/Database";
 import ConversationUserTable from "../../../backend/database/tables/ConversationUserTable";
 import { getSession } from "@/lib";
@@ -9,13 +9,12 @@ import ConversationTable from "@/backend/database/tables/ConversationTable";
 
 export default async function User(req: NextApiRequest, res: NextApiResponse){
     
-
     const session = await getSession(req, res)
     const user = session.user
     
     if(user && req.method === "GET"){
-        const {name, sender_id, id } = req.query
-        
+        const {name, sender_id, id, initializer_id, adressee_id } = req.query
+       
         try {
             const userTable = new UserTable<UserType>()
 
@@ -24,12 +23,12 @@ export default async function User(req: NextApiRequest, res: NextApiResponse){
                 && sender_id !== undefined
                 && typeof sender_id === "string"
             ){
-                const usersFound = await userTable.search(
-                    ["username", "firstname", "name", "id"], 
-                    ["username", "name", "firstname"],
-                    { values: [`%${name}%`, `%${name}%`, `%${name}%`], operator: "OR"}
-                ) as UserType[]
-                const users = usersFound.filter(user => user.id !== parseInt(sender_id))
+                const users  = await userTable.raw(`
+                    SELECT username, firstname, name, id
+                    FROM users
+                    WHERE (username LIKE ? OR name LIKE ? OR firstname LIKE ?)
+                    AND id != ?
+                `, [`%${name}%`, `%${name}%`, `%${name}%`, user.id])
                 
                 let usersWithNoConversationWithAuthUser: UserType[] = [];
 
@@ -56,6 +55,16 @@ export default async function User(req: NextApiRequest, res: NextApiResponse){
                 ]).find(parseInt(id)) as UserType[]
 
                 res.status(200).json({success: true, user: foundUser})
+            }else if((initializer_id !== undefined && typeof initializer_id === "string") && (adressee_id !== undefined && typeof adressee_id === "string")){
+                const [initializer] = await userTable.columns([
+                    "id", "name", "username", 
+                    "firstname", "email", "sex", 
+                    "image", "is_online"
+                ]).find(parseInt(initializer_id)) as AuthUser[]
+
+                const [adressee] = await userTable.find(parseInt(adressee_id)) as AuthUser[]
+
+                res.status(200).json({success: true, owners: {initializer, adressee}})
             }else {
                 res.status(500).json({success: false, error: "undefined name"})
             }  

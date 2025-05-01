@@ -60,16 +60,18 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                         .columns<ConversationUser, undefined>(['c.*'])
                         .join({ 'conversations_users': { alias: "cu", on: "c.id = cu.conversation_id" } })
                         .where<ConversationUser>({ 'cu.user_id': u.id })
+                        .orderBy("c.created_at", "DESC")
                         .get() as Conversation[];
 
                     socket.emit('conversations', conversations);
-                    // continue here
                 } catch (e) {
                     console.error(e)
                 }
             })
 
             socket.on('get_conversation_last_message', async(conversation_id)=>{
+                console.log('get_conversation_last_message')
+
                 try {
                     const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
                     .join({
@@ -90,26 +92,10 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                                 ["created_at", "updated_at", "remember_token", "password"]
                             >[]
                     
-                    socket.emit('conversation_last_message', {...message, sender: user})
+                    socket.emit(`${conversation_id}.conversation_last_message`, {...message, sender: user})
                 }catch(e){
                     console.error(e)
                 }
-            })
-
-            socket.on('get_conversation_owners', async(initializer_id, adressee_id)=>{
-                console.log('get_conversation_owners')
-                const [initializer] = await userTable.columns([
-                    "id", "name", "username", 
-                    "firstname", "email", "sex", 
-                    "image", "is_online"
-                ]).find(initializer_id) as AuthUser[]
-
-                const [adressee] = await userTable.find(adressee_id) as AuthUser[]
-
-                socket.emit('conversation_owners', {
-                    initializer: initializer, 
-                    adressee: adressee
-                })
             })
 
             socket.on('get_conversation_messages', async (conversation_id, adressee_id)=>{                

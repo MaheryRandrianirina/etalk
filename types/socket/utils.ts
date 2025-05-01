@@ -4,13 +4,14 @@ import { ConversationMessage } from "../conversation";
 import { AuthUser, User } from "../user";
 import { Socket } from "socket.io-client";
 
-interface ServerToClientEvents {
+type ServerToClientEvents<T extends string = string> = {
     conversations: (a: Conversation[])=>void;
-    conversation_last_message: (message: Join<ConversationMessage, {sender: AuthUser}>) => void;
     conversation_owners: (owners: {initializer: AuthUser, adressee:AuthUser}) => void;
     conversation_messages: (messages: Message[]) => void,
     conversation_messages_error: (error: {status: number, message: string}) => void
-}
+} & {
+    [key in `${T}.conversation_last_message`]: (message: Join<ConversationMessage, { sender: AuthUser }>) => void;
+  };
 
 interface ClientToServerEvents {
     get_conversations: () => void;

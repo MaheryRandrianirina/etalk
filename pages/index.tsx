@@ -30,7 +30,7 @@ axios.get(`http://localhost:3000/api/socket`).catch(console.error)
 export default function Home({user}: {
   user: User
 }) {
-  
+  console.log("index tsx")
   const [conversations, setConversations]: [
     conversations: UserConversations,
     setConversations: Dispatch<SetStateAction<UserConversations>>
@@ -79,12 +79,11 @@ export default function Home({user}: {
 
   if(socket){
     socket.on("conversations", (message: Conversation[])=>{
-      console.log("conv", message)
       setConversations(message satisfies UserConversations);
     });
   }
   
-  useEffect(()=>{       
+  useEffect(()=>{  
       socket.emit("get_conversations", "message");
 
       if(showMenu){
@@ -140,7 +139,7 @@ export default function Home({user}: {
   }
   
   const isLoading = conversations === null;
-
+  
   return (
       <div className="app_container" style={{ height: "100%" }}>
         <Head>
