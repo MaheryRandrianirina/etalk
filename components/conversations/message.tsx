@@ -5,11 +5,10 @@ import { MessageType } from "../../types/messageType";
 import Bubble from "./bubble";
 import useClassnameAnimator from "../../hooks/useClassnameAnimator";
 
-export default function Message({type, last, className, content}: {
+export default function Message({type, className, content}: {
   type: MessageType, 
-  content: ConversationMessage
-  last?: boolean,
-  className?: string
+  content: ConversationMessage,
+  className?: string,
 }): JSX.Element {
   const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
 
@@ -20,10 +19,10 @@ export default function Message({type, last, className, content}: {
   })
   
     return <div className={"message " + type + " " + classnameForAnimation}>
-      <Bubble content={className ? content : undefined}/>  
+      <Bubble content={className ? content : undefined} isPending={content.pending}/>  
       <div className="datetime">
         {content.created_at ? `${(new DateHelper()).format(content.created_at)}` : ""}
       </div>
-      {last && <p className="status"></p> }
+      {content.pending && <p className="is-pending">envoi...</p> }
     </div>
 }

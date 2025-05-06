@@ -73,7 +73,7 @@
 - Modifier le composant registerStepTwo en ajoutant le prop "errors" comme pour le registerStepOne [v]
 - Faire marche l'upload d'image dans l'inscription [v]
 - utiliser websocket au lieu d'ably
-    - Fix bugs: les conversations listees sont affichees avec le nom d'une seule personne correspondante alors qu'ils devraient en etre autrement et c'est ce nom qui s'affiche a l'interieur de la conversation
+    - Fix bugs: les conversations listees sont affichees avec le nom d'une seule personne correspondante alors qu'ils devraient en etre autrement et c'est ce nom qui s'affiche a l'interieur de la conversation [v]
     - afficher "envoi" en attendant que le message soit envoye
 - eviter de charger lors du click sur le bouton retour
 - Envoyer un message en cliquant sur le bouton d'envoi (bug: la date qui s'affiche sur chaque conversation dans la boite de reception devrait etre la date du dernier message)

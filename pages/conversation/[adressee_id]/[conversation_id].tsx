@@ -26,8 +26,6 @@ export type BlockUser = {
     error: Error | null
 }
 
-axios.get(`http://localhost:3000/api/socket`).catch(console.error)
-
 export default function UserConversation({user, create, setCreateConversation, animation, setBackwarded}: {
     create?: true,
     user: User,
@@ -54,21 +52,10 @@ export default function UserConversation({user, create, setCreateConversation, a
     const [blockUser, setBlockUser] = useState<BlockUser>({success: false, error: null} as BlockUser);
     
     const { socket, connected, connectionError} = useConnectionStateListener('connect');
-    
-    if (socket) {
-        if(!create) {
-            socket.emit("get_conversation_messages", conversation_id, adressee_id);
-
-            socket.on('conversation_messages', (message: ConversationMessage[]) => {
-                setShowMessageIntoBubble(true)
-                setConversationMessages(message)
-            });
-        }
-    }
-    
 
     const chosenReceiversLength = chosenReceivers.length;
     const texto = message?.texto;
+    const socketIsDefined = socket !== null;
 
     useEffect(()=>{
         document.title = "Conversation"
@@ -96,7 +83,14 @@ export default function UserConversation({user, create, setCreateConversation, a
                 setDisableButton(true)
             }
         }else { 
-            socket.on('conversation_messages_error', (error)=>{
+            socket?.emit("get_conversation_messages", conversation_id, adressee_id);
+    
+            socket?.on('conversation_messages', (message: ConversationMessage[]) => {
+                setShowMessageIntoBubble(true)
+                setConversationMessages(message)
+            });
+
+            socket?.on('conversation_messages_error', (error)=>{
                 if (error.status === 404) {
                     document.location.href = "/404"
                 }
@@ -133,12 +127,18 @@ export default function UserConversation({user, create, setCreateConversation, a
                 setDisableButton(true)
             }
         }
+
+        return () => {
+            socket?.off('conversation_messages')
+            socket?.off('conversation_messages_error')
+        }
          
     }, [
         create,
         disableButton,
         chosenReceiversLength, 
         texto,
+        socketIsDefined,
         showMessageIntoBubble
     ]);
 
@@ -146,23 +146,35 @@ export default function UserConversation({user, create, setCreateConversation, a
     const handleSubmitForm: MouseEventHandler<HTMLButtonElement> = (e:FormEvent<HTMLButtonElement>)=>{
         e.preventDefault()
         
+        
         if(create && chosenReceivers.length > 0 && message){
+            const {pending, ...toSendMessage} = message
+
             chosenReceivers.forEach(chosenReceiver => {
-                axios.post(`/api/user/conversation/message/${chosenReceiver.id}`, message).then(res => {
+                axios.post(`/api/user/conversation/message/${chosenReceiver.id}`, toSendMessage).then(res => {
                     setShowMessageIntoBubble(true)
+                    setMessage(m => {
+                        return {...m, texto: ""}
+                    })
                 }).catch(e => {
                     console.error(e)
                 })
             })
             
         }else if(!create && message){
-            socket.emit("message", conversation_id, {
-                message: message, 
+            const {pending, ...toSendMessage} = message
+            
+            socket?.emit(`message`, conversation_id, {
+                message: toSendMessage, 
                 adressee_id: adressee_id
             })
 
             setMessage(m => {
                 return {...m, texto: ""}
+            })
+
+            setConversationMessages(msg => {
+                return [...msg, {id: msg.length, ...message}]
             })
         }
     }
@@ -174,7 +186,7 @@ export default function UserConversation({user, create, setCreateConversation, a
             setAnimate(false)
             setBackwarded(true)
         }else {
-            document.location.href = "/"
+            window.history.back();
         }
 
     }, [setAnimate, setBackwarded, create, setCreateConversation])

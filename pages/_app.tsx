@@ -1,6 +1,8 @@
 import '@/styles/sass/main.scss'
+import axios from 'axios'
 import type { AppProps } from 'next/app'
 import localFont from "next/font/local"
+import { useEffect } from 'react'
 
 const Montserrat = localFont({src: [
   {
@@ -22,6 +24,10 @@ const Montserrat = localFont({src: [
 
 export default function App({ Component, pageProps }: AppProps) {
   
+  useEffect(()=>{
+    axios.get(`http://localhost:3000/api/socket`).catch(console.error)
+  }, [])
+
   return <main className={Montserrat.className} style={{width: "100%", height: "100%"}}>
       <Component {...pageProps} />
     </main>

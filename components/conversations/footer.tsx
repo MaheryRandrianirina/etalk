@@ -14,10 +14,11 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
 
     const handleTextoChange: ChangeEventHandler = (event: ChangeEvent<HTMLTextAreaElement>) => {
         setMessage(m => {
+            const message = {texto: event.target.value, created_at: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'), sender_id: sender_id, pending: true} as ConversationMessage
             if(m === null){
-                return {texto: event.target.value, created_at: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'), sender_id: sender_id} as ConversationMessage
+                return message
             }else {
-                return {...m, texto: event.target.value, created_at: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'), sender_id: sender_id}
+                return {...m, ...message}
             }
         })
     }

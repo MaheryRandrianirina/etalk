@@ -32,7 +32,8 @@ interface SocketData {
 
 type ResponseHandler = (message: unknown) => void
 
-type SocketValue = { socket: Socket<DefaultEventsMap, DefaultEventsMap>, connected: boolean, connectionError: boolean }
+type SocketValue = { socket: Socket<DefaultEventsMap, DefaultEventsMap>|null, connected: boolean, connectionError: Error|null }
+
 export type {
     ServerToClientEvents,
     ClientToServerEvents,

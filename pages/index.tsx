@@ -24,13 +24,10 @@ import { SocketProvider } from '@/components/contexts/providers/SocketProvider'
 
 type AnimationClassName = {receptionBox: string, conversation: string}
 
-
-axios.get(`http://localhost:3000/api/socket`).catch(console.error)
-
 export default function Home({user}: {
   user: User
 }) {
-  console.log("index tsx")
+  
   const [conversations, setConversations]: [
     conversations: UserConversations,
     setConversations: Dispatch<SetStateAction<UserConversations>>
@@ -84,14 +81,14 @@ export default function Home({user}: {
   }
   
   useEffect(()=>{  
-      socket.emit("get_conversations", "message");
+      socket?.emit("get_conversations", "message");
 
       if(showMenu){
         setClassnameForAnimation("active")
       }else {
         setClassnameForAnimation("")
       }
-  }, [showMenu, backwarded])
+  }, [showMenu, socket, connected, backwarded])
 
   const handleClickMessageCircle: EventHandler<SyntheticEvent> = (event: SyntheticEvent)=>{
       event.preventDefault()

@@ -617,6 +617,10 @@ p {
             .datetime {
                 text-align: left;
             }
+            .is-pending {
+                background: $secondary;
+                color: $white;
+            }
         }
 
         .message.outgoing {
@@ -634,6 +638,9 @@ p {
                     border-right: 20px solid transparent;
                     border-top: 20px solid transparent;
                 }
+            }
+            .bubble.pending::after {
+                bottom: 40px;
             }
             .datetime {
                 text-align: right;

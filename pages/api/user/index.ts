@@ -36,10 +36,10 @@ export default async function User(req: NextApiRequest, res: NextApiResponse){
                     const foundUser = users[i];
 
                     const conversationTable = new ConversationTable<Conversation>()
-                    const authUserConversationsWithFoundOne = await conversationTable.where<undefined>(
-                        ["initializer_id", "adressee_id"],
-                        [user.id, foundUser.id]
-                    ).get() as ConversationUser[]
+                    const authUserConversationsWithFoundOne = await conversationTable.raw(`
+                        SELECT * FROM conversation
+                        WHERE (initializer_id = ? AND adressee_id = ?) OR (initializer_id = ? AND adressee_id = ?)
+                    `, [user.id, foundUser.id, foundUser.id, user.id])
 
                     if (authUserConversationsWithFoundOne.length === 0) {
                         usersWithNoConversationWithAuthUser.push(foundUser);

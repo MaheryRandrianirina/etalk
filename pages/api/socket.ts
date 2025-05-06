@@ -6,7 +6,7 @@ import { Socket as NetSocket } from "net"
 import ConversationTable from "../../backend/database/tables/ConversationTable"
 import { Conversation, ConversationUser, Message } from "../../types/Database"
 import { GetAway } from "../../types/utils"
-import { AuthUser, User } from "../../types/user"
+import { User } from "../../types/user"
 import MessageTable from "../../backend/database/tables/MessageTable"
 import UserTable from "../../backend/database/tables/UserTable"
 import { Conversation as UserConversation } from "../../backend/User/Conversation"
@@ -40,7 +40,10 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
         ClientToServerEvents,
         ServerToClientEvents,
         InterServerEvents,
-        SocketData>(res.socket.server)
+        SocketData>(res.socket.server, {
+            pingInterval: 25000, // Send a ping every 25 seconds
+            pingTimeout: 60000,  // Wait 60 seconds for a pong before disconnecting
+        })
 
         res.socket.server.io = io
 
@@ -50,7 +53,9 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
         const messageTable = new MessageTable();
 
         io.on('connection', (socket)=>{
-            socket.join("chat_list");
+            socket.on('disconnect', (reason) => {
+                console.log(`Disconnected: ${reason}`);
+            });
 
             socket.on('get_conversations', async()=>{
                 console.log("get conversationssss")
@@ -70,21 +75,16 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
             })
 
             socket.on('get_conversation_last_message', async(conversation_id)=>{
-                console.log('get_conversation_last_message')
+                console.log("get_conversation_last_message server", conversation_id)
 
                 try {
-                    const [message] = await messageTable.columns<ConversationUser, undefined>(['m.*'])
-                    .join({
-                        "conversations_users": {alias: "cu", on: "cu.user_id = m.sender_id"},
-                        "users": {alias: "u", on: "u.id = cu.user_id"}
-                    })
-                    .where<ConversationUser>({
-                        "m.conversation_id": conversation_id, 
-                        "OR": {"m.sender_id": u.id, "m.receiver_id": u.id}}
-                    )
-                    .orderBy("m.created_at", "DESC")
-                    .limit(1)
-                    .get() as Message[]
+                    const [message] = await messageTable.raw(`
+                            SELECT * FROM message
+                            WHERE conversation_id = ?
+                            AND (sender_id = ? OR receiver_id = ?)
+                            ORDER BY created_at DESC
+                            LIMIT 1
+                        `, [conversation_id, u.id, u.id]);
                     
                     const [user] = await userTable
                         .find(message.sender_id) as GetAway<
@@ -92,6 +92,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                                 ["created_at", "updated_at", "remember_token", "password"]
                             >[]
                     
+                    console.log("sending conversation last message", conversation_id, message.id)
                     socket.emit(`${conversation_id}.conversation_last_message`, {...message, sender: user})
                 }catch(e){
                     console.error(e)
@@ -102,6 +103,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                 const userConversation = new UserConversation(req, session, conversation_id)
                 const messages = await userConversation.messages()
 
+                console.log("send messages fron get_conversation_messages")
                 socket.emit('conversation_messages', messages)
             })
 
@@ -119,6 +121,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                     }
                     
                     const messages = await userConversation.messages()
+
                     socket.emit('conversation_messages', messages)
                 }catch(e){
                     console.error(e)

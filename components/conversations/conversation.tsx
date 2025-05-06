@@ -31,23 +31,24 @@ function Conversation({currentUser, conversation}: {
 
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
     
-    const socketValue= useContext(SocketContext);
-
-    if(message === null && socketValue){
-        console.log("message = null", `${conversation.id}.conversation_last_message`)
-        socketValue.socket.emit("get_conversation_last_message", `${conversation.id}`)
-
-        socketValue?.socket.on(`${conversation.id}.conversation_last_message`, (message: Join<ConversationMessage, {sender: AuthUser}>) => {
-            setMessage(message)
-        })
-    }
+    const socketValue = useContext(SocketContext)
 
     const conversationOwnersDefined = conversationOwners != null
+    const socketIsDefined = socketValue != null && socketValue.socket != null
+    const {initializer_id, adressee_id} = conversation
+    const conversationId = conversation.id
+    console.log("id", message?.id)
 
     useEffect(()=>{
+        console.log("get_conversation_last_message", conversationId)
+        socketValue?.socket?.emit("get_conversation_last_message", `${conversationId}`)
         
+        socketValue?.socket?.on(`${conversationId}.conversation_last_message`, (message: Join<ConversationMessage, {sender: AuthUser}>) => {
+            setMessage(message)
+        })
+
         if(!conversationOwnersDefined){
-            axios.get(`/api/user?initializer_id=${conversation.initializer_id}&adressee_id=${conversation.adressee_id}`)
+            axios.get(`/api/user?initializer_id=${initializer_id}&adressee_id=${adressee_id}`)
                 .then(res => {
                     setConversationOwners(res.data.owners)
                 })
@@ -60,11 +61,22 @@ function Conversation({currentUser, conversation}: {
             setClassnameForAnimation("active")
         }
 
-    }, [classnameForAnimation, conversationOwnersDefined])
+        return () => {
+            socketValue?.socket?.off(`${conversation.id}.conversation_last_message`)
+        }
+
+    }, [
+        classnameForAnimation, 
+        conversationOwnersDefined, 
+        socketIsDefined, 
+        initializer_id, 
+        adressee_id, 
+        conversationId
+    ])
 
     const profilPic = conversationOwners?.adressee?.id !== currentUser.id ? 
         conversationOwners?.adressee.image : conversationOwners.initializer.image
-    console.log("conversation", conversation.id, message)
+    
     return <Link href={{
         pathname: "/conversation/[adressee_id]/[conversation_id]",
         query: { adressee_id: conversationOwners?.adressee.id, conversation_id: conversation.id}
