@@ -1,8 +1,7 @@
 import UserTable from "../../../backend/database/tables/UserTable";
 import { NextApiRequest, NextApiResponse } from "next/types";
 import { AuthUser, User as UserType } from "../../../types/user";
-import { Conversation, ConversationUser } from "../../../types/Database";
-import ConversationUserTable from "../../../backend/database/tables/ConversationUserTable";
+import { Conversation } from "../../../types/Database";
 import { getSession } from "@/lib";
 import ConversationTable from "@/backend/database/tables/ConversationTable";
 

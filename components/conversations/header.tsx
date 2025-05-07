@@ -1,5 +1,4 @@
 import ProfilePic from "../atoms/profilePic";
-import profilePic from "../../public/20200823_120127_0.jpg";
 import { AddReceiverInput } from "../atoms/input";
 import {
   ChangeEvent,
@@ -223,7 +222,7 @@ const ConversationHeader = ({
     e: SyntheticEvent
   ) => {
     e.preventDefault();
-    e.stopPropagation()
+    e.stopPropagation();
     
     if (!showAdresseeProfile) {
       toggleAdresseeProfile(true);
@@ -232,7 +231,7 @@ const ConversationHeader = ({
         return {...c, profile: "visible"}
       });
     } else {
-      resetProfileClassnameForAnimation()
+      resetProfileClassnameForAnimation();
     }
   };
 
@@ -336,7 +335,7 @@ const ConversationHeader = ({
   }, [modal, resetModalClassnameForAnimation, toggleBlockUser])
 
   const showResults = foundReceivers.length > 0 && receiver.length > 2;
-
+  
   return (
     <div className="conversation_header" >
       <BackIcon onClickBack={handleBackward}/>
@@ -350,7 +349,7 @@ const ConversationHeader = ({
             adressee && adressee.blocked ? <p className='blocked_user'>Bloqué</p> : ""
           )}
           {adressee && adressee.image ? (
-            <ProfilePic imagePath={profilePic} />
+            <ProfilePic imagePath={adressee.image } />
           ) : (
             <UserIcon />
           )}
@@ -377,8 +376,8 @@ const ConversationHeader = ({
         />
       )}
 
-      {showAdresseeProfile &&
-        adressee &&
+      {(showAdresseeProfile &&
+        adressee) &&
         createPortal(
             <ButtonContext.Provider value={handleClickBlockUntoggleBlockUserButton}>
               <Profile

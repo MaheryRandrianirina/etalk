@@ -201,11 +201,11 @@ export default class Table<T extends Entity> {
      * @param dataForArrayConditions est seulement defini quand conditions est défini et sous forme de tableau.
      * @returns 
      */
-    get<U extends Entity, ConcatTypes extends any>(): Promise<unknown> {
+    get<U extends Entity, ConcatTypes extends unknown>(): Promise<unknown> {
         return new Promise(async(resolve, reject)=>{
             
             if(this.columnsToFetch && this.columnsToFetch.length > 0){
-                this.query = this.getQueryBuilder().select<U, true>(this.columnsToFetch as TableColumns<T, U, ConcatTypes>, this.tableToJoin !== undefined)
+                this.query = this.getQueryBuilder().select<U, ConcatTypes>(this.columnsToFetch as TableColumns<T, U, ConcatTypes>, this.tableToJoin !== undefined)
             }else {
                 this.query = this.getQueryBuilder().select("*", this.tableToJoin !== undefined)
             }
@@ -308,9 +308,7 @@ export default class Table<T extends Entity> {
         })
     }
 
-    delete(credential: number | (keyof ColumnsToFill<T>)[] | ColumnsToFill<T>, 
-        dataForArrayCredential?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]
-    ) {
+    delete(credential: number | (keyof ColumnsToFill<T>)[] | ColumnsToFill<T>, dataForArrayCredential?: (ColumnsToFill<T>[keyof ColumnsToFill<T>])[]) {
         return new Promise(async(resolve, reject)=>{
             if(typeof credential === "number"){
                 this.query = this.getQueryBuilder().delete().where(['id'] as (keyof ColumnsToFill<T>)[])

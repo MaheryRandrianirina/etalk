@@ -1,15 +1,16 @@
 import { NextApiRequest, NextApiResponse} from "next"
-import { withSessionRoute } from "../../../backend/utilities/withSession"
 import ConversationTable from "../../../backend/database/tables/ConversationTable"
-import { Conversation, ConversationUser } from "../../../types/Database"
+import { Conversation as ConversationType, ConversationUser } from "../../../types/Database"
+import { getSession } from "@/lib"
 
-export default withSessionRoute(Conversation)
 
-async function Conversation(req: NextApiRequest, res: NextApiResponse) {
-    const user = req.session.user
+export default async function Conversation(req: NextApiRequest, res: NextApiResponse) {
+    const session = await getSession(req, res);
+    const user = session.user;
+
     if(user){
         try {
-            const conversationTable = new ConversationTable<Conversation>()
+            const conversationTable = new ConversationTable<ConversationType>()
             const conversations = await conversationTable
                 .columns<ConversationUser, undefined>(["c.*"])
                 .join({'conversations_users': {alias: "cu", on: "c.id = cu.conversation_id"}})
@@ -19,7 +20,6 @@ async function Conversation(req: NextApiRequest, res: NextApiResponse) {
         }catch(e){
             res.status(500).json({success: false})
         }
-        
     }else {
 
     }

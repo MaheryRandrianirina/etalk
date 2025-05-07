@@ -56,16 +56,30 @@ async function getConversationAdressee(
         let foundUser: User
 
         if(nb_adressee_id === user_id){
-            [foundUser] = await userTable.columns<ConversationUser, undefined>(["u.*"])
-                .join({"conversations_users": {
-                    alias: "cu",
-                    on: "u.id = cu.user_id"
-                }, 
-                    "conversation": {alias: "c", on: "cu.conversation_id = c.id"}
-                }).where<ConversationUser>(
-                    ["cu.user_id !=", "cu.conversation_id"],
-                    [nb_adressee_id, nb_conversation_id]
-                ).get() as User[]
+            [foundUser] = (await userTable
+              .columns<ConversationUser, true>([
+                "u.id",
+                "u.name",
+                "u.username",
+                "u.firstname",
+                "u.email",
+                "u.sex",
+                "u.image",
+                "u.is_online",
+                "u.blocked",
+              ])
+              .join({
+                conversations_users: {
+                  alias: "cu",
+                  on: "u.id = cu.user_id",
+                },
+                conversation: { alias: "c", on: "cu.conversation_id = c.id" },
+              })
+              .where<ConversationUser>(
+                ["cu.user_id !=", "cu.conversation_id"],
+                [nb_adressee_id, nb_conversation_id]
+              )
+              .get()) as User[];
         }else {
             [foundUser] = await userTable.columns([
                 "id", "name", "username", 

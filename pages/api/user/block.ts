@@ -1,14 +1,14 @@
 import BlockedUsersTable from "../../../backend/database/tables/BlockedUsers";
-import { withSessionRoute } from "../../../backend/utilities/withSession";
 import {NextApiRequest, NextApiResponse} from "next"
 import { User } from "../../../types/user";
-import { BlockedUsers } from "../../../types/Database";
+import { BlockedUsers, ColumnsToFill } from "../../../types/Database";
+import { getSession } from "@/lib";
 
-export default withSessionRoute(Block)
 
-async function Block(req: NextApiRequest, res: NextApiResponse) {
-    const {user} = req.session
-
+export default async function Block(req: NextApiRequest, res: NextApiResponse) {
+    const session = await getSession(req, res);
+    const user = session.user;
+    
     if(!user){
         res.redirect("/forbidden")
         return
@@ -31,15 +31,12 @@ async function Block(req: NextApiRequest, res: NextApiResponse) {
                     .get() as BlockedUsers[]
                 
                 if(blocked_user){
-                    await blockedUsersTable.delete({
-                        "blocked_user_id": adressee_id,
-                        "user_id": user.id
-                    })
+                    await blockedUsersTable.delete(["blocked_user_id", "user_id"], [adressee_id, user.id])
 
                     res.status(200).json({success: true})
                 }else {
                     await blockedUsersTable
-                        .new({"user_id": user.id, "blocked_user_id": adressee_id})
+                        .new({"user_id": user.id, "blocked_user_id": adressee_id} as ColumnsToFill<BlockedUsers>)
 
                     res.status(200).json({success: true})
                 } 

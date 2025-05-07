@@ -27,6 +27,7 @@ export interface ResponseWithSocket<T> extends NextApiResponse<T>{
 export default async function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
     const session = await getSession(req, res);
     const user = session.user;
+    
     if(!user){
         res.status(403).json({success: false, forbidden: true});
         return;

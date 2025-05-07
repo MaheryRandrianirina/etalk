@@ -73,16 +73,26 @@ type Prefix<T extends ColumnsToFill<Entity>, U extends T> = {
     ]: T[key]
 }
 
-type PrefixArray<T extends ColumnsToFill<Entity>, U extends T> = [
-    (U extends User ? `u.${(keyof U | "*") & string}` : 
-    (U extends Message ? `m.${(keyof U | "*") & string}` : 
-    (U extends ConversationUser ? `cu.${(keyof U | "*") & string}` : 
-    (U extends Calls ? `ca.${(keyof U | "*") & string}` : 
-    (U extends UserCalls ? `uc.${(keyof U | "*") & string}` : 
-    (U extends UserFriends ? `uf.${(keyof U | "*") & string}` : 
-    (U extends BlockedUsers ? `bu.${(keyof U | "*") & string}` : 
-    (U extends Conversation ? `c.${(keyof U | "*") & string}` : never))))))))
-]
+
+type PrefixArray<T extends ColumnsToFill<Entity>, U extends T> = 
+    U extends User
+        ? (`u.${keyof U & string}` | "u.*")[]
+        : U extends Message
+        ? (`m.${keyof U & string}` | "m.*")[]
+        : U extends ConversationUser
+        ? (`cu.${keyof U & string}` | "cu.*")[]
+        : U extends Calls
+        ? (`ca.${keyof U & string}` | "ca.*")[]
+        : U extends UserCalls
+        ? (`uc.${keyof U & string}` | "uc.*")[]
+        : U extends UserFriends
+        ? (`uf.${keyof U & string}` | "uf.*")[]
+        : U extends BlockedUsers
+        ? (`bu.${keyof U & string}` | "bu.*")[]
+        : U extends Conversation
+        ? (`c.${keyof U & string}` | "c.*")[]
+        : never;
+;
 
 type Join<T, U> = T & U
 
@@ -101,7 +111,7 @@ type OptionalSuffix<U extends Entity, T extends Prefix<ColumnsToFill<U>, U>, S e
     [key in keyof T as key extends string ? (`${key} ${S}` & string) | key : key] : T[key]
 }
 
-type TableColumns<T extends Entity, U extends any, Concat extends any> = U extends Entity ? 
+type TableColumns<T extends Entity, U extends Entity, Concat extends unknown> = U extends Entity ? 
     (Concat extends true ? JoinArray<PrefixArray<ColumnsToFill<T>, T>, PrefixArray<ColumnsToFill<U>, U>> : 
     (Concat extends undefined ? PrefixArray<ColumnsToFill<T>, T> : any))  : 
     (keyof ColumnsToFill<T>)[] | keyof ColumnsToFill<T> | string
