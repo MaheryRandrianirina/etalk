@@ -74,9 +74,9 @@
 - Faire marche l'upload d'image dans l'inscription [v]
 - utiliser websocket au lieu d'ably
     - Fix bugs: les conversations listees sont affichees avec le nom d'une seule personne correspondante alors qu'ils devraient en etre autrement et c'est ce nom qui s'affiche a l'interieur de la conversation [v]
-    - afficher "envoi" en attendant que le message soit envoye
-- eviter de charger lors du click sur le bouton retour
-- Envoyer un message en cliquant sur le bouton d'envoi (bug: la date qui s'affiche sur chaque conversation dans la boite de reception devrait etre la date du dernier message)
+    - afficher "envoi" en attendant que le message soit envoye [v]
+- eviter de charger lors du click sur le bouton retour [v]
+- Envoyer un message en cliquant sur le bouton d'envoi (bug: la date qui s'affiche sur chaque conversation dans la boite de reception devrait etre la date du dernier message) [v]
 - Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist)
 - Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes
 - Implementer le token csrf sur toutes les requetes de type POST
