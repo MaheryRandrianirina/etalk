@@ -9,5 +9,5 @@ export default function ProfilePic({imagePath}: {imagePath: string | StaticImage
         return imagePath
     })()
     // fix : image height & width in the adressee profile
-    return <Image src={profilePic} alt="user profile photo" className="profile_pic" width={40} height={40}/>
+    return <Image src={profilePic} alt="user profile photo" className="profile_pic" width={250} height={250}/>
 }

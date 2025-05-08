@@ -68,6 +68,7 @@ main {
             background: $secondaryGreen;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
+            width: 100%;
             .user_icon {
                 position: absolute;
                 @include centerAbsolutePosition();
