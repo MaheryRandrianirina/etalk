@@ -1,24 +1,16 @@
-import { getIronSession } from "iron-session";
-import { MiddlewareConfig, NextResponse } from "next/server";
-import { RequestWithSession, SessionData } from "./types/session";
+import { MiddlewareConfig, NextRequest } from "next/server";
+import { Routes } from "./types/enums/routes";
+import { shouldBeConnected } from "./backend/middlewares/shouldbeConnected";
+import { shouldNotBeConnected } from "./backend/middlewares/shouldNotBeConnected";
 
 
+export async function middleware(request: NextRequest) {
+    const route = request.nextUrl.pathname;
+    if (route !== Routes.login && route != Routes.register) {
+        return shouldBeConnected(request)
+    }
 
-export async function middleware(request: RequestWithSession) {
-    const sessionOptions = {
-        password: process.env.COOKIE_PASSWORD !== undefined ? process.env.COOKIE_PASSWORD : "cookie_name",
-        cookieName: process.env.COOKIE_NAME !== undefined ? process.env.COOKIE_NAME : "cookie_password",
-        
-        cookieOptions: {
-          secure: process.env.NODE_ENV === "production",
-        },
-    };
-    const session = await getIronSession<SessionData>(request, NextResponse.next(), sessionOptions);
-    request.session = session;
-
-    return NextResponse.next({
-        request
-    });
+    return shouldNotBeConnected(request);
 }
 
 export const config: MiddlewareConfig = {

@@ -1,6 +1,7 @@
 import { getIronSession } from "iron-session";
 import { SessionData } from "../../types/session";
 import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest, NextResponse } from "next/server";
 
 const sessionOptions = {
     password: process.env.COOKIE_PASSWORD !== undefined ? process.env.COOKIE_PASSWORD : "cookie_name",
@@ -11,7 +12,7 @@ const sessionOptions = {
     },
 };
 
-async function getSession(req: NextApiRequest, res: NextApiResponse){
+async function getSession(req: NextApiRequest|NextRequest, res: NextApiResponse|NextResponse){
     return await getIronSession<SessionData>(req, res, sessionOptions)
 }
 

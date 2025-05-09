@@ -3,9 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next"
 
 
 export async function getServerSideProps({req, res}: {req: NextApiRequest, res: NextApiResponse}){
-    const session = await getSession(req, res);
-    
-    if(session.user){
+    console.log("getServerSideProps")
+    if(res.statusCode === 201){
         return {
             props: {},
             redirect: {
