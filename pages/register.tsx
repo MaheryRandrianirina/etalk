@@ -22,7 +22,6 @@ import { PostDataReturnType } from "@/types/registration/dataBaseCommunication"
 import { RegistrationStepThreeProperties } from "@/types/registration/registration";
 import useFormErrors from "@/hooks/useFormErrors";
 import { RegistrationFormErrors } from "@/types/errors";
-import { getServerSideProps } from "@/pages/api/authenticated";
 import { FileError, UploadError } from "@/lib/index";
 import { password_alerts } from "@/lib/constants";
 import { debounce } from "@/lib/utils";
@@ -298,5 +297,3 @@ export default function Register(): JSX.Element {
         }
     </div>
 }
-
-export {getServerSideProps}
