@@ -1,8 +1,7 @@
 import { getSession } from "@/lib";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function shouldBeConnected(req: NextRequest) {
-    const res = NextResponse.next();
+export async function shouldBeConnected(req: NextRequest, res: NextResponse) {
     const session = await getSession(req, res);
     
     if (!session.user && req.method?.toLocaleLowerCase() === "get") {

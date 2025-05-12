@@ -7,13 +7,23 @@ import { shouldNotBeConnected } from "./backend/middlewares/shouldNotBeConnected
 export async function middleware(request: NextRequest) {
     const route = request.nextUrl.pathname;
     
-    if (route !== Routes.login && route !== Routes.register) {
-        return shouldBeConnected(request)
-    }else if (route === Routes.login || route === Routes.register) {
-        return shouldNotBeConnected(request);
+    const shouldNotBeConnectedRoutes: string[] = [
+        Routes.login,
+        Routes.register,
+        Routes.apiLogin,
+        Routes.apiRegister,
+    ];
+
+    let res = NextResponse.next();
+
+    if (shouldNotBeConnectedRoutes.includes(route)) {
+        res = await shouldNotBeConnected(request, res);
+    }else if(!shouldNotBeConnectedRoutes.includes(route)){        
+        res = await shouldBeConnected(request, res);
     }
 
-    return NextResponse.next();
+
+    return res;
 }
 
 export const config: MiddlewareConfig = {
