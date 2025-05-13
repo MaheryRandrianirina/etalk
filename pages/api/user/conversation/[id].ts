@@ -8,18 +8,18 @@ import { getSession } from "@/lib";
 
 
 export default async function Conversation(req: NextApiRequest, res: NextApiResponse){
-    const session = await getSession(req, res)
-    const user = session.user
-    if(req.method === "GET" && user){
-        const {id, adressee_id} = req.query
-        
-        if(typeof id === "string" && adressee_id === undefined && user.id){
-            await getLastMessage(parseInt(id), user.id, res)
-        }else if(typeof adressee_id === "string" && user.id && typeof id === "string"){
-            await getConversationAdressee(adressee_id, id, user.id, res)
-        }
-    }else {
-        res.status(403).redirect("/forbidden")
+    const session = await getSession(req, res);
+    const user = session.user as User;
+    const { id, adressee_id } = req.query;
+
+    if (typeof id === "string" && adressee_id === undefined && user.id) {
+      await getLastMessage(parseInt(id), user.id, res);
+    } else if (
+      typeof adressee_id === "string" &&
+      user.id &&
+      typeof id === "string"
+    ) {
+      await getConversationAdressee(adressee_id, id, user.id, res);
     }
 }
 

@@ -4,9 +4,5 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function shouldNotBeConnected(req: NextRequest, res: NextResponse) {
     const session = await getSession(req, res);
     
-    if (session.user && req.method?.toLocaleLowerCase() === "get") {
-        return NextResponse.redirect(new URL("/", req.url));
-    }
-
-    return res;
+    return session.user ? NextResponse.redirect(new URL("/", req.url)) : res;
 }

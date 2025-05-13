@@ -9,13 +9,11 @@ import ConversationTable from "@/backend/database/tables/ConversationTable";
 export default async function User(req: NextApiRequest, res: NextApiResponse){
     
     const session = await getSession(req, res)
-    const user = session.user
-    
-    if(user && req.method === "GET"){
-        const {name, sender_id, id, initializer_id, adressee_id } = req.query
+    const user = session.user as UserType
+    const {name, sender_id, id, initializer_id, adressee_id } = req.query
        
         try {
-            const userTable = new UserTable<UserType>()
+            const userTable = new UserTable()
 
             if(name !== undefined 
                 && typeof name === "string"
@@ -70,6 +68,5 @@ export default async function User(req: NextApiRequest, res: NextApiResponse){
         }catch(e){
             console.error(e)
         }
-    }
     
 }
