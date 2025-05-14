@@ -9,13 +9,11 @@ import { Join } from "../../types/Database";
 
 const Profile: FC<{
     adressee: Join<AuthUser, {blocked: boolean}>,
-    blockUserSuccess: boolean,
     transitionendHandler: TransitionEventHandler<HTMLDivElement>,
     className: string,
     onClickCloseButton: MouseEventHandler<SVGElement>
 }> = ({
     adressee, 
-    blockUserSuccess,
     transitionendHandler, 
     className, 
     onClickCloseButton
