@@ -10,7 +10,6 @@ import {
   SyntheticEvent,
   TransitionEvent,
   TransitionEventHandler,
-  memo,
   useCallback,
   useEffect,
   useState,
@@ -43,7 +42,7 @@ const ConversationHeader = ({
   chosenReceivers,
   setChosenReceivers,
   handleBackward,
-  blockUser
+  setAdressee
 }: {
   addReceiver?: true;
   user: AuthUser;
@@ -51,10 +50,7 @@ const ConversationHeader = ({
   chosenReceivers: ChosenReceiver[];
   setChosenReceivers: Dispatch<SetStateAction<ChosenReceiver[]>>;
   handleBackward: MouseEventHandler<SVGElement>;
-  blockUser: {
-    state: BlockUser,
-    set: Dispatch<SetStateAction<BlockUser>>
-  }
+  setAdressee: Dispatch<SetStateAction<Join<AuthUser, {blocked: boolean}> | null>>
 }): JSX.Element => {
 
   const [receiver, setReceiver]: [
@@ -301,19 +297,16 @@ const ConversationHeader = ({
   const toggleBlockUser = useCallback(async()=>{
     try {
       const res = await axios.post("/api/user/block", {adressee_id: adressee?.id})
+      
       if(res.statusText === "OK"){
-        blockUser.set(bu => {
-          return {...bu, success: res.data.success}
-        })
+        setAdressee(user => ({...user, blocked: res.data.blocked}))
 
         return true
       }
     }catch(e){
-      blockUser.set(bu => {
-        return {...bu, error: e as Error}
-      })
+      // create a global state for error
     }
-  }, [adressee, blockUser])
+  }, [adressee])
 
   const handleClickModalButtons: MouseEventHandler<HTMLButtonElement> = useCallback(async (e: MouseEvent) => {
     e.preventDefault();
@@ -383,7 +376,6 @@ const ConversationHeader = ({
               <Profile
                 className={classnameForAnimation.profile}
                 transitionendHandler={handleAdresseeProfileTransitionend}
-                blockUserSuccess={blockUser.state.success}
                 adressee={adressee}
                 onClickCloseButton={handleClickCloseButton}
             />

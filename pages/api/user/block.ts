@@ -16,7 +16,7 @@ export default async function Block(req: NextApiRequest, res: NextApiResponse) {
         const [blocked_user] = (await blockedUsersTable
           .columns<User, undefined>(["bu.*"])
           .join({
-            user: {
+            users: {
               alias: "u",
               on: "u.id = bu.user_id AND u.id = bu.blocked_user_id",
               type: "LEFT",
@@ -34,14 +34,14 @@ export default async function Block(req: NextApiRequest, res: NextApiResponse) {
             [adressee_id, user.id]
           );
 
-          res.status(200).json({ success: true });
+          res.status(200).json({ success: true, blocked: false });
         } else {
           await blockedUsersTable.new({
             user_id: user.id,
             blocked_user_id: adressee_id,
           } as ColumnsToFill<BlockedUsers>);
 
-          res.status(200).json({ success: true });
+          res.status(200).json({ success: true, blocked: true });
         }
       } catch (e) {
         res.status(500).json({ success: false, error: e });

@@ -48,8 +48,7 @@ export default function UserConversation({user, create, setCreateConversation, a
     const [showMessageIntoBubble, setShowMessageIntoBubble] = useState<boolean>(false)
     const [disableButton, setDisableButton] = useState<boolean>(true)
     const [animate, setAnimate] = useState<boolean>(false)
-    const [adressee, setAdressee] = useState<Join<AuthUser, {blocked: boolean}> | null>(null as Join<AuthUser, {blocked: boolean}> | null)    
-    const [blockUser, setBlockUser] = useState<BlockUser>({success: false, error: null} as BlockUser);
+    const [adressee, setAdressee] = useState<Join<AuthUser, {blocked: boolean}> | null>(null as Join<AuthUser, {blocked: boolean}> | null) 
     
     const { socket, connected, connectionError} = useConnectionStateListener('connect');
 
@@ -95,7 +94,7 @@ export default function UserConversation({user, create, setCreateConversation, a
                     document.location.href = "/404"
                 }
             });
-
+            
             if(!adressee) {
                 axios.get(`/api/user/conversation/${conversation_id}?adressee_id=${adressee_id}`).then(res => {
                     if(res.statusText === "OK"){
@@ -207,10 +206,7 @@ export default function UserConversation({user, create, setCreateConversation, a
     }
     
     return <div className={"user_conversation " + (adressee?.blocked ? "blocked " : "") + (animate && animation ? animation.className : (!animate && animation ? "" : "flip"))} onTransitionEnd={handleTransitionend}>
-        <ConversationHeader blockUser={{
-            state: blockUser,
-            set: setBlockUser
-        }} user={user} handleBackward={handleBackward} addReceiver={create} adressee={adressee ? adressee : undefined} 
+        <ConversationHeader setAdressee={setAdressee} user={user} handleBackward={handleBackward} addReceiver={create} adressee={adressee ? adressee : undefined} 
             chosenReceivers={chosenReceivers} setChosenReceivers={setChosenReceivers}
         />
 
