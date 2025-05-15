@@ -4,6 +4,7 @@ enum Routes {
     home = '/',
     apiRegister = "/api/register",
     apiLogin = "/api/login",
+    apiLogout = "/api/logout",
     apiSocket = "/api/socket",
     conversation = "/conversation",
     apiUser = "/api/user",

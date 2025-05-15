@@ -24,6 +24,7 @@ export async function middleware(request: NextRequest) {
     ];
     const shouldBePostRoutes: string[] = [
         Routes.apiLogin,
+        Routes.apiLogout,
         Routes.apiRegister,
         Routes.apiUpload,
         Routes.apiUser,
@@ -47,13 +48,13 @@ export async function middleware(request: NextRequest) {
         res = await shouldBewithMethod(request, res, ["post"])
     }
 
+    if(shouldBeGetRoutes.includes(route) && shouldBePostRoutes.includes(route)) {
+        res = await shouldBewithMethod(request, res, ["get", "post"])
+    }
+
     // require csrf token for post requests
     if(request.method.toLowerCase() === "post") {
         res = await shouldHaveCsrfToken(request, res)
-    }
-
-    if(shouldBeGetRoutes.includes(route) && shouldBePostRoutes.includes(route)) {
-        res = await shouldBewithMethod(request, res, ["get", "post"])
     }
 
     // protect routes for authentication
