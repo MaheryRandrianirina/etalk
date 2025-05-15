@@ -10,24 +10,19 @@ export const config = {
   };
 
 export default async function Upload(req: NextApiRequest, res: NextApiResponse) {
-    
-    if (req.method?.toLowerCase() === "post") {
-        const uploadDir =  path.join(process.cwd(), 'public', 'images', 'user', 'profile_photo');
-        const form = new formidable.IncomingForm({
-            uploadDir: uploadDir,
-            keepExtensions: true,
-        });
+  const uploadDir =  path.join(process.cwd(), 'public', 'images', 'user', 'profile_photo');
+  const form = new formidable.IncomingForm({
+      uploadDir: uploadDir,
+      keepExtensions: true,
+  });
 
-        form.parse(req, async (err, fields, files) => {
-            if (err) {
-              console.error("Error parsing files:", err);
-              return res.status(500).json({ error: "Error parsing files" });
-            }
-            
-            const profile_photo = files["profile_photo"] as formidable.File
-            res.status(200).send({ success: true, file: profile_photo.newFilename, message: "File uploaded successfully" });
-        });
-    }else {
-        res.status(401).send("Not Allowed Method")
-    }
+  form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error("Error parsing files:", err);
+        return res.status(500).json({ error: "Error parsing files" });
+      }
+      
+      const profile_photo = files["profile_photo"] as formidable.File
+      res.status(200).send({ success: true, file: profile_photo.newFilename, message: "File uploaded successfully" });
+  });
 }

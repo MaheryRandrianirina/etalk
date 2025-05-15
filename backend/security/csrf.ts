@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 
-export default class CsrfClass {
+export class CsrfGenerator {
     private tokens: string[] = []
 
     constructor(private key: string = "csrf", private sessionKey: string = "_csrf"){}

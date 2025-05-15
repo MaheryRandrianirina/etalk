@@ -3,6 +3,7 @@ import { Routes } from "./types/enums/routes";
 import { shouldBeConnected } from "./backend/middlewares/shouldbeConnected";
 import { shouldNotBeConnected } from "./backend/middlewares/shouldNotBeConnected";
 import { shouldBewithMethod } from "./backend/middlewares/shouldBeWithMethod";
+import { shouldHaveCsrfToken } from "./backend/middlewares/shouldHaveCsrfToken";
 
 
 export async function middleware(request: NextRequest) {
@@ -44,6 +45,11 @@ export async function middleware(request: NextRequest) {
         route.match(/\/api\/user\/conversation\/message\/\d+/)
     ) {
         res = await shouldBewithMethod(request, res, ["post"])
+    }
+
+    // require csrf token for post requests
+    if(request.method.toLowerCase() === "post") {
+        res = await shouldHaveCsrfToken(request, res)
     }
 
     if(shouldBeGetRoutes.includes(route) && shouldBePostRoutes.includes(route)) {
