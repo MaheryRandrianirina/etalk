@@ -10,7 +10,7 @@ export default async function Csrf(req: NextApiRequest, res: NextApiResponse){
         const tokenString = token.toString("base64")
 
         const session = await getSession(req, res)
-        session._csrf = tokenString
+        session._token = tokenString
 
         await session.save()
         
