@@ -21,7 +21,10 @@ export type LoginInputs = {
 const PostLoginData = async (data: LoginInputs, setProgress: (progress: number)=>void) => {
     try {
         const res = await axios.post("/api/login", data, {
-            onUploadProgress: onUploadProgress(setProgress)
+            onUploadProgress: onUploadProgress(setProgress),
+            headers: {
+                "X-CSRF-Token": sessionStorage.getItem("_csrf")
+            }
         })
         if(res.statusText === "OK"){
             return res.data

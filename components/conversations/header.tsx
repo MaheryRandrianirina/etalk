@@ -14,7 +14,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { AuthUser, User } from "../../types/user";
 import SearchResults from "../molecules/searchResults";
 import { GetAway, MultipleClassnameForAnimation } from "../../types/utils";
@@ -34,6 +34,7 @@ import { Join } from "../../types/Database";
 import BackIcon from "../atoms/icons/backIcon";
 import { ModalData } from "../../types/modal";
 import { debounce } from "@/lib/utils";
+import { handleCsrfTokenError } from "@/lib/utils/errorHandlers";
 
 const ConversationHeader = ({
   addReceiver,
@@ -298,6 +299,7 @@ const ConversationHeader = ({
     try {
       const res = await axios.post("/api/user/block", {adressee_id: adressee?.id})
       
+
       if(res.statusText === "OK"){
         setAdressee(user => ({...user, blocked: res.data.blocked}))
 

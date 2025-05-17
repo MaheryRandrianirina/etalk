@@ -4,6 +4,7 @@ import { shouldBeConnected } from "./backend/middlewares/shouldbeConnected";
 import { shouldNotBeConnected } from "./backend/middlewares/shouldNotBeConnected";
 import { shouldBewithMethod } from "./backend/middlewares/shouldBeWithMethod";
 import { shouldHaveCsrfToken } from "./backend/middlewares/shouldHaveCsrfToken";
+import { cors } from "./backend/middlewares/cors";
 
 
 export async function middleware(request: NextRequest) {
@@ -32,6 +33,10 @@ export async function middleware(request: NextRequest) {
     ];
 
     let res = NextResponse.next();
+
+    //enable cors
+    res = cors(res)
+
     // protect routes for specific methods
     if(
         shouldBeGetRoutes.includes(route)&& 

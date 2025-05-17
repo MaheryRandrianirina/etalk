@@ -19,6 +19,7 @@ import { Join } from "@/types/Database"
 import type { NextApiRequest, NextApiResponse } from "next"
 import { getSession } from "@/lib/index"
 import { useConnectionStateListener } from "@/lib/socket"
+import { handleCsrfTokenError } from "@/lib/utils/errorHandlers"
 
 
 export type BlockUser = {
@@ -149,15 +150,23 @@ export default function UserConversation({user, create, setCreateConversation, a
         if(create && chosenReceivers.length > 0 && message){
             const {pending, ...toSendMessage} = message
 
-            chosenReceivers.forEach(chosenReceiver => {
-                axios.post(`/api/user/conversation/message/${chosenReceiver.id}`, toSendMessage).then(res => {
+            const postMessage = (receiver_id: number)=>{
+                return axios.post(`/api/user/conversation/message/${receiver_id}`, toSendMessage).then(res => {
                     setShowMessageIntoBubble(true)
                     setMessage(m => {
                         return {...m, texto: ""}
                     })
-                }).catch(e => {
-                    console.error(e)
                 })
+            }
+
+            chosenReceivers.forEach(chosenReceiver => {
+                postMessage(chosenReceiver.id)
+                    .catch(e => {
+                        handleCsrfTokenError(e as AxiosError, ()=>{
+                            // resend the message with the new updated csrf token
+                            postMessage(chosenReceiver.id)
+                        })
+                    })
             })
             
         }else if(!create && message){

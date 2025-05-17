@@ -1,28 +1,23 @@
+import { getSession } from "@/lib";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function shouldHaveCsrfToken(req: NextRequest, res: NextResponse) {
-    const _token = req.headers.get('X-CSRF-Token')
-    if (!_token) {
+    const session = await getSession(req, res)
+    const expectedToken = session._csrf
+    const _token = req.cookies.get("_csrf")
+    console.log("expectedToken", session, _token)
+    if (!_token ||  !expectedToken) {
         return NextResponse.json(
             { success: false, message: 'Token required' },
             { status: 400 }
         )
-    }else if(csrfTokenhasExpired() || res.cookies.get("_csrf")?.value !== _token) {
+    }else if(expectedToken !== _token.value) {
         res.cookies.delete("_csrf")
 
         return NextResponse.json(
-            { success: false, error: 'Invalid token' },
+            { success: false, error: 'Invalid token', type:'csrf-error' },
             { status: 403 }
         )
-    }
-
-    function csrfTokenhasExpired() {
-        const csrfToken = res.cookies.get("_csrf")?.value
-        if (!csrfToken) {
-            return true
-        }
-
-        return false;
     }
 
     return res

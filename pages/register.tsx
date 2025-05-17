@@ -53,13 +53,10 @@ const PostDataforRegistration: (
                 const uploadRes = await axios.post("/api/upload", formdata) as AxiosResponse<{success: boolean, file?: string}, unknown>
                 
                 if(uploadRes.data.success){
-                    res = await axios.post(
-                        "/api/register", 
-                        { 
+                    res = await axios.post("/api/register", { 
                             registrationStep: step, 
                             data: {file: uploadRes.data.file}
-                        }
-                    ) as AxiosResponse<{success: boolean}, unknown>
+                        }) as AxiosResponse<{success: boolean}, unknown>
                 }else {
                     throw new UploadError("Le téléversement de votre fichier a échoué.\nVeuillez réessayer s'il vous plait")
                 }

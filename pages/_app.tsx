@@ -1,4 +1,5 @@
 import '@/styles/sass/main.scss'
+import { CsrfData } from '@/types/data'
 import axios from 'axios'
 import type { AppProps } from 'next/app'
 import localFont from "next/font/local"
@@ -22,18 +23,16 @@ const Montserrat = localFont({src: [
   }
 ]})
 
-type CsrfData = { success: boolean, csrf: string }
-
 export default function App({ Component, pageProps }: AppProps) {
   const [error, setError] = useState<string|null>(null) 
   
   useEffect(()=>{
     Promise.allSettled([
       axios.get(`http://localhost:3000/api/socket`), 
-      axios.get("/api/csr")
+      axios.get("/api/csrf")
     ]).then((res)=>{
       if(res[1].status === "fulfilled"){
-        const { csrf } = JSON.parse(res[1].value.data) as CsrfData
+        const { csrf } = res[1].value.data as CsrfData
         sessionStorage.setItem("_csrf", csrf)
       }else {
         // reprocess the csrf token retrieval

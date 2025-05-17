@@ -73,4 +73,5 @@
 - Envoyer un message en cliquant sur le bouton d'envoi (bug: la date qui s'affiche sur chaque conversation dans la boite de reception devrait etre la date du dernier message) [v]
 - Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist) [v]
 - Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes [v]
-- Implementer le token csrf sur toutes les requetes de type POST
+- Implementer le token csrf sur toutes les requetes de type POST [v]
+- Basculer dans un chatroom lorsqu'une conversation est cree

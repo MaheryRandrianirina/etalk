@@ -5,6 +5,4 @@ export async function shouldBeConnected(req: NextRequest, res: NextResponse) {
     const session = await getSession(req, res);
     
     return !session.user ? NextResponse.redirect(new URL("/login", req.url)) : res;
-
-    return res;
 }
