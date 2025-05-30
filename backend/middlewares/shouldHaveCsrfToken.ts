@@ -5,10 +5,10 @@ export async function shouldHaveCsrfToken(req: NextRequest, res: NextResponse) {
     const session = await getSession(req, res)
     const expectedToken = session._token
     const _csrf = req.cookies.get("_csrf")
-    console.log(expectedToken, _csrf?.value)
+    // next thing to do : handle theses errors
     if (!_csrf ||  !expectedToken) {
         return NextResponse.json(
-            { success: false, message: 'Token required' },
+            { success: false, message: 'Token required', type:'csrf-error' },
             { status: 400 }
         )
     }else if(expectedToken !== _csrf.value) {

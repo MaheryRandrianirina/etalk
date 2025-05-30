@@ -11,6 +11,7 @@ import { ProgressBar } from "@/components/atoms/loaders/Progressbar";
 import { onUploadProgress } from "@/lib/utils/events";
 import { setPageTitle } from "@/lib/utils/page";
 import { page_title } from "@/lib/constants";
+import { handleCsrfTokenError } from "@/lib/utils/errorHandlers";
 
 export type LoginInputs = {
     username: string,
@@ -21,10 +22,7 @@ export type LoginInputs = {
 const PostLoginData = async (data: LoginInputs, setProgress: (progress: number)=>void) => {
     try {
         const res = await axios.post("/api/login", data, {
-            onUploadProgress: onUploadProgress(setProgress),
-            headers: {
-                "X-CSRF-Token": sessionStorage.getItem("_csrf")
-            }
+            onUploadProgress: onUploadProgress(setProgress)
         })
         if(res.statusText === "OK"){
             return res.data
@@ -32,7 +30,7 @@ const PostLoginData = async (data: LoginInputs, setProgress: (progress: number)=
             throw new Error("Une erreur est survenue lors de la connexion")
         }
     }catch(e){
-        throw e
+        handleCsrfTokenError(e as AxiosError)
     }
     
 }

@@ -36,10 +36,7 @@ export default function App({ Component, pageProps }: AppProps) {
         sessionStorage.setItem("_csrf", csrf)
       }else {
         // reprocess the csrf token retrieval
-        axios.get("/api/csrf").then(res => {
-          const data = res.data as CsrfData
-          sessionStorage.setItem("_csrf", data.csrf)
-        }).catch(error => setError("Il y a eu une erreur lors de la recuperation du token csrf"))
+        axios.get("/api/csrf").catch(error => setError("Il y a eu une erreur lors de la recuperation du token csrf"))
       }
 
       if(res[0].status === "rejected") {

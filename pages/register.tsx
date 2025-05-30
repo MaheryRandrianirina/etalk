@@ -29,6 +29,7 @@ import { ProgressContext } from "@/components/contexts/Progress";
 import { onUploadProgress } from "@/lib/utils/events";
 import { setPageTitle } from "@/lib/utils/page";
 import { page_title} from "@/lib/constants";
+import { handleCsrfTokenError } from "@/lib/utils/errorHandlers";
 
 
 const PostDataforRegistration: (
@@ -73,7 +74,7 @@ const PostDataforRegistration: (
             return res.data
         }
     }catch(error){
-        throw error
+        handleCsrfTokenError(error as AxiosError)
     }
 }
 

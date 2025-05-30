@@ -306,7 +306,7 @@ const ConversationHeader = ({
         return true
       }
     }catch(e){
-      // create a global state for error
+      handleCsrfTokenError(e as AxiosError)
     }
   }, [adressee])
 
