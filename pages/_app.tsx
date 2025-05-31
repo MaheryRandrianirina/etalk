@@ -1,9 +1,12 @@
+import { ErrorContext } from '@/components/contexts/ErrorContext'
+import { ErrorUI } from '@/components/molecules/errorUi'
 import '@/styles/sass/main.scss'
 import { CsrfData } from '@/types/data'
 import axios from 'axios'
 import type { AppProps } from 'next/app'
 import localFont from "next/font/local"
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 const Montserrat = localFont({src: [
   {
@@ -47,6 +50,12 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [])
 
   return <main className={Montserrat.className} style={{width: "100%", height: "100%"}}>
-      <Component {...pageProps} />
+      <ErrorContext.Provider value={setError}>
+        <Component {...pageProps} />
+      </ErrorContext.Provider>
+      {error && createPortal(
+          <ErrorUI message={error}/>,
+          document.querySelector("main") as HTMLElement
+      )}
     </main>
 }

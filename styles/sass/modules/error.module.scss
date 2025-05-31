@@ -1,0 +1,15 @@
+@import "../colors.scss";
+
+.error {
+    position: fixed;
+    padding: 24px;
+    width: 200px;
+    margin: 0 auto;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    background: $primaryBlack;
+    color: $fail;
+    border-radius: 5px;
+    box-shadow: 0 0 3px $secondary;
+}

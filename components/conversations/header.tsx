@@ -11,6 +11,7 @@ import {
   TransitionEvent,
   TransitionEventHandler,
   useCallback,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -35,6 +36,7 @@ import BackIcon from "../atoms/icons/backIcon";
 import { ModalData } from "../../types/modal";
 import { debounce } from "@/lib/utils";
 import { handleCsrfTokenError } from "@/lib/utils/errorHandlers";
+import { ErrorContext } from "../contexts/ErrorContext";
 
 const ConversationHeader = ({
   addReceiver,
@@ -295,6 +297,8 @@ const ConversationHeader = ({
     }
   }
 
+  const setError = useContext(ErrorContext)
+  
   const toggleBlockUser = useCallback(async()=>{
     try {
       const res = await axios.post("/api/user/block", {adressee_id: adressee?.id})
@@ -306,7 +310,10 @@ const ConversationHeader = ({
         return true
       }
     }catch(e){
-      handleCsrfTokenError(e as AxiosError)
+      handleCsrfTokenError(e as AxiosError, () => {
+        setError("Quelque chose s'est mal passé, veuillez réessayer s'il vous plait !")
+        setTimeout(()=>setError(null), 2000)
+      })
     }
   }, [adressee])
 

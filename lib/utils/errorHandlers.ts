@@ -1,7 +1,8 @@
 import { CsrfData } from "@/types/data"
 import axios, { AxiosError } from "axios"
+import { Dispatch, SetStateAction } from "react"
 
-function handleCsrfTokenError(e: AxiosError<any>, cb: (()=>void)|null = null, setError?: unknown) {
+function handleCsrfTokenError(e: AxiosError<any>, cb: Function|null = null) {
     if(e.response?.data.type && e.response?.data.type !== "csrf-error") {
         return
     }
@@ -10,7 +11,6 @@ function handleCsrfTokenError(e: AxiosError<any>, cb: (()=>void)|null = null, se
         cb && cb()
     }).catch(error => {
         console.error("Il y a eu une erreur lors de la recuperation du token csrf")
-        // setError
     })
 }
 

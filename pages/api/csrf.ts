@@ -14,7 +14,7 @@ export default async function Csrf(req: NextApiRequest, res: NextApiResponse){
 
         await session.save()
         
-        const csrfCookie = `_csrf=${encodeURIComponent(tokenString)}; Path=/; HttpOnly; SameSite=Strict; Secure; Max-Age=${60 * 5}`;
+        const csrfCookie = `_csrf=${encodeURIComponent(tokenString)}; Path=/; HttpOnly; SameSite=Strict; Secure; Max-Age=${60}`;
 
         const existingCookies = res.getHeader("Set-Cookie") as string|string[]|undefined || [];
         const cookies = Array.isArray(existingCookies) ? existingCookies : [existingCookies];
