@@ -191,7 +191,12 @@ export default class Auth {
                     this.userTable.update({remember_token: rememberToken} as ColumnsToFill<User>, {id: user.id} as ColumnsToFill<User>)
                     
                     const response = NextResponse.next()
-                    response.cookies.set("auth", rememberToken)
+                    response.cookies.set("auth", rememberToken, {
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: "strict",
+                        maxAge: 60 * 60 * 24 * 30 // 30 jours
+                    })
                 }catch(e){
                     throw e
                 }

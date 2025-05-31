@@ -31,7 +31,7 @@ export async function shouldHaveCsrfToken(req: NextRequest, res: NextResponse) {
     await session.save()
 
     // Use NextResponse's cookies API to set the cookie
-    const csrfCookie = `_csrf=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Secure; Max-Age=${60}`;
+    const csrfCookie = `_csrf=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Secure; Max-Age=${60*5}`;
     const existingCookies = res.headers.get("Set-Cookie") || "";
     const cookies = existingCookies ? existingCookies.split(",") : [];
     res.headers.set("Set-Cookie", [...cookies, csrfCookie].join(","));

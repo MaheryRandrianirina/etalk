@@ -5,8 +5,7 @@ import { createPortal } from "react-dom"
 import { ButtonContext } from "../contexts/ButtonContext"
 import ConfirmationModal from "./modals/confirmationModal"
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
-import Data from "../../lib/data"
-import CsrfClass from "../../backend/security/csrf"
+import axios from "axios"
 
 export default function Menu({
     className,
@@ -74,11 +73,7 @@ export default function Menu({
           case "confirmation":
             if(e.currentTarget.classList.contains('ok')){
                 try {
-                    const data = new Data()
-
-                    const res = await data
-                        .post("/api/logout", {_csrf: await (new CsrfClass())
-                            .generate()}) as {data: {success: boolean}}
+                    const res = await axios.post("/api/logout")
                     
                     if(res.data.success){
                         document.location.reload()

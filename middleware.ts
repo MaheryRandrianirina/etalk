@@ -56,9 +56,9 @@ export async function middleware(request: NextRequest) {
     if(shouldBeGetRoutes.includes(route) && shouldBePostRoutes.includes(route)) {
         res = await shouldBewithMethod(request, res, ["get", "post"])
     }
-
+    
     // require csrf token for post requests
-    if(request.method.toLowerCase() === "post") {
+    if(request.method.toLowerCase() === "post" && route !== Routes.apiLogin && route !== Routes.apiRegister) {
         res = await shouldHaveCsrfToken(request, res)
     }
 
