@@ -6,6 +6,7 @@ import { ButtonContext } from "../contexts/ButtonContext"
 import ConfirmationModal from "./modals/confirmationModal"
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
 import axios from "axios"
+import msgStyle from "@/styles/sass/modules/messageMenu.module.scss"
 
 export default function Menu({
     className,
@@ -124,5 +125,19 @@ export default function Menu({
           </ButtonContext.Provider>, 
           document.querySelector('main') as HTMLElement)
         }
+    </div>
+}
+
+export const MessageMenu = () => {
+    const [visible, setVisible] = useState(false)
+
+    useEffect(()=>{
+        setVisible(true)
+
+        return () => setVisible(false)
+    }, [])
+
+    return <div className={msgStyle.menu + (visible ? " "+msgStyle.visible : "")}>
+        <p>supprimer</p>
     </div>
 }
