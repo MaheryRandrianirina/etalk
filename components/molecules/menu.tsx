@@ -128,7 +128,7 @@ export default function Menu({
     </div>
 }
 
-export const MessageMenu = () => {
+export const MessageMenu = ({onClick}: {onClick: MouseEventHandler<HTMLParagraphElement>}) => {
     const [visible, setVisible] = useState(false)
 
     useEffect(()=>{
@@ -138,6 +138,6 @@ export const MessageMenu = () => {
     }, [])
 
     return <div className={msgStyle.menu + (visible ? " "+msgStyle.visible : "")}>
-        <p>supprimer</p>
+        <p onClick={onClick}>supprimer</p>
     </div>
 }

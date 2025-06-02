@@ -11,7 +11,7 @@
     box-shadow: 0 0 3px $secondary;
     color: $fail;
     opacity: 0;
-    transition: opacity .3s ease-in, top .3s ease-in;
+    transition: opacity .3s ease, top .3s ease-in;
 }
 
 .visible {

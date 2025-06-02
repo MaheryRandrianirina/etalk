@@ -58,7 +58,7 @@ export async function middleware(request: NextRequest) {
     }
     
     // require csrf token for post requests
-    if(request.method.toLowerCase() === "post" && route !== Routes.apiLogin && route !== Routes.apiRegister) {
+    if((request.method.toLowerCase() === "post" || request.method.toLowerCase() === "delete") && route !== Routes.apiLogin && route !== Routes.apiRegister) {
         res = await shouldHaveCsrfToken(request, res)
     }
 

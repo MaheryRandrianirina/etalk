@@ -1,14 +1,15 @@
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { ConversationMessage } from "../../types/conversation";
 import { AuthUser } from "../../types/user";
 import Message from "./message";
 import useClassnameAnimator from "../../hooks/useClassnameAnimator";
 
-export default function Content({messages, showIntoBubble, user}: {
+export default function Content({messages, showIntoBubble, user, setConversationMessages}: {
     messages: ConversationMessage[],
     showIntoBubble: boolean
-    user: AuthUser
+    user: AuthUser,
+    setConversationMessages: Dispatch<SetStateAction<ConversationMessage[]>>
 }):JSX.Element {
     const {classnameForAnimation, setClassnameForAnimation} = useClassnameAnimator("")
     const [clickBody, setClickBody] = useState(false)
@@ -38,7 +39,7 @@ export default function Content({messages, showIntoBubble, user}: {
         <div className='messages_container'>
             {(messages.length > 0 && showIntoBubble) && 
                 messages.map(message => {
-                    return <Message setClickBody={setClickBody} clickBody={clickBody} key={String(message.id)} content={message} className={classnameForAnimation} type={user.id !== message.sender_id ? 
+                    return <Message setConversationMessages={setConversationMessages} setClickBody={setClickBody} clickBody={clickBody} key={String(message.id)} content={message} className={classnameForAnimation} type={user.id !== message.sender_id ? 
                         "incoming" : "outgoing"}
                     />
             })}
