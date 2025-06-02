@@ -43,7 +43,7 @@
     - Ajouter l'animation au congratsForSubscription [v]
     - Ajouter un progress-bar lors des soumissions de formulaire (inscription, connexion) [v]
     - Régler la récupération des messages [v]
-    - Suppression des messages : afficher un petit menu lors d'un click droite ou appui prolonge
+    - Suppression des messages : afficher un petit menu lors d'un click droite ou appui prolonge [v]
     - Ajouter le support d'amojis 
     - Recherche de conversation
     - Refaire une récupération via le websocket lors du retour après la création de conversation
