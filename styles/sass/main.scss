@@ -665,9 +665,9 @@ p {
         border-top: 1px solid $white;
         .actions_buttons {
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             margin-bottom: 10px;
-            width: 160px;
+            width: 200px;
             .uploads {
                 .add_file_button, .add_image_button {
                     @include action_button();
@@ -681,13 +681,16 @@ p {
                 }
             }
             .peers {
-                margin-left: 40px;
                 .microphone_button, .video_call_button {
                     @include action_button();
                 }
                 .microphone_button {
                     margin-right: 10px;
                 }
+            }
+
+            svg {
+                @include action_button();
             }
         }
 
@@ -717,6 +720,13 @@ p {
             .send_icon.disabled {
                 fill: $secondary;
             }
+        }
+
+        .emoji-picker {
+            position: absolute;
+            bottom: 124px;
+            left: 0;
+            right: 0;
         }
     }
 }
@@ -763,6 +773,10 @@ p {
             .microphone_button, .video_call_button {
                 fill: $secondary;
             }
+        }
+
+        .actions_buttons svg {
+            fill: $secondary;
         }
     }
 }

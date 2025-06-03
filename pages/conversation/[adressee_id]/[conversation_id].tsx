@@ -51,7 +51,7 @@ export default function UserConversation({user, create, setCreateConversation, a
     const [animate, setAnimate] = useState<boolean>(false)
     const [adressee, setAdressee] = useState<Join<AuthUser, {blocked: boolean}> | null>(null as Join<AuthUser, {blocked: boolean}> | null) 
     
-    const { socket, connected, connectionError} = useConnectionStateListener('connect');
+    const { socket } = useConnectionStateListener('connect');
 
     const chosenReceiversLength = chosenReceivers.length;
     const texto = message?.texto;
@@ -145,7 +145,6 @@ export default function UserConversation({user, create, setCreateConversation, a
 
     const handleSubmitForm: MouseEventHandler<HTMLButtonElement> = (e:FormEvent<HTMLButtonElement>)=>{
         e.preventDefault()
-        
         
         if(create && chosenReceivers.length > 0 && message){
             const {pending, ...toSendMessage} = message
