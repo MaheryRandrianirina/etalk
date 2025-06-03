@@ -303,7 +303,6 @@ const ConversationHeader = ({
     try {
       const res = await axios.post("/api/user/block", {adressee_id: adressee?.id})
       
-
       if(res.statusText === "OK"){
         setAdressee(user => ({...user, blocked: res.data.blocked}))
 
