@@ -70,4 +70,6 @@
 - Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist) [v]
 - Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes [v]
 - Implementer le token csrf sur toutes les requetes de type POST [v]
+- gerer les erreurs durant les events socket
+- tester l'envoi de message entre 2 utilisateurs
 - Basculer dans un chatroom lorsqu'une conversation est cree

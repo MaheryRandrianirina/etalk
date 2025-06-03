@@ -1,7 +1,9 @@
-import { ChangeEvent, ChangeEventHandler, Dispatch, MouseEventHandler, SetStateAction, useEffect } from "react";
+import { ChangeEvent, ChangeEventHandler, Dispatch, MouseEventHandler, SetStateAction, useEffect, useState } from "react";
 import MessageTextarea from "./messageTextarea";
 import { ConversationMessage } from "../../types/conversation";
 import { formatDate } from "date-fns";
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import { MouseDownEvent } from "emoji-picker-react/dist/config/config";
 
 export default function ConversationFooter({submitForm, message, setMessage, disableButton, sender_id, blockedAdressee}: {
     submitForm: MouseEventHandler<HTMLButtonElement>,
@@ -12,6 +14,8 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
     blockedAdressee: boolean
 }): JSX.Element {
 
+    const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+
     const handleTextoChange: ChangeEventHandler = (event: ChangeEvent<HTMLTextAreaElement>) => {
         setMessage(m => {
             const message = {texto: event.target.value, created_at: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'), sender_id: sender_id, pending: true} as ConversationMessage
@@ -21,6 +25,19 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
                 return {...m, ...message}
             }
         })
+    }
+
+    const toggleEmojiPicker = ()=>{
+        setShowEmojiPicker(s => !s)
+    }
+
+    const handleEmojiClick: MouseDownEvent = (emojiObject: EmojiClickData, e: MouseEvent) => {
+        e.stopPropagation()
+        
+        setMessage(m => {
+            const newTexto = m ? m.texto + emojiObject.emoji : emojiObject.emoji;
+            return {...m, texto: newTexto, created_at: formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'), sender_id: sender_id, pending: true} as ConversationMessage;
+        });
     }
 
     return <div className="conversation_footer">
@@ -44,6 +61,10 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
                         <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                     </svg>
                 </div>
+                <div className="emojis">
+                    <svg onClick={toggleEmojiPicker} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1a11 11 0 1 0 11 11A11.013 11.013 0 0 0 12 1zm0 20a9 9 0 1 1 9-9 9.011 9.011 0 0 1-9 9zm6-8a6 6 0 0 1-12 0 1 1 0 0 1 2 0 4 4 0 0 0 8 0 1 1 0 0 1 2 0zM8 10V9a1 1 0 0 1 2 0v1a1 1 0 0 1-2 0zm6 0V9a1 1 0 0 1 2 0v1a1 1 0 0 1-2 0z"/>
+                    </svg>
+                </div>
             </div>
             <MessageTextarea events={{onChange: handleTextoChange}} 
                 attributes={{
@@ -60,5 +81,6 @@ export default function ConversationFooter({submitForm, message, setMessage, dis
                 </svg>
             </button>
         </form>
+        {showEmojiPicker && <EmojiPicker className="emoji-picker" onEmojiClick={handleEmojiClick}/>}
     </div>
 }

@@ -24,7 +24,6 @@ export default function Content({messages, showIntoBubble, user, setConversation
         }
 
         const handleClickBody = ()=> {
-            console.log("clickeee")
             setClickBody(true)
         }
 
