@@ -75,6 +75,8 @@ const PostDataforRegistration: (
         }
     }catch(error){
         handleCsrfTokenError(error as AxiosError)
+
+        throw error
     }
 }
 

@@ -10,6 +10,8 @@ function handleCsrfTokenError(e: AxiosError<any>, cb: Function|null = null) {
     }).catch(error => {
         console.error("Il y a eu une erreur lors de la recuperation du token csrf")
     })
+
+    return
 }
 
 export { handleCsrfTokenError }

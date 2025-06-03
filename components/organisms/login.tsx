@@ -31,6 +31,8 @@ const PostLoginData = async (data: LoginInputs, setProgress: (progress: number)=
         }
     }catch(e){
         handleCsrfTokenError(e as AxiosError)
+        
+        throw e
     }
     
 }
