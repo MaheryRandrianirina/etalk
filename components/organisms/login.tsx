@@ -128,6 +128,9 @@ export default function Login(): JSX.Element {
                     }
                 }
             }
+
+            // reset progress a 0
+            setProgress(0)
             
         }
         
