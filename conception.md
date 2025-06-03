@@ -42,27 +42,17 @@
     - Ajouter l'oeil sur les inputs de mot de passe avec la possibilié de voir les MDP [v]
     - Ajouter l'animation au congratsForSubscription [v]
     - Ajouter un progress-bar lors des soumissions de formulaire (inscription, connexion) [v]
-    - Régler la récupération des messages
-    - Déconnecter l'utilisateur après un certains moment s'il a coché le 'se souvenir de moi'
-    - Installer react-test-renderer, @testing-library/react
-    - Installer date-fns
-    - Regler l'heure des messages
-    - Réduire les rerendus
-    - Suppression des messages
+    - Régler la récupération des messages [v]
+    - Suppression des messages : afficher un petit menu lors d'un click droite ou appui prolonge [v]
     - Ajouter le support d'amojis 
     - Recherche de conversation
     - Refaire une récupération via le websocket lors du retour après la création de conversation
     - Ajouter le statut en ligne de l'utilisateur dans le BDD lorsqu'il se connecte
     - Liste d'amis et leur statut en ligne
-    - Optimiser le code react
     - Envoi d'images
     - Envoi de fichiers
     - Vocal
     - Appel vidéo
-    
-
-# FONCTIONNALITES A AJOUTER
-    - Support d'emojis
     
 # PROCHAINES CHOSES A FAIRE URGEMMENT
 - Remplacer tous les RequestWithSession en NextApiRequest ou NextRequest [v]
@@ -77,6 +67,9 @@
     - afficher "envoi" en attendant que le message soit envoye [v]
 - eviter de charger lors du click sur le bouton retour [v]
 - Envoyer un message en cliquant sur le bouton d'envoi (bug: la date qui s'affiche sur chaque conversation dans la boite de reception devrait etre la date du dernier message) [v]
-- Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist)
-- Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes
-- Implementer le token csrf sur toutes les requetes de type POST
+- Mettre dans un middleware la verification de l'authentification (Mettre en place un whitelist) [v]
+- Mettre dans un middleware la verification des methodes http autorisees pour toutes les routes [v]
+- Implementer le token csrf sur toutes les requetes de type POST [v]
+- gerer les erreurs durant les events socket
+- tester l'envoi de message entre 2 utilisateurs
+- Basculer dans un chatroom lorsqu'une conversation est cree

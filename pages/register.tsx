@@ -29,6 +29,7 @@ import { ProgressContext } from "@/components/contexts/Progress";
 import { onUploadProgress } from "@/lib/utils/events";
 import { setPageTitle } from "@/lib/utils/page";
 import { page_title} from "@/lib/constants";
+import { handleCsrfTokenError } from "@/lib/utils/errorHandlers";
 
 
 const PostDataforRegistration: (
@@ -53,13 +54,10 @@ const PostDataforRegistration: (
                 const uploadRes = await axios.post("/api/upload", formdata) as AxiosResponse<{success: boolean, file?: string}, unknown>
                 
                 if(uploadRes.data.success){
-                    res = await axios.post(
-                        "/api/register", 
-                        { 
+                    res = await axios.post("/api/register", { 
                             registrationStep: step, 
                             data: {file: uploadRes.data.file}
-                        }
-                    ) as AxiosResponse<{success: boolean}, unknown>
+                        }) as AxiosResponse<{success: boolean}, unknown>
                 }else {
                     throw new UploadError("Le téléversement de votre fichier a échoué.\nVeuillez réessayer s'il vous plait")
                 }
@@ -76,7 +74,7 @@ const PostDataforRegistration: (
             return res.data
         }
     }catch(error){
-        throw error
+        handleCsrfTokenError(error as AxiosError)
     }
 }
 

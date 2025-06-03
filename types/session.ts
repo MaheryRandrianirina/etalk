@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 
 type SessionData = {
     user?: AuthUser,
+    _token?: string
     userId?: number,
     registrationStepOneData: {
         name: string,

@@ -3,6 +3,8 @@ import { Routes } from "./types/enums/routes";
 import { shouldBeConnected } from "./backend/middlewares/shouldbeConnected";
 import { shouldNotBeConnected } from "./backend/middlewares/shouldNotBeConnected";
 import { shouldBewithMethod } from "./backend/middlewares/shouldBeWithMethod";
+import { shouldHaveCsrfToken } from "./backend/middlewares/shouldHaveCsrfToken";
+import { cors } from "./backend/middlewares/cors";
 
 
 export async function middleware(request: NextRequest) {
@@ -23,6 +25,7 @@ export async function middleware(request: NextRequest) {
     ];
     const shouldBePostRoutes: string[] = [
         Routes.apiLogin,
+        Routes.apiLogout,
         Routes.apiRegister,
         Routes.apiUpload,
         Routes.apiUser,
@@ -30,6 +33,10 @@ export async function middleware(request: NextRequest) {
     ];
 
     let res = NextResponse.next();
+
+    //enable cors
+    res = cors(res)
+
     // protect routes for specific methods
     if(
         shouldBeGetRoutes.includes(route)&& 
@@ -48,6 +55,11 @@ export async function middleware(request: NextRequest) {
 
     if(shouldBeGetRoutes.includes(route) && shouldBePostRoutes.includes(route)) {
         res = await shouldBewithMethod(request, res, ["get", "post"])
+    }
+    
+    // require csrf token for post requests
+    if((request.method.toLowerCase() === "post" || request.method.toLowerCase() === "delete") && route !== Routes.apiLogin && route !== Routes.apiRegister) {
+        res = await shouldHaveCsrfToken(request, res)
     }
 
     // protect routes for authentication

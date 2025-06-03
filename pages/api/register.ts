@@ -3,9 +3,7 @@ import Auth from "../../backend/User/Auth"
 import { getSession } from "@/lib/index"
 
 export default async function Register(req: NextApiRequest, res: NextApiResponse) {
-    if(req.method === "POST"){
-        const session = await getSession(req, res);
-        const auth = new Auth(req, res, session);
-        await auth.registerUser();
-    }
+    const session = await getSession(req, res);
+    const auth = new Auth(req, res, session);
+    await auth.registerUser();
 }

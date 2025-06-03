@@ -16,7 +16,7 @@ import { IronSession } from "iron-session"
 
 export default class Auth {
 
-    private userTable = new UserTable<User>()
+    private userTable = new UserTable()
 
     private passwordGuard = new PasswordGuard()
 
@@ -29,9 +29,7 @@ export default class Auth {
         }
     }
 
-    constructor(private req: NextApiRequest, private res: NextApiResponse, private session: IronSession<SessionData>) {
-
-    }
+    constructor(private req: NextApiRequest, private res: NextApiResponse, private session: IronSession<SessionData>) {}
 
     async registerUser() {
         const body: RegistrationRequestBody = this.req.body 
@@ -193,7 +191,12 @@ export default class Auth {
                     this.userTable.update({remember_token: rememberToken} as ColumnsToFill<User>, {id: user.id} as ColumnsToFill<User>)
                     
                     const response = NextResponse.next()
-                    response.cookies.set("auth", rememberToken)
+                    response.cookies.set("auth", rememberToken, {
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: "strict",
+                        maxAge: 60 * 60 * 24 * 30 // 30 jours
+                    })
                 }catch(e){
                     throw e
                 }

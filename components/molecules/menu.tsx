@@ -5,8 +5,8 @@ import { createPortal } from "react-dom"
 import { ButtonContext } from "../contexts/ButtonContext"
 import ConfirmationModal from "./modals/confirmationModal"
 import useClassnameAnimator from "../../hooks/useClassnameAnimator"
-import Data from "../../lib/data"
-import CsrfClass from "../../backend/security/csrf"
+import axios from "axios"
+import msgStyle from "@/styles/sass/modules/messageMenu.module.scss"
 
 export default function Menu({
     className,
@@ -74,11 +74,7 @@ export default function Menu({
           case "confirmation":
             if(e.currentTarget.classList.contains('ok')){
                 try {
-                    const data = new Data()
-
-                    const res = await data
-                        .post("/api/logout", {_csrf: await (new CsrfClass())
-                            .generate()}) as {data: {success: boolean}}
+                    const res = await axios.post("/api/logout")
                     
                     if(res.data.success){
                         document.location.reload()
@@ -129,5 +125,19 @@ export default function Menu({
           </ButtonContext.Provider>, 
           document.querySelector('main') as HTMLElement)
         }
+    </div>
+}
+
+export const MessageMenu = ({onClick}: {onClick: MouseEventHandler<HTMLParagraphElement>}) => {
+    const [visible, setVisible] = useState(false)
+
+    useEffect(()=>{
+        setVisible(true)
+
+        return () => setVisible(false)
+    }, [])
+
+    return <div className={msgStyle.menu + (visible ? " "+msgStyle.visible : "")}>
+        <p onClick={onClick}>supprimer</p>
     </div>
 }
