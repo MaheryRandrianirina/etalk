@@ -52,7 +52,7 @@ export default function UserConversation({user, create, setCreateConversation, a
     const [adressee, setAdressee] = useState<Join<AuthUser, {blocked: boolean}> | null>(null as Join<AuthUser, {blocked: boolean}> | null) 
     
     const { socket } = useConnectionStateListener('connect');
-
+    
     const chosenReceiversLength = chosenReceivers.length;
     const texto = message?.texto;
     const socketIsDefined = socket !== null;

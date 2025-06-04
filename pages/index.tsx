@@ -82,7 +82,7 @@ export default function Home({user}: {
   
   useEffect(()=>{  
       socket?.emit("get_conversations", "message");
-
+      
       if(showMenu){
         setClassnameForAnimation("active")
       }else {

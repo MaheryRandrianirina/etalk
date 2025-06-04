@@ -266,7 +266,7 @@ export default class Auth {
                 }
             } catch (e) {
                 const error = e as MysqlError | Error;
-                console.error(error)
+                
                 if ("sqlMessage" in error) {
                     this.res
                         .status(500)

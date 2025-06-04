@@ -19,6 +19,7 @@ export const useConnectionStateListener = (event: ConnectionEvent)=>{
     })
 
     useEffect(()=>{
+        console.log("set socket")
         const newSocket = io({
             reconnection: true,
             reconnectionAttempts: 5,

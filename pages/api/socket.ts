@@ -25,17 +25,10 @@ export interface ResponseWithSocket<T> extends NextApiResponse<T>{
 }
 
 export default async function socketHandler (req: NextApiRequest, res: ResponseWithSocket<any>){
-    const session = await getSession(req, res);
-    const user = session.user;
     
-    if(!user){
-        res.status(403).json({success: false, forbidden: true});
-        return;
-    }
     
     if(res.socket.server.io){
         console.log("socket already initialized")
-        res.socket.server.io.disconnectSockets()
     }else {
         const io = new IOServer<
         ClientToServerEvents,
@@ -48,19 +41,26 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
 
         res.socket.server.io = io
 
-        const u = user as Omit<User, "created_at" | "updated_at" | "email" | "remember_token" | "password">;
+        
 
         const userTable = new UserTable();
         const messageTable = new MessageTable();
 
-        io.on('connection', (socket)=>{
+        io.on('connection', async(socket)=>{
+            const request = socket.request
+            const session = await getSession(request, res);
+            const user = session.user;
+            const u = user as Omit<User, "created_at" | "updated_at" | "email" | "remember_token" | "password">;
+
             socket.on('disconnect', (reason) => {
                 console.log(`Disconnected: ${reason}`);
             });
-
+            
             socket.on('get_conversations', async()=>{
-                console.log("get conversationssss")
+                console.log("get conversations")
+                
                 try {
+                    console.log("connected user", session.user, request.headers["user-agent"])
                     const conversationTable = new ConversationTable<Conversation>()
                     const conversations = await conversationTable
                         .columns<ConversationUser, undefined>(['c.*'])
@@ -122,7 +122,7 @@ export default async function socketHandler (req: NextApiRequest, res: ResponseW
                     }
                     
                     const messages = await userConversation.messages()
-
+                    console.log("send message then emit conversation_messages")
                     socket.emit('conversation_messages', messages)
                 }catch(e){
                     console.error(e)
